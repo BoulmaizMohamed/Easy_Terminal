@@ -105,3 +105,89 @@ Footer {
     background: $surface-darken-3;
     color: $text-muted;
 }
+
+/* History Screen Styles */
+
+#history-dialog {
+    width: 100%;
+    height: 100%;
+    background: $surface;
+    padding: 1;
+}
+
+#history-header {
+    height: 3;
+    layout: horizontal;
+    align: left middle;
+    margin-bottom: 1;
+}
+
+#history-title {
+    width: 22;
+    text-style: bold;
+    color: $primary;
+}
+
+#history-search {
+    width: 1fr;
+    background: $surface-darken-1;
+    border: solid $primary-darken-2;
+    padding: 0 1;
+}
+
+#history-filter-bar {
+    height: 3;
+    layout: horizontal;
+    margin-bottom: 1;
+}
+
+.filter-btn {
+    margin-right: 1;
+    min-width: 10;
+    height: 3;
+    border: none;
+    background: $surface-darken-1;
+    color: $text-muted;
+}
+
+.filter-btn:hover {
+    background: $surface-lighten-1;
+    color: $text;
+}
+
+.filter-btn.active {
+    background: $primary;
+    color: $text;
+    text-style: bold;
+}
+
+#history-table-container {
+    height: 1fr;
+    border: solid $surface-darken-2;
+    background: $surface;
+    margin-bottom: 1;
+}
+
+#history-table {
+    height: 100%;
+    background: $surface;
+}
+
+#history-preview-container {
+    height: 8;
+    background: $surface-darken-1;
+    border: solid $surface-darken-2;
+    padding: 0 1;
+}
+
+#history-preview-title {
+    text-style: bold;
+    color: $text-muted;
+    margin-bottom: 0;
+}
+
+#history-preview-log {
+    height: 6;
+    background: transparent;
+    color: $text;
+}

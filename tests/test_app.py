@@ -27,3 +27,36 @@ def test_app_command_execution():
         app.shell.close()
 
     asyncio.run(_test())
+
+
+def test_history_screen_flow():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            # Run a command to ensure history exists
+            inp = app.query_one("#command-input")
+            inp.value = "Write-Output 'HistoryEntry123'"
+            await pilot.press("enter")
+            await pilot.pause(1.0)
+
+            # Open history screen
+            await pilot.press("ctrl+h")
+            await pilot.pause(0.5)
+
+            # Verify history screen is active
+            from command_center.history_screen import HistoryScreen
+            assert isinstance(app.screen, HistoryScreen)
+
+            table = app.screen.query_one("#history-table")
+            assert table.row_count > 0
+
+            # Press Escape to close history screen
+            await pilot.press("escape")
+            await pilot.pause(0.5)
+
+            # We should be back on the main screen
+            assert not isinstance(app.screen, HistoryScreen)
+
+        app.shell.close()
+
+    asyncio.run(_test())

@@ -12,6 +12,9 @@ from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.widgets import Footer, Input, Label, RichLog, Static
 
+from command_center.db import init_db
+from command_center.history import get_recent_unique_commands, log_command
+from command_center.history_screen import HistoryScreen
 from command_center.shell import ShellSession
 
 THEMES = [
@@ -33,6 +36,7 @@ class CommandCenterApp(App):
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
+        Binding("ctrl+h", "open_history", "History", show=True),
         Binding("ctrl+c", "interrupt_or_clear", "Interrupt/Clear", show=True),
         Binding("ctrl+r", "restart_shell", "Restart Shell", show=True),
         Binding("ctrl+y", "copy_last_output", "Copy Output", show=True),
@@ -46,6 +50,7 @@ class CommandCenterApp(App):
         self.command_history: List[str] = []
         self.history_index: int = -1
         self.last_output_buffer: List[str] = []
+        self.current_running_command: str = ""
 
     def compose(self) -> ComposeResult:
         """Compose the layout of the terminal UI."""
@@ -94,6 +99,14 @@ class CommandCenterApp(App):
 
     def on_mount(self) -> None:
         """Run on application startup."""
+        try:
+            init_db()
+            saved_recent = get_recent_unique_commands(shell=self.shell.shell_type)
+            if saved_recent:
+                self.command_history.extend(saved_recent)
+        except Exception:
+            pass
+
         log = self.query_one(RichLog)
         log.write("[bold cyan]Welcome to Command Center[/bold cyan]")
         log.write(
@@ -111,6 +124,7 @@ class CommandCenterApp(App):
 
         input_widget = self.query_one(Input)
         input_widget.value = ""
+        self.current_running_command = cmd
 
         # Track in history
         if not self.command_history or self.command_history[-1] != cmd:
@@ -156,6 +170,22 @@ class CommandCenterApp(App):
             f"[dim]-- exit: [{ec_color}]{exit_code}[/{ec_color}] | {duration_ms}ms[/dim]"
         )
 
+        # Log into SQLite history
+        if self.current_running_command:
+            preview = "".join(self.last_output_buffer)
+            try:
+                log_command(
+                    command=self.current_running_command,
+                    shell=self.shell.shell_type,
+                    cwd=new_cwd,
+                    exit_code=exit_code,
+                    duration_ms=duration_ms,
+                    output_preview=preview,
+                )
+            except Exception:
+                pass
+            self.current_running_command = ""
+
         # Update status bar
         status_state = self.query_one("#status-state", Static)
         status_state.update("Ready")
@@ -181,6 +211,18 @@ class CommandCenterApp(App):
     def on_input_changed(self, event: Input.Changed) -> None:
         """Hook for future auto-suggest integration."""
         pass
+
+    def action_open_history(self) -> None:
+        """Opens the History screen."""
+        self.push_screen(HistoryScreen(), self._on_history_screen_result)
+
+    def _on_history_screen_result(self, cmd: Optional[str]) -> None:
+        """Callback when a command is selected from the History screen."""
+        if cmd:
+            input_widget = self.query_one(Input)
+            input_widget.value = cmd
+            input_widget.focus()
+            self.handle_command_submit(Input.Submitted(input_widget, cmd))
 
     def action_toggle_theme(self) -> None:
         """Cycles through clean modern themes."""
