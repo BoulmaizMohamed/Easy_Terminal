@@ -61,10 +61,13 @@ def make_portable_distribution(source_dir: Path) -> Path:
         encoding="utf-8",
     )
 
-    # 2. Pre-create local data folder & copy LICENSE
+    # 2. Pre-create local data folder & copy LICENSE and User Guide
     (portable_dir / "data").mkdir(exist_ok=True)
     if (ROOT_DIR / "LICENSE").exists():
         shutil.copyfile(ROOT_DIR / "LICENSE", portable_dir / "LICENSE")
+    guide_pdf = ROOT_DIR / "docs" / "Easy_Terminal_User_Guide.pdf"
+    if guide_pdf.exists():
+        shutil.copyfile(guide_pdf, portable_dir / "Easy_Terminal_User_Guide.pdf")
 
     # 3. Add Portable README
     readme_content = (

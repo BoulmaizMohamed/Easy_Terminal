@@ -1,0 +1,822 @@
+"""
+Easy_Terminal - PDF User Guide Generator
+Captures live screenshots from the Textual application and compiles a
+professional, multi-page PDF user guide via headless Chrome.
+
+Author: B.Mohammed_Amin
+License: MIT
+"""
+
+import asyncio
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).parent.parent.resolve()
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from command_center.app import CommandCenterApp
+from textual.widgets import Input
+
+DOCS_DIR = ROOT_DIR / "docs"
+SCREENSHOTS_DIR = DOCS_DIR / "screenshots"
+DIST_DIR = ROOT_DIR / "dist"
+
+
+async def capture_screenshots() -> None:
+    """Captures high-resolution vector SVG screenshots of all key screens."""
+    print("==> Capturing application screens...")
+    SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    app = CommandCenterApp()
+    async with app.run_test(size=(110, 32)) as pilot:
+        await pilot.pause(0.2)
+
+        # 1. Main Terminal Screen (with executed command)
+        inp = app.query_one("#command-input", Input)
+        inp.value = "git status"
+        await pilot.press("enter")
+        await pilot.pause(0.4)
+        (SCREENSHOTS_DIR / "screen_main.svg").write_text(app.export_screenshot(), encoding="utf-8")
+
+        # 2. Command Library Screen (Ctrl+L)
+        await pilot.press("ctrl+l")
+        await pilot.pause(0.3)
+        (SCREENSHOTS_DIR / "screen_library.svg").write_text(app.export_screenshot(), encoding="utf-8")
+
+        # 3. Command Palette Screen (Ctrl+P)
+        await pilot.press("escape")
+        await pilot.pause(0.2)
+        await pilot.press("ctrl+p")
+        await pilot.pause(0.3)
+        (SCREENSHOTS_DIR / "screen_palette.svg").write_text(app.export_screenshot(), encoding="utf-8")
+
+        # 4. Git Repositories Screen (Ctrl+G)
+        await pilot.press("escape")
+        await pilot.pause(0.2)
+        await pilot.press("ctrl+g")
+        await pilot.pause(0.3)
+        (SCREENSHOTS_DIR / "screen_repos.svg").write_text(app.export_screenshot(), encoding="utf-8")
+
+        # 5. Settings Screen (F10)
+        await pilot.press("escape")
+        await pilot.pause(0.2)
+        await pilot.press("f10")
+        await pilot.pause(0.3)
+        (SCREENSHOTS_DIR / "screen_settings.svg").write_text(app.export_screenshot(), encoding="utf-8")
+
+    print("    All 5 screen captures completed successfully.")
+
+
+def build_guide_html() -> Path:
+    """Generates the comprehensive HTML user guide with embedded styling."""
+    html_file = DOCS_DIR / "Easy_Terminal_User_Guide.html"
+    print(f"==> Generating HTML guide at {html_file}...")
+
+    html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Easy_Terminal - User Guide & Quick Reference</title>
+<style>
+    @page {
+        size: A4;
+        margin: 10mm 14mm 12mm 14mm;
+    }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #1e293b;
+        background-color: #ffffff;
+        font-size: 9.5pt;
+        line-height: 1.45;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page {
+        page-break-after: always;
+        break-after: page;
+        height: 272mm;
+        max-height: 272mm;
+        position: relative;
+        overflow: hidden;
+    }
+    .page:last-child {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+
+    /* Headers & Typography */
+    .header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+    }
+    .header-bar .logo-title {
+        font-size: 15pt;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.5px;
+    }
+    .header-bar .badge {
+        background: #0ea5e9;
+        color: #ffffff;
+        font-size: 8pt;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 9999px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .header-bar .meta {
+        font-size: 8pt;
+        color: #64748b;
+        text-align: right;
+    }
+
+    h1 {
+        font-size: 18pt;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 3px;
+        letter-spacing: -0.5px;
+    }
+    .tagline {
+        font-size: 10.5pt;
+        color: #475569;
+        margin-bottom: 10px;
+    }
+    h2 {
+        font-size: 12pt;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 8px;
+        margin-bottom: 5px;
+        border-left: 4px solid #0284c7;
+        padding-left: 8px;
+    }
+    h3 {
+        font-size: 10.5pt;
+        font-weight: 600;
+        color: #1e293b;
+        margin-top: 6px;
+        margin-bottom: 4px;
+    }
+    p {
+        margin-bottom: 7px;
+        color: #334155;
+    }
+
+    /* Cards & Grids */
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px 10px;
+    }
+    .card h4 {
+        font-size: 9.5pt;
+        font-weight: 700;
+        color: #0369a1;
+        margin-bottom: 3px;
+    }
+
+    /* Screenshot Containers */
+    .screenshot-card {
+        background: #090d16;
+        border-radius: 6px;
+        padding: 4px;
+        border: 1px solid #1e293b;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+        margin: 6px 0 8px 0;
+        text-align: center;
+        page-break-inside: avoid;
+    }
+    .screenshot-card img {
+        width: 100%;
+        max-height: 120mm;
+        object-fit: contain;
+        border-radius: 4px;
+        display: block;
+        margin: 0 auto;
+    }
+    .caption {
+        font-size: 8pt;
+        color: #64748b;
+        text-align: center;
+        margin-top: 3px;
+        margin-bottom: 8px;
+        font-style: italic;
+    }
+
+    /* Pro-tips & Callouts */
+    .tip-box {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        padding: 6px 10px;
+        border-radius: 0 5px 5px 0;
+        margin-bottom: 8px;
+        font-size: 8.5pt;
+        color: #166534;
+    }
+    .tip-box strong {
+        color: #14532d;
+    }
+    .info-box {
+        background: #f0f9ff;
+        border-left: 4px solid #0284c7;
+        padding: 6px 10px;
+        border-radius: 0 5px 5px 0;
+        margin-bottom: 8px;
+        font-size: 8.5pt;
+        color: #075985;
+    }
+
+    /* Key Badges & Tables */
+    .key {
+        display: inline-block;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-bottom-width: 2px;
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 8pt;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 6px 0 10px 0;
+        font-size: 8.5pt;
+    }
+    th, td {
+        padding: 5px 8px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    th {
+        background: #f1f5f9;
+        color: #334155;
+        font-weight: 700;
+    }
+    tr:nth-child(even) td {
+        background: #f8fafc;
+    }
+
+    /* Footer */
+    .footer-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 6px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 7.5pt;
+        color: #94a3b8;
+    }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER & HERO OVERVIEW -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+            <span class="badge">v1.0.0</span>
+        </div>
+        <div class="meta">
+            User Manual & Quick Reference<br>
+            <strong>Author: B.Mohammed_Amin • MIT License</strong>
+        </div>
+    </div>
+
+    <h1>Welcome to Easy_Terminal</h1>
+    <div class="tagline">The Modern, Safe, and Visual Windows Command Center</div>
+
+    <p>
+        <strong>Easy_Terminal</strong> turns everyday terminal workflows into a visual, productive, and beginner-friendly experience. Built on top of native Windows shells (PowerShell, Command Prompt, and WSL), it provides visual buttons, smart auto-completion, instant project jumping, and safe command execution guards.
+    </p>
+
+    <div class="grid-3">
+        <div class="card">
+            <h4>🚀 Dual Shell Engine</h4>
+            <p>Switch between <strong>PowerShell</strong>, <strong>CMD</strong>, and <strong>WSL/Bash</strong> instantly with <span class="key">F2</span>.</p>
+        </div>
+        <div class="card">
+            <h4>📚 86+ Curated Commands</h4>
+            <p>Built-in Command Library split into <strong>Everyday Common</strong> & <strong>Specialized</strong> developer tools (<span class="key">Ctrl+L</span>).</p>
+        </div>
+        <div class="card">
+            <h4>🌐 Bilingual (EN / FR)</h4>
+            <p>Complete multi-language interface with English and French switching in settings (<span class="key">F10</span>).</p>
+        </div>
+    </div>
+
+    <h2>Main Terminal Interface</h2>
+    <div class="screenshot-card">
+        <img src="screenshots/screen_main.svg" alt="Easy_Terminal Main Interface">
+    </div>
+    <div class="caption">Figure 1: Main screen with live Git repository indicator, welcome banner, and 1-click action bar.</div>
+
+    <div class="tip-box">
+        <strong>💡 Pro Tip:</strong> Type any command or file path and press <span class="key">Tab</span> for instant path completion. Type <code>clear</code> or <code>cls</code> anytime to wipe output.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Created by B.Mohammed_Amin</span>
+        <span>Page 1 of 7</span>
+    </div>
+</div>
+
+<!-- PAGE 2: INSTALLATION & WINDOWS INTEGRATION -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 1: Installation & Setup</div>
+    </div>
+
+    <h2>1. Installation Options</h2>
+    <p>Easy_Terminal is distributed in two editions to fit every workflow and environment:</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>A. Windows Setup Wizard (Recommended)</h4>
+            <p><strong>File:</strong> <code>Easy_Terminal-Setup.exe</code></p>
+            <ul style="padding-left: 16px; margin-top: 4px; font-size: 8.5pt;">
+                <li>Guided Windows Inno Setup wizard.</li>
+                <li>Creates Desktop and Start Menu shortcuts.</li>
+                <li>Integrates <em>"Open in Terminal"</em> directly into the Windows Explorer right-click menu.</li>
+                <li>Clean, standard uninstall via Windows Settings / Control Panel.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>B. Portable Edition (Zero-Install)</h4>
+            <p><strong>File:</strong> <code>Easy_Terminal-Portable.zip</code></p>
+            <ul style="padding-left: 16px; margin-top: 4px; font-size: 8.5pt;">
+                <li>100% self-contained: ideal for USB flash drives and portable toolkits.</li>
+                <li>All history, settings, and favorites stay inside the local <code>data/</code> folder.</li>
+                <li>Leaves zero footprint in <code>%APPDATA%</code> on host computers.</li>
+                <li>Includes batch scripts to enable/disable context menu on demand.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>2. Windows Explorer Right-Click Integration</h2>
+    <p>
+        Launch Easy_Terminal directly inside any project folder or drive partition from the Windows Explorer context menu:
+    </p>
+
+    <div style="display: flex; gap: 14px; align-items: center; margin: 8px 0;">
+        <div style="flex: 0 0 180px; text-align: center;">
+            <div class="screenshot-card" style="padding: 4px; display: inline-block;">
+                <img src="screenshots/context_menu.png" alt="Windows Context Menu" style="max-height: 160px; width: auto;">
+            </div>
+            <div class="caption">Figure 2: Explorer Right-Click Menu</div>
+        </div>
+        <div style="flex: 1;">
+            <div class="info-box">
+                <strong>How to use Context Menu navigation:</strong>
+                <ol style="padding-left: 16px; margin-top: 4px; line-height: 1.5; font-size: 8.5pt;">
+                    <li>Right-click any folder or drive in Windows Explorer.</li>
+                    <li>Click <strong>Open in Terminal</strong> (or <em>Show more options</em> on Windows 11).</li>
+                    <li>Easy_Terminal opens immediately inside that working directory.</li>
+                    <li>If the folder is a Git repository, the branch indicator detects it automatically!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <h2>3. First Launch & Beginner Welcome Banner</h2>
+    <p>
+        Upon first launch, Easy_Terminal displays a beginner guide with essential shortcuts. The status bar displays your current working directory and Git branch.
+    </p>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Created by B.Mohammed_Amin</span>
+        <span>Page 2 of 7</span>
+    </div>
+</div>
+
+<!-- PAGE 3: INTERFACE ANATOMY & QUICK ACTION BAR -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 2: Interface Anatomy</div>
+    </div>
+
+    <h2>Interface Anatomy & Screen Layout</h2>
+    <p>Easy_Terminal is organized into four distinct visual zones:</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>Zone 1: Top Header Bar</h4>
+            <p>Displays active shell mode (<code>Shell: PowerShell / CMD / WSL</code>), active Git repository badge (e.g. <code>cli (master)</code>), and quick menu shortcuts.</p>
+        </div>
+        <div class="card">
+            <h4>Zone 2: Terminal Output Screen</h4>
+            <p>Scrollable rich output terminal. Every command displays its exit status code and real-time execution duration (e.g. <code>exit: 0 | 502ms ✓</code>).</p>
+        </div>
+        <div class="card">
+            <h4>Zone 3: Quick Action Bar</h4>
+            <p>Seven pre-configured, one-click visual buttons providing instant access to everyday commands without typing.</p>
+        </div>
+        <div class="card">
+            <h4>Zone 4: Smart Prompt & Auto-Completion</h4>
+            <p>Syntax-highlighted input bar featuring intelligent tab completion, command history (<span class="key">↑</span>/<span class="key">↓</span>), and real-time safety guard.</p>
+        </div>
+    </div>
+
+    <h2>The 1-Click Quick Action Bar</h2>
+    <p>Located directly above the input prompt, these buttons give rapid access to common tasks:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 110px;">Button</th>
+                <th style="width: 140px;">Underlying Action</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>📁 Files</strong></td>
+                <td><code>Get-ChildItem / dir</code></td>
+                <td>Lists files and folders in current directory with sizes and dates.</td>
+            </tr>
+            <tr>
+                <td><strong>⚡ Top Apps</strong></td>
+                <td>Process monitor</td>
+                <td>Displays the most resource-intensive applications currently running.</td>
+            </tr>
+            <tr>
+                <td><strong>💾 Disks</strong></td>
+                <td><code>Get-PSDrive / wmic</code></td>
+                <td>Shows available storage, free space, and partitions across all drives.</td>
+            </tr>
+            <tr>
+                <td><strong>🌐 Ping</strong></td>
+                <td><code>Test-Connection</code></td>
+                <td>Performs a quick network latency check to verify internet connectivity.</td>
+            </tr>
+            <tr>
+                <td><strong>📚 Library</strong></td>
+                <td><span class="key">Ctrl+L</span></td>
+                <td>Opens the built-in library of 86+ categorized commands.</td>
+            </tr>
+            <tr>
+                <td><strong>🐚 Shell</strong></td>
+                <td><span class="key">F2</span></td>
+                <td>Cycles instantly between PowerShell, Command Prompt, and WSL.</td>
+            </tr>
+            <tr>
+                <td><strong>🧹 Clear</strong></td>
+                <td><code>Clear-Host / cls</code></td>
+                <td>Wipes the output log for a clean workspace.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="tip-box">
+        <strong>⚡ Safety Guard:</strong> When destructive commands (such as <code>rm -rf /</code>, <code>del /s *</code>, or <code>format</code>) are submitted, Easy_Terminal pauses and prompts for confirmation to prevent accidental data loss.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Created by B.Mohammed_Amin</span>
+        <span>Page 3 of 7</span>
+    </div>
+</div>
+
+<!-- PAGE 4: COMMAND LIBRARY & CATEGORIES -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 3: Command Library (Ctrl+L)</div>
+    </div>
+
+    <h2>The 86+ Built-in Command Library (<span class="key">Ctrl+L</span>)</h2>
+    <p>
+        Never memorize complex flags or shell syntax again. Easy_Terminal includes an organized library of 86 everyday and advanced commands, divided cleanly into two logical categories:
+    </p>
+
+    <div class="screenshot-card">
+        <img src="screenshots/screen_library.svg" alt="Command Library Modal">
+    </div>
+    <div class="caption">Figure 3: Command Library modal with split categories (Everyday vs Specialized) and instant search filter.</div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>🌟 Common Everyday Commands</h4>
+            <p>Essential daily commands for all users:</p>
+            <ul style="padding-left: 16px; font-size: 8pt; line-height: 1.4;">
+                <li><strong>Files & Folders:</strong> List files, search content, directory tree, disk usage.</li>
+                <li><strong>Network & Web:</strong> IP address details, ping test, DNS lookup, speed check.</li>
+                <li><strong>System Health:</strong> CPU/RAM usage, active processes, uptime, battery status.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>⚙️ Specialized Commands</h4>
+            <p>Professional tools for developers and power users:</p>
+            <ul style="padding-left: 16px; font-size: 8pt; line-height: 1.4;">
+                <li><strong>Git & Version Control:</strong> Branch status, staged diffs, commit log, stash.</li>
+                <li><strong>Containers & Docker:</strong> List containers, prune dangling images, compose.</li>
+                <li><strong>Dev Runtimes:</strong> Python venv setup, Node package audit, open ports.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>How to execute from the Library:</strong>
+        <ul style="padding-left: 16px; margin-top: 3px; font-size: 8.5pt;">
+            <li>Press <span class="key">Enter</span> to execute the selected command immediately.</li>
+            <li>Press <span class="key">Insert</span> to paste the command into the input bar so you can edit parameters before running.</li>
+        </ul>
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Created by B.Mohammed_Amin</span>
+        <span>Page 4 of 7</span>
+    </div>
+</div>
+
+<!-- PAGE 5: GIT REPOSITORIES -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 4: Git Project Navigation</div>
+    </div>
+
+    <h2>Git Repositories & Fast Navigation (<span class="key">Ctrl+G</span>)</h2>
+    <p>
+        Working on multiple codebases? Easy_Terminal automatically discovers and registers Git repositories on your computer, allowing you to jump between projects instantly without typing long paths.
+    </p>
+
+    <div class="screenshot-card">
+        <img src="screenshots/screen_repos.svg" alt="Git Repositories Navigation">
+    </div>
+    <div class="caption">Figure 4: Repository Navigator showing tracked projects, active branch badges, and folder paths.</div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>⭐ Auto-Discovery</h4>
+            <p>Every time you navigate to a directory containing a <code>.git</code> repository, Easy_Terminal records it and tracks its active branch.</p>
+        </div>
+        <div class="card">
+            <h4>⚡ Instant Switching</h4>
+            <p>Select any repository from the list and press <span class="key">Enter</span>. The active shell changes directory immediately and updates the top status badge.</p>
+        </div>
+    </div>
+
+    <div class="tip-box">
+        <strong>⚡ CLI Navigation Shortcuts:</strong> You can also jump directly by typing <code>goto &lt;repo-name&gt;</code> or <code>repos</code> in the prompt.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Created by B.Mohammed_Amin</span>
+        <span>Page 5 of 7</span>
+    </div>
+</div>
+
+<!-- PAGE 6: COMMAND PALETTE -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 5: Fuzzy Command Palette</div>
+    </div>
+
+    <h2>Fuzzy Command Palette (<span class="key">Ctrl+P</span>)</h2>
+    <p>
+        Press <span class="key">Ctrl+P</span> anytime to open the global fuzzy command palette. Search across all app functions, settings, history, and shell utilities by typing any keyword.
+    </p>
+
+    <div class="screenshot-card">
+        <img src="screenshots/screen_palette.svg" alt="Fuzzy Command Palette">
+    </div>
+    <div class="caption">Figure 5: Fuzzy Search Command Palette for immediate keyboard-driven actions.</div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>🔍 Fuzzy Search</h4>
+            <p>Type non-consecutive letters (e.g. <code>pows</code> for PowerShell or <code>sett</code> for Settings) to instantly locate actions.</p>
+        </div>
+        <div class="card">
+            <h4>⚡ Action Shortcuts</h4>
+            <p>Each palette entry shows its associated direct keybinding, helping you learn shortcuts organically.</p>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>Tip:</strong> Press <span class="key">Esc</span> anytime to close any open modal and return directly to the prompt.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Created by B.Mohammed_Amin</span>
+        <span>Page 6 of 7</span>
+    </div>
+</div>
+
+<!-- PAGE 7: SETTINGS & SHORTCUTS CHEAT SHEET -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 6: Settings & Cheat Sheet</div>
+    </div>
+
+    <h2>1. Settings & Languages (<span class="key">F10</span>)</h2>
+    <p>
+        Configure Easy_Terminal to match your preferred language (English / Français), default shell, and safety prompt settings:
+    </p>
+
+    <div class="screenshot-card" style="margin-bottom: 4px;">
+        <img src="screenshots/screen_settings.svg" alt="Settings Dialog" style="max-height: 80mm;">
+    </div>
+    <div class="caption">Figure 6: Settings modal with language selector, safety mode, and developer credit.</div>
+
+    <h2>2. Complete Keyboard Shortcuts Cheat Sheet</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 120px;">Shortcut</th>
+                <th style="width: 180px;">Action</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="key">Ctrl+L</span></td>
+                <td><strong>Command Library</strong></td>
+                <td>Browse 86+ everyday and specialized commands.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+P</span></td>
+                <td><strong>Command Palette</strong></td>
+                <td>Global fuzzy search across commands and features.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+G</span></td>
+                <td><strong>Git Repositories</strong></td>
+                <td>Jump directly between tracked Git code repositories.</td>
+            </tr>
+            <tr>
+                <td><span class="key">F2</span></td>
+                <td><strong>Switch Shell</strong></td>
+                <td>Toggle dynamically between PowerShell, CMD, and WSL/Bash.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+H</span></td>
+                <td><strong>Command History</strong></td>
+                <td>View, filter, and rerun previously executed shell commands.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+T</span></td>
+                <td><strong>Toggle Theme</strong></td>
+                <td>Cycle color themes (Modern Dark, Matrix Green, Midnight).</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+Y</span></td>
+                <td><strong>Copy Output</strong></td>
+                <td>Copies the output of the last command to Windows clipboard.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+R</span></td>
+                <td><strong>Restart Shell</strong></td>
+                <td>Restarts the active backend shell process without closing UI.</td>
+            </tr>
+            <tr>
+                <td><span class="key">F10</span></td>
+                <td><strong>Settings</strong></td>
+                <td>Configure language (English/French), default shell, safety.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Tab</span></td>
+                <td><strong>Auto-Complete</strong></td>
+                <td>Autocompletes file names, folders, and command names.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+C</span></td>
+                <td><strong>Interrupt / Clear</strong></td>
+                <td>Interrupts running execution or clears current prompt line.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+Q</span></td>
+                <td><strong>Quit</strong></td>
+                <td>Exits Easy_Terminal cleanly.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="info-box" style="text-align: center; margin-top: 6px;">
+        <strong>Easy_Terminal v1.0.0</strong> — Designed & Developed by <strong>B.Mohammed_Amin</strong><br>
+        Distributed under the open-source <strong>MIT License</strong>.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Created by B.Mohammed_Amin</span>
+        <span>Page 7 of 7</span>
+    </div>
+</div>
+
+</body>
+</html>
+"""
+    html_file.write_text(html_content, encoding="utf-8")
+    print(f"    HTML guide generated ({len(html_content)} bytes).")
+    return html_file
+
+
+def compile_pdf_with_chrome(html_file: Path) -> Path:
+    """Compiles the HTML document to PDF using headless Chrome."""
+    pdf_file = DOCS_DIR / "Easy_Terminal_User_Guide.pdf"
+    print(f"==> Compiling PDF via Chrome to {pdf_file}...")
+
+    chrome_candidates = [
+        Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
+        Path(r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"),
+        Path(os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe")),
+    ]
+    chrome_exe = None
+    for cand in chrome_candidates:
+        if cand.exists():
+            chrome_exe = cand
+            break
+
+    if not chrome_exe:
+        raise FileNotFoundError("Google Chrome executable not found for PDF compilation.")
+
+    cmd = [
+        str(chrome_exe),
+        "--headless=new",
+        "--disable-gpu",
+        "--allow-file-access-from-files",
+        f"--print-to-pdf={pdf_file}",
+        "--no-pdf-header-footer",
+        str(html_file.resolve()),
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0 and not pdf_file.exists():
+        raise RuntimeError(f"Chrome PDF generation failed: {result.stderr}")
+
+    if not pdf_file.exists() or pdf_file.stat().st_size == 0:
+        raise RuntimeError("PDF file was not created or is 0 bytes.")
+
+    size_kb = pdf_file.stat().st_size / 1024
+    print(f"    PDF compiled successfully ({size_kb:.1f} KB)!")
+
+    # Also copy to dist folder if dist exists
+    if DIST_DIR.exists():
+        dist_pdf = DIST_DIR / "Easy_Terminal_User_Guide.pdf"
+        shutil.copyfile(pdf_file, dist_pdf)
+        print(f"    Copied PDF to {dist_pdf}")
+
+    return pdf_file
+
+
+async def main() -> None:
+    await capture_screenshots()
+    html_path = build_guide_html()
+    pdf_path = compile_pdf_with_chrome(html_path)
+    print(f"\n[SUCCESS] Easy_Terminal User Guide generated at:\n  {pdf_path}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
