@@ -17,8 +17,10 @@ from textual.widgets import Button, Footer, Input, Label, OptionList, RichLog, S
 from textual.widgets.option_list import Option
 
 from command_center.db import init_db
+from command_center.git_info import get_location_info
 from command_center.history import get_recent_unique_commands, log_command
 from command_center.history_screen import HistoryScreen
+from command_center.i18n import t
 from command_center.library import load_seed_library
 from command_center.library_screen import LibraryScreen
 from command_center.palette_screen import PaletteScreen
@@ -77,16 +79,24 @@ class CommandCenterApp(App):
         """Returns the active persistent shell session."""
         return self.shell_manager.current
 
+    def _render_prompt_symbol(self) -> str:
+        """Renders styled prompt with shell type, directory/repo indicator and arrow."""
+        loc = get_location_info(self.shell.cwd)
+        shell_glyph = "PS" if self.shell.shell_type == "powershell" else "CMD"
+        prompt_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
+        badge = loc.get_prompt_badge()
+        return f"[{prompt_color} bold]{shell_glyph}[/{prompt_color} bold] [dim {prompt_color}]{badge}[/dim {prompt_color}] [{prompt_color} bold]❯[/{prompt_color} bold]"
+
     def compose(self) -> ComposeResult:
         """Compose the layout of the terminal UI."""
-        prompt_glyph = "PS ❯" if self.shell.shell_type == "powershell" else "CMD ❯"
+        lang = self.settings.language
         prompt_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
 
         with Horizontal(id="header-bar"):
             yield Label("⚡ COMMAND CENTER", id="app-title")
-            yield Label("• Modern Windows Terminal", id="app-subtitle")
+            yield Label(t("app_subtitle", lang), id="app-subtitle")
             yield Static("", id="header-spacer")
-            yield Label(f"[bold {prompt_color}]{self.shell.shell_type.upper()}[/bold {prompt_color}]  •  [dim]F10 Settings[/dim]", id="header-hints")
+            yield Label(f"[bold {prompt_color}]{self.shell.shell_type.upper()}[/bold {prompt_color}]  •  [dim]{t('header_settings', lang)}[/dim]", id="header-hints")
 
         with Container(id="output-container"):
             yield RichLog(
@@ -99,25 +109,27 @@ class CommandCenterApp(App):
 
         with Vertical(id="bottom-dock"):
             with Horizontal(id="quick-actions-bar"):
-                yield Button("📁 Files", id="qa-files", classes="qa-btn")
-                yield Button("⚡ Top Apps", id="qa-procs", classes="qa-btn")
-                yield Button("💾 Disks", id="qa-disks", classes="qa-btn")
-                yield Button("🌐 Ping", id="qa-ping", classes="qa-btn")
-                yield Button("📚 Library", id="qa-library", classes="qa-btn")
-                yield Button("🔄 Shell", id="qa-shell", classes="qa-btn")
-                yield Button("🧹 Clear", id="qa-clear", classes="qa-btn")
+                yield Button(t("qa_files", lang), id="qa-files", classes="qa-btn")
+                yield Button(t("qa_procs", lang), id="qa-procs", classes="qa-btn")
+                yield Button(t("qa_disks", lang), id="qa-disks", classes="qa-btn")
+                yield Button(t("qa_ping", lang), id="qa-ping", classes="qa-btn")
+                yield Button(t("qa_library", lang), id="qa-library", classes="qa-btn")
+                yield Button(t("qa_shell", lang), id="qa-shell", classes="qa-btn")
+                yield Button(t("qa_clear", lang), id="qa-clear", classes="qa-btn")
 
             with Horizontal(id="input-container"):
-                yield Static(f"[{prompt_color}]{prompt_glyph}[/{prompt_color}]", id="prompt-symbol")
+                yield Static(self._render_prompt_symbol(), id="prompt-symbol")
+                ph = t("placeholder_ps", lang) if self.shell.shell_type == "powershell" else t("placeholder_cmd", lang)
                 yield Input(
                     id="command-input",
-                    placeholder="Type a PowerShell command and press Enter...",
+                    placeholder=ph,
                 )
 
             with Container(id="suggestions-container"):
                 yield OptionList(id="suggestions-list")
 
             with Horizontal(id="status-bar"):
+                loc = get_location_info(self.shell.cwd)
                 yield Static(
                     f"{self.shell.shell_type.upper()}",
                     id="status-shell",
@@ -129,17 +141,49 @@ class CommandCenterApp(App):
                     classes="status-badge",
                 )
                 yield Static(
-                    "Exit: 0",
+                    loc.get_repo_badge(lang),
+                    id="status-repo",
+                    classes="status-badge",
+                )
+                yield Static(
+                    f"{t('status_exit', lang)}: 0",
                     id="status-exit",
                     classes="status-badge",
                 )
                 yield Static(
-                    "Ready",
+                    t("status_ready", lang),
                     id="status-state",
                     classes="status-badge",
                 )
 
         yield Footer()
+
+    def _refresh_ui_language(self) -> None:
+        """Updates all visible UI labels and badges according to active language."""
+        lang = self.settings.language
+        prompt_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
+        try:
+            self.query_one("#app-subtitle", Label).update(t("app_subtitle", lang))
+            self.query_one("#header-hints", Label).update(
+                f"[bold {prompt_color}]{self.shell.shell_type.upper()}[/bold {prompt_color}]  •  [dim]{t('header_settings', lang)}[/dim]"
+            )
+            self.query_one("#qa-files", Button).label = t("qa_files", lang)
+            self.query_one("#qa-procs", Button).label = t("qa_procs", lang)
+            self.query_one("#qa-disks", Button).label = t("qa_disks", lang)
+            self.query_one("#qa-ping", Button).label = t("qa_ping", lang)
+            self.query_one("#qa-library", Button).label = t("qa_library", lang)
+            self.query_one("#qa-shell", Button).label = t("qa_shell", lang)
+            self.query_one("#qa-clear", Button).label = t("qa_clear", lang)
+
+            ph = t("placeholder_ps", lang) if self.shell.shell_type == "powershell" else t("placeholder_cmd", lang)
+            self.query_one("#command-input", Input).placeholder = ph
+
+            loc = get_location_info(self.shell.cwd)
+            self.query_one("#status-repo", Static).update(loc.get_repo_badge(lang))
+            self.query_one("#status-state", Static).update(t("status_ready", lang))
+            self.query_one("#prompt-symbol", Static).update(self._render_prompt_symbol())
+        except Exception:
+            pass
 
     def on_mount(self) -> None:
         """Run on application startup."""
@@ -152,27 +196,55 @@ class CommandCenterApp(App):
         except Exception:
             pass
 
+        loc = get_location_info(self.shell.cwd)
+        lang = self.settings.language
         log = self.query_one(RichLog)
         shell_badge_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
         welcome_body = Text()
-        welcome_body.append("⚡ COMMAND CENTER ", style="bold cyan")
-        welcome_body.append("— Modern Terminal Workspace for Windows\n\n", style="bold white")
-        welcome_body.append("Active Shell: ", style="bold")
-        welcome_body.append(f"{self.shell.shell_type.upper()} ", style=f"bold {shell_badge_color}")
-        welcome_body.append("• Location: ", style="dim")
-        welcome_body.append(f"{self.shell.cwd}\n\n", style="dim cyan")
-        welcome_body.append("Quick Start for Beginners:\n", style="bold white")
-        welcome_body.append("  • Click any Quick Action button below (Files, Top Apps, Disks, Ping)\n", style="cyan")
-        welcome_body.append("  • Press [Ctrl+L] to browse 86 everyday & specialized commands\n", style="cyan")
-        welcome_body.append("  • Press [Ctrl+P] for fuzzy command palette & instant search\n", style="cyan")
-        welcome_body.append("  • Type 'clear' or 'cls' anytime to wipe screen, 'exit' to close\n\n", style="dim")
-        welcome_body.append("Pro Tip: Start typing any command or file name and press [Tab] for auto-completion.", style="italic dim")
 
-        log.write(Panel(welcome_body, title="[bold cyan]Welcome[/bold cyan]", border_style="cyan", padding=(0, 1)))
+        if lang == "fr":
+            welcome_body.append("⚡ COMMAND CENTER ", style="bold cyan")
+            welcome_body.append("— Espace de travail terminal moderne pour Windows\n\n", style="bold white")
+            welcome_body.append("Shell actif : ", style="bold")
+            welcome_body.append(f"{self.shell.shell_type.upper()} ", style=f"bold {shell_badge_color}")
+            welcome_body.append("• Emplacement : ", style="dim")
+            welcome_body.append(f"{self.shell.cwd}\n", style="dim cyan")
+            if loc.is_git:
+                welcome_body.append("• Dépôt Git : ", style="dim")
+                welcome_body.append(f"{loc.repo_name} [{loc.branch}]\n\n", style="bold green")
+            else:
+                welcome_body.append(f"• Racine disque : {loc.root}\n\n", style="dim")
+            welcome_body.append("Démarrage rapide pour débutants :\n", style="bold white")
+            welcome_body.append("  • Cliquez sur un bouton d'action rapide ci-dessous (Fichiers, Applications, Disques, Ping)\n", style="cyan")
+            welcome_body.append("  • Appuyez sur [Ctrl+L] pour parcourir 86 commandes quotidiennes et spécialisées\n", style="cyan")
+            welcome_body.append("  • Appuyez sur [Ctrl+P] pour la palette de commandes et recherche rapide\n", style="cyan")
+            welcome_body.append("  • Tapez 'clear' ou 'cls' à tout moment pour effacer l'écran, 'exit' pour quitter\n\n", style="dim")
+            welcome_body.append("Astuce : Tapez une commande ou un chemin et appuyez sur [Tab] pour l'autocomplétion.", style="italic dim")
+            panel_title = "[bold cyan]Bienvenue[/bold cyan]"
+        else:
+            welcome_body.append("⚡ COMMAND CENTER ", style="bold cyan")
+            welcome_body.append("— Modern Terminal Workspace for Windows\n\n", style="bold white")
+            welcome_body.append("Active Shell: ", style="bold")
+            welcome_body.append(f"{self.shell.shell_type.upper()} ", style=f"bold {shell_badge_color}")
+            welcome_body.append("• Location: ", style="dim")
+            welcome_body.append(f"{self.shell.cwd}\n", style="dim cyan")
+            if loc.is_git:
+                welcome_body.append("• Git Repo: ", style="dim")
+                welcome_body.append(f"{loc.repo_name} [{loc.branch}]\n\n", style="bold green")
+            else:
+                welcome_body.append(f"• Drive Root: {loc.root}\n\n", style="dim")
+            welcome_body.append("Quick Start for Beginners:\n", style="bold white")
+            welcome_body.append("  • Click any Quick Action button below (Files, Top Apps, Disks, Ping)\n", style="cyan")
+            welcome_body.append("  • Press [Ctrl+L] to browse 86 everyday & specialized commands\n", style="cyan")
+            welcome_body.append("  • Press [Ctrl+P] for fuzzy command palette & instant search\n", style="cyan")
+            welcome_body.append("  • Type 'clear' or 'cls' anytime to wipe screen, 'exit' to close\n\n", style="dim")
+            welcome_body.append("Pro Tip: Start typing any command or file name and press [Tab] for auto-completion.", style="italic dim")
+            panel_title = "[bold cyan]Welcome[/bold cyan]"
 
-        shell_label = "PowerShell" if self.shell.shell_type == "powershell" else "Command Prompt (CMD)"
+        log.write(Panel(welcome_body, title=panel_title, border_style="cyan", padding=(0, 1)))
+
         inp = self.query_one("#command-input", Input)
-        inp.placeholder = f"Type a {shell_label} command or click a quick action above..."
+        inp.placeholder = t("placeholder_ps", lang) if self.shell.shell_type == "powershell" else t("placeholder_cmd", lang)
         inp.focus()
 
     @on(Button.Pressed, "#qa-files")
@@ -350,24 +422,32 @@ class CommandCenterApp(App):
 
         # Update status bar
         status_state = self.query_one("#status-state", Static)
-        status_state.update("Ready")
+        status_state.update(t("status_ready", self.settings.language))
 
         status_cwd = self.query_one("#status-cwd", Static)
         status_cwd.update(f"{new_cwd}")
 
+        loc = get_location_info(new_cwd)
+        status_repo = self.query_one("#status-repo", Static)
+        status_repo.update(loc.get_repo_badge(self.settings.language))
+
+        prompt_sym = self.query_one("#prompt-symbol", Static)
+        prompt_sym.update(self._render_prompt_symbol())
+
         # Update exit code badge
         exit_badge = self.query_one("#status-exit", Static)
+        exit_lbl = t("status_exit", self.settings.language)
         if exit_code == 0:
-            exit_badge.update("Exit: [green]0[/green]")
+            exit_badge.update(f"{exit_lbl}: [green]0[/green]")
         else:
-            exit_badge.update(f"Exit: [red]{exit_code}[/red]")
+            exit_badge.update(f"{exit_lbl}: [red]{exit_code}[/red]")
 
         self.query_one(Input).focus()
 
     def _set_state_running(self) -> None:
         """Set status bar to running state."""
         status_state = self.query_one("#status-state", Static)
-        status_state.update("Running...")
+        status_state.update(t("status_running", self.settings.language))
 
     @on(Input.Changed, "#command-input")
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -507,9 +587,12 @@ class CommandCenterApp(App):
     def _on_settings_result(self, new_settings: Optional[AppSettings]) -> None:
         """Callback when settings are saved."""
         if new_settings:
+            old_lang = self.settings.language
             self.settings = new_settings
             self.theme = new_settings.theme
-            self.notify("Settings saved successfully!", timeout=2)
+            if new_settings.language != old_lang:
+                self._refresh_ui_language()
+            self.notify(t("settings_saved_notify", self.settings.language), timeout=2)
 
     def action_open_palette(self) -> None:
         """Opens the Command Palette and Help screen (Ctrl+P)."""
@@ -537,13 +620,12 @@ class CommandCenterApp(App):
         log.write(f"\n[dim]-- Switched active shell to [bold cyan]{shell_name}[/bold cyan] --[/dim]")
 
         # Update prompt symbol
-        prompt_glyph = "PS ❯" if new_shell == "powershell" else "CMD ❯"
-        prompt_color = "cyan" if new_shell == "powershell" else "yellow"
-        self.query_one("#prompt-symbol", Static).update(f"[{prompt_color}]{prompt_glyph}[/{prompt_color}]")
+        self.query_one("#prompt-symbol", Static).update(self._render_prompt_symbol())
 
         # Update header status
+        prompt_color = "cyan" if new_shell == "powershell" else "yellow"
         self.query_one("#header-hints", Label).update(
-            f"[bold {prompt_color}]{new_shell.upper()}[/bold {prompt_color}]  •  [dim]F10 Settings[/dim]"
+            f"[bold {prompt_color}]{new_shell.upper()}[/bold {prompt_color}]  •  [dim]{t('header_settings', self.settings.language)}[/dim]"
         )
 
         # Update status bar
@@ -553,9 +635,13 @@ class CommandCenterApp(App):
         status_cwd = self.query_one("#status-cwd", Static)
         status_cwd.update(f"{self.shell.cwd}")
 
+        loc = get_location_info(self.shell.cwd)
+        status_repo = self.query_one("#status-repo", Static)
+        status_repo.update(loc.get_repo_badge(self.settings.language))
+
         # Update input placeholder
         inp = self.query_one("#command-input", Input)
-        inp.placeholder = f"Type a {shell_name} command and press Enter..."
+        inp.placeholder = t("placeholder_ps", self.settings.language) if new_shell == "powershell" else t("placeholder_cmd", self.settings.language)
 
         self.notify(f"Active shell: {shell_name}", timeout=2)
 
@@ -587,7 +673,10 @@ class CommandCenterApp(App):
         self.shell.restart()
         log = self.query_one(RichLog)
         log.write("[bold yellow]Shell session restarted.[/bold yellow]")
+        loc = get_location_info(self.shell.cwd)
         self.query_one("#status-cwd", Static).update(f"{self.shell.cwd}")
+        self.query_one("#status-repo", Static).update(loc.get_repo_badge(self.settings.language))
+        self.query_one("#prompt-symbol", Static).update(self._render_prompt_symbol())
         self.notify("Persistent shell session restarted.", timeout=2)
 
     def action_copy_last_output(self) -> None:

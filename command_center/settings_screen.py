@@ -11,6 +11,7 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Footer, Label, Static
 
+from command_center.i18n import t
 from command_center.settings import AppSettings, save_settings
 
 AVAILABLE_THEMES = [
@@ -38,54 +39,90 @@ class SettingsScreen(ModalScreen[Optional[AppSettings]]):
         self.theme_idx = AVAILABLE_THEMES.index(self.settings.theme) if self.settings.theme in AVAILABLE_THEMES else 0
 
     def compose(self) -> ComposeResult:
+        lang = self.settings.language
         with Vertical(id="settings-dialog"):
-            yield Label("SETTINGS & PREFERENCES", id="settings-title")
+            yield Label(t("settings_title", lang), id="settings-title")
+
+            # Language selection
+            yield Label(t("settings_lang_label", lang), id="lbl-lang", classes="settings-label")
+            with Horizontal(classes="settings-row"):
+                lang_name = "Français" if lang == "fr" else "English"
+                yield Button(f"{t('settings_lang_btn', lang)}: {lang_name}", id="btn-lang-toggle", classes="settings-btn")
 
             # Theme selection
-            yield Label("Interface Theme:", classes="settings-label")
+            yield Label(t("settings_theme_label", lang), id="lbl-theme", classes="settings-label")
             with Horizontal(classes="settings-row"):
-                yield Button(f"Theme: {self.settings.theme}", id="btn-theme-cycle", classes="settings-btn")
+                yield Button(f"{t('settings_theme_btn', lang)}: {self.settings.theme}", id="btn-theme-cycle", classes="settings-btn")
 
             # Default shell
-            yield Label("Default Shell:", classes="settings-label")
+            yield Label(t("settings_shell_label", lang), id="lbl-shell", classes="settings-label")
             with Horizontal(classes="settings-row"):
                 yield Button(
-                    f"Shell: {self.settings.default_shell.upper()}",
+                    f"{t('settings_shell_btn', lang)}: {self.settings.default_shell.upper()}",
                     id="btn-shell-toggle",
                     classes="settings-btn",
                 )
 
             # Library Enter Action
-            yield Label("Library Enter Behavior:", classes="settings-label")
+            yield Label(t("settings_lib_label", lang), id="lbl-lib-action", classes="settings-label")
             with Horizontal(classes="settings-row"):
                 yield Button(
-                    f"Enter Action: {self.settings.library_enter_action.upper()}",
+                    f"{t('settings_lib_btn', lang)}: {self.settings.library_enter_action.upper()}",
                     id="btn-lib-action-toggle",
                     classes="settings-btn",
                 )
 
             # History output retention
-            yield Label("History Output Retention:", classes="settings-label")
+            yield Label(t("settings_retention_label", lang), id="lbl-retention", classes="settings-label")
             with Horizontal(classes="settings-row"):
                 yield Button(
-                    f"Retention: {self.settings.history_retention.upper()}",
+                    f"{t('settings_retention_btn', lang)}: {self.settings.history_retention.upper()}",
                     id="btn-retention-toggle",
                     classes="settings-btn",
                 )
 
             # Safety confirmation
-            yield Label("Dangerous Command Safety Check:", classes="settings-label")
+            yield Label(t("settings_safety_label", lang), id="lbl-safety", classes="settings-label")
             with Horizontal(classes="settings-row"):
-                status_str = "ENABLED (Confirm before run)" if self.settings.safety_enabled else "DISABLED"
+                status_str = t("safety_enabled_str", lang) if self.settings.safety_enabled else t("safety_disabled_str", lang)
                 yield Button(
-                    f"Safety: {status_str}",
+                    f"{t('settings_safety_btn', lang)}: {status_str}",
                     id="btn-safety-toggle",
                     classes="settings-btn",
                 )
 
             with Horizontal(id="settings-actions"):
-                yield Button("Save Preferences (Enter)", variant="primary", id="btn-settings-save")
-                yield Button("Cancel (Esc)", variant="default", id="btn-settings-cancel")
+                yield Button(t("settings_save_btn", lang), variant="primary", id="btn-settings-save")
+                yield Button(t("settings_cancel_btn", lang), variant="default", id="btn-settings-cancel")
+
+    def _refresh_labels(self) -> None:
+        """Updates dialog texts to match active language and settings."""
+        lang = self.settings.language
+        try:
+            self.query_one("#settings-title", Label).update(t("settings_title", lang))
+            self.query_one("#lbl-lang", Label).update(t("settings_lang_label", lang))
+            lang_name = "Français" if lang == "fr" else "English"
+            self.query_one("#btn-lang-toggle", Button).label = f"{t('settings_lang_btn', lang)}: {lang_name}"
+            self.query_one("#lbl-theme", Label).update(t("settings_theme_label", lang))
+            self.query_one("#btn-theme-cycle", Button).label = f"{t('settings_theme_btn', lang)}: {self.settings.theme}"
+            self.query_one("#lbl-shell", Label).update(t("settings_shell_label", lang))
+            self.query_one("#btn-shell-toggle", Button).label = f"{t('settings_shell_btn', lang)}: {self.settings.default_shell.upper()}"
+            self.query_one("#lbl-lib-action", Label).update(t("settings_lib_label", lang))
+            self.query_one("#btn-lib-action-toggle", Button).label = f"{t('settings_lib_btn', lang)}: {self.settings.library_enter_action.upper()}"
+            self.query_one("#lbl-retention", Label).update(t("settings_retention_label", lang))
+            self.query_one("#btn-retention-toggle", Button).label = f"{t('settings_retention_btn', lang)}: {self.settings.history_retention.upper()}"
+            self.query_one("#lbl-safety", Label).update(t("settings_safety_label", lang))
+            status_str = t("safety_enabled_str", lang) if self.settings.safety_enabled else t("safety_disabled_str", lang)
+            self.query_one("#btn-safety-toggle", Button).label = f"{t('settings_safety_btn', lang)}: {status_str}"
+            self.query_one("#btn-settings-save", Button).label = t("settings_save_btn", lang)
+            self.query_one("#btn-settings-cancel", Button).label = t("settings_cancel_btn", lang)
+        except Exception:
+            pass
+
+    @on(Button.Pressed, "#btn-lang-toggle")
+    def toggle_language(self) -> None:
+        self.settings.language = "fr" if self.settings.language == "en" else "en"
+        self._refresh_labels()
 
     @on(Button.Pressed, "#btn-theme-cycle")
     def cycle_theme(self) -> None:

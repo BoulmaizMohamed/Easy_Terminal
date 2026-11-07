@@ -13,6 +13,7 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, DataTable, Footer, Input, Label, RichLog, Static
 
+from command_center.i18n import t
 from command_center.importers.json_sync import export_library_json, import_library_json
 from command_center.importers.tldr import sync_tldr_pages
 from command_center.library import (
@@ -165,29 +166,32 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         self.filter_tier: Optional[str] = None
 
     def compose(self) -> ComposeResult:
+        lang_obj = getattr(getattr(self, "app", None), "settings", None)
+        lang = getattr(lang_obj, "language", "en") if lang_obj else "en"
+
         with Vertical(id="library-dialog"):
             with Horizontal(id="library-header"):
-                yield Label("COMMAND LIBRARY", id="library-title")
+                yield Label(t("lib_title", lang), id="library-title")
                 yield Input(
-                    placeholder="Search library by name, command, description, or tags... (Esc to close)",
+                    placeholder=t("lib_search_placeholder", lang),
                     id="library-search",
                 )
 
             with Horizontal(id="library-tier-bar"):
-                yield Button("All Commands (1)", id="btn-tier-all", classes="tier-btn active")
-                yield Button("★ Everyday Commands (2)", id="btn-tier-everyday", classes="tier-btn")
-                yield Button("⚙ Specialized Commands (3)", id="btn-tier-specialized", classes="tier-btn")
+                yield Button(t("lib_tier_all", lang), id="btn-tier-all", classes="tier-btn active")
+                yield Button(t("lib_tier_everyday", lang), id="btn-tier-everyday", classes="tier-btn")
+                yield Button(t("lib_tier_specialized", lang), id="btn-tier-specialized", classes="tier-btn")
 
             with Horizontal(id="library-filter-bar"):
-                yield Button("All Shells", id="btn-shell-all", classes="lib-filter-btn active")
+                yield Button(t("lib_shell_all", lang), id="btn-shell-all", classes="lib-filter-btn active")
                 yield Button("PowerShell", id="btn-shell-ps", classes="lib-filter-btn")
                 yield Button("CMD", id="btn-shell-cmd", classes="lib-filter-btn")
-                yield Button("Favorites Only", id="btn-filter-favs", classes="lib-filter-btn")
+                yield Button(t("lib_favs_only", lang), id="btn-filter-favs", classes="lib-filter-btn")
                 yield Button(f"Sort: {self.current_sort_label}", id="btn-sort-cycle", classes="lib-filter-btn")
-                yield Button("Sync tldr (s)", id="btn-sync-tldr", classes="lib-filter-btn")
-                yield Button("Export (x)", id="btn-export-json", classes="lib-filter-btn")
-                yield Button("Import (i)", id="btn-import-json", classes="lib-filter-btn")
-                yield Button("+ Add (a)", variant="success", id="btn-add-command")
+                yield Button(t("lib_sync_tldr", lang), id="btn-sync-tldr", classes="lib-filter-btn")
+                yield Button(t("lib_export", lang), id="btn-export-json", classes="lib-filter-btn")
+                yield Button(t("lib_import", lang), id="btn-import-json", classes="lib-filter-btn")
+                yield Button(t("lib_add_btn", lang), variant="success", id="btn-add-command")
 
             with Container(id="library-table-container"):
                 yield DataTable(id="library-table", cursor_type="row")

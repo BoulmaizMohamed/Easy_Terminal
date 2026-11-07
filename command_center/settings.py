@@ -26,6 +26,7 @@ class AppSettings:
     library_enter_action: str = "run"  # "run" | "insert"
     history_retention: str = "preview"  # "preview" | "off"
     safety_enabled: bool = True
+    language: str = "en"  # "en" | "fr"
 
 
 def load_settings(file_path: Optional[str | Path] = None) -> AppSettings:
@@ -43,6 +44,7 @@ def load_settings(file_path: Optional[str | Path] = None) -> AppSettings:
             library_enter_action=str(data.get("library_enter_action", "run")).lower(),
             history_retention=str(data.get("history_retention", "preview")).lower(),
             safety_enabled=bool(data.get("safety_enabled", True)),
+            language=str(data.get("language", "en")).lower(),
         )
     except Exception:
         return AppSettings()

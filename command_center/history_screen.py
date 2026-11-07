@@ -39,18 +39,28 @@ class HistoryScreen(ModalScreen[Optional[str]]):
         self.filter_shell: Optional[str] = None
 
     def compose(self) -> ComposeResult:
+        lang_obj = getattr(getattr(self, "app", None), "settings", None)
+        lang = getattr(lang_obj, "language", "en") if lang_obj else "en"
+        is_fr = lang == "fr"
+
+        title = "HISTORIQUE DES COMMANDES" if is_fr else "COMMAND HISTORY"
+        ph = "Rechercher dans l'historique... (Échap pour fermer)" if is_fr else "Search history... (Type to filter, Esc to close)"
+        btn_all = "Tout" if is_fr else "All"
+        btn_failed = "Échecs uniquement" if is_fr else "Failed Only"
+        btn_top = "Top 25 les plus utilisés" if is_fr else "Top 25 Most Used"
+
         with Vertical(id="history-dialog"):
             with Horizontal(id="history-header"):
-                yield Label("COMMAND HISTORY", id="history-title")
+                yield Label(title, id="history-title")
                 yield Input(
-                    placeholder="Search history... (Type to filter, Esc to close)",
+                    placeholder=ph,
                     id="history-search",
                 )
 
             with Horizontal(id="history-filter-bar"):
-                yield Button("All", id="btn-filter-all", classes="filter-btn active")
-                yield Button("Failed Only", id="btn-filter-failed", classes="filter-btn")
-                yield Button("Top 25 Most Used", id="btn-filter-most-used", classes="filter-btn")
+                yield Button(btn_all, id="btn-filter-all", classes="filter-btn active")
+                yield Button(btn_failed, id="btn-filter-failed", classes="filter-btn")
+                yield Button(btn_top, id="btn-filter-most-used", classes="filter-btn")
                 yield Button("PowerShell", id="btn-filter-ps", classes="filter-btn")
                 yield Button("CMD", id="btn-filter-cmd", classes="filter-btn")
 

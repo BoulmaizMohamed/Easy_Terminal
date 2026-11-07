@@ -24,18 +24,32 @@ class SafetyConfirmationDialog(ModalScreen[bool]):
         self.reason = reason
 
     def compose(self) -> ComposeResult:
+        lang_obj = getattr(getattr(self, "app", None), "settings", None)
+        lang = getattr(lang_obj, "language", "en") if lang_obj else "en"
+
+        is_fr = lang == "fr"
+        title = "COMMANDE POTENTIELLEMENT DESTRUCTIVE" if is_fr else "POTENTIALLY DESTRUCTIVE COMMAND"
+        reason_label = f"Raison : {self.reason}" if is_fr else f"Reason: {self.reason}"
+        prompt_label = (
+            "Le shell vous appartient. Voulez-vous vraiment exécuter cette commande ?"
+            if is_fr
+            else "The shell is yours. Are you sure you want to run this command?"
+        )
+        confirm_btn = "Exécuter quand même (Entrée)" if is_fr else "Run Anyway (Enter)"
+        cancel_btn = "Annuler (Échap)" if is_fr else "Cancel (Esc)"
+
         with Vertical(id="safety-dialog"):
-            yield Label("POTENTIALLY DESTRUCTIVE COMMAND", id="safety-title")
-            yield Label(f"Reason: {self.reason}", id="safety-reason")
+            yield Label(title, id="safety-title")
+            yield Label(reason_label, id="safety-reason")
 
             with Container(id="safety-command-box"):
                 yield Label(self.command, id="safety-command-text")
 
-            yield Label("The shell is yours. Are you sure you want to run this command?", id="safety-prompt")
+            yield Label(prompt_label, id="safety-prompt")
 
             with Horizontal(id="safety-actions"):
-                yield Button("Run Anyway (Enter)", variant="error", id="btn-safety-confirm")
-                yield Button("Cancel (Esc)", variant="default", id="btn-safety-cancel")
+                yield Button(confirm_btn, variant="error", id="btn-safety-confirm")
+                yield Button(cancel_btn, variant="default", id="btn-safety-cancel")
 
     def on_mount(self) -> None:
         # Default focus to Cancel for defensive safety

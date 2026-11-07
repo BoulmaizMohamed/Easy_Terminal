@@ -135,12 +135,14 @@ Screen {
     color: $text;
     layout: horizontal;
     padding: 0 2;
-    border-top: solid $surface-darken-3;
+    border: none;
 }
 
 .status-badge {
     margin-right: 2;
     text-style: bold;
+    width: auto;
+    height: 1;
 }
 
 #status-shell {
@@ -150,7 +152,12 @@ Screen {
 }
 
 #status-cwd {
-    color: $text-muted;
+    color: $text;
+    max-width: 45;
+}
+
+#status-repo {
+    color: $success;
 }
 
 #status-exit {

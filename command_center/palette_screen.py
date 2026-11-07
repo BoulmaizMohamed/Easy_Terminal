@@ -34,20 +34,39 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
         self.filter_tier: Optional[str] = None
 
     def compose(self) -> ComposeResult:
+        lang_obj = getattr(getattr(self, "app", None), "settings", None)
+        lang = getattr(lang_obj, "language", "en") if lang_obj else "en"
+        is_fr = lang == "fr"
+
+        title = "PALETTE DE COMMANDES & AIDE" if is_fr else "COMMAND PALETTE & HELP"
+        tier_all = "Toutes les commandes" if is_fr else "All Commands"
+        tier_evry = "★ Quotidiennes" if is_fr else "★ Everyday"
+        tier_spec = "⚙ Spécialisées" if is_fr else "⚙ Specialized"
+        ph = (
+            "Rechercher par nom, commande ou tag... (Entrée=Exécuter, Tab=Insérer)"
+            if is_fr
+            else "Type to search all commands, descriptions, or tags... (Enter=Run, Tab=Insert)"
+        )
+        hint = (
+            "[Entrée] Exécuter  •  [Tab] Insérer  •  [Échap] Fermer"
+            if is_fr
+            else "[Enter] Run Command  •  [Tab] Insert into Input  •  [Esc] Close"
+        )
+
         with Vertical(id="palette-dialog"):
-            yield Label("COMMAND PALETTE & HELP", id="palette-title")
+            yield Label(title, id="palette-title")
             with Horizontal(id="palette-tier-bar"):
-                yield Button("All Commands", id="btn-pal-all", classes="pal-tier-btn active")
-                yield Button("★ Everyday", id="btn-pal-everyday", classes="pal-tier-btn")
-                yield Button("⚙ Specialized", id="btn-pal-specialized", classes="pal-tier-btn")
+                yield Button(tier_all, id="btn-pal-all", classes="pal-tier-btn active")
+                yield Button(tier_evry, id="btn-pal-everyday", classes="pal-tier-btn")
+                yield Button(tier_spec, id="btn-pal-specialized", classes="pal-tier-btn")
             yield Input(
-                placeholder="Type to search all commands, descriptions, or tags... (Enter=Run, Tab=Insert)",
+                placeholder=ph,
                 id="palette-search",
             )
             yield OptionList(id="palette-list")
             with Container(id="palette-detail-container"):
                 yield RichLog(id="palette-detail-log", wrap=True, highlight=True)
-            yield Label("[Enter] Run Command  •  [Tab] Insert into Input  •  [Esc] Close", id="palette-hint")
+            yield Label(hint, id="palette-hint")
 
     def on_mount(self) -> None:
         self.refresh_results()
