@@ -38,6 +38,7 @@ Screen {
 #header-hints {
     color: $text-muted;
     text-style: dim;
+    width: auto;
 }
 
 /* ==========================================================================
@@ -60,67 +61,32 @@ Screen {
 }
 
 /* ==========================================================================
-   Status Bar
-   ========================================================================== */
-
-#status-bar {
-    height: 1;
-    dock: bottom;
-    background: $surface-darken-2;
-    color: $text;
-    layout: horizontal;
-    padding: 0 2;
-    border-top: solid $surface-darken-3;
-}
-
-.status-badge {
-    margin-right: 2;
-    text-style: bold;
-}
-
-#status-shell {
-    color: $accent;
-    background: $surface-darken-1;
-    padding: 0 1;
-}
-
-#status-cwd {
-    color: $text-muted;
-}
-
-#status-exit {
-    color: $text;
-}
-
-#status-state {
-    color: $warning;
-}
-
-/* ==========================================================================
-   Bottom Dock & Command Input
+   Bottom Dock & Controls
    ========================================================================== */
 
 #bottom-dock {
     dock: bottom;
     height: auto;
+    background: $surface-darken-1;
+    border-top: solid $surface-lighten-1;
 }
 
 #quick-actions-bar {
     height: 3;
     layout: horizontal;
-    background: $surface-darken-2;
-    padding: 0 1;
+    background: transparent;
+    padding: 0 2;
     align: left middle;
-    border-top: solid $primary;
 }
 
 .qa-btn {
-    min-width: 11;
-    height: 3;
+    min-width: 10;
+    height: 1;
     border: none;
-    background: $surface;
+    background: $surface-darken-2;
     color: $text;
-    margin-right: 1;
+    margin: 0 1 0 0;
+    padding: 0 1;
 }
 
 .qa-btn:hover {
@@ -132,9 +98,9 @@ Screen {
 #input-container {
     height: 3;
     layout: horizontal;
-    background: $surface-darken-1;
+    background: $surface-darken-2;
     padding: 0 2;
-    border-top: solid $surface-lighten-1;
+    border-top: solid $surface-darken-3;
     align: left middle;
 }
 
@@ -148,6 +114,7 @@ Screen {
 
 #command-input {
     width: 1fr;
+    height: 1;
     background: transparent;
     border: none;
     color: $text;
@@ -156,6 +123,42 @@ Screen {
 
 #command-input:focus {
     border: none;
+}
+
+/* ==========================================================================
+   Status Bar
+   ========================================================================== */
+
+#status-bar {
+    height: 1;
+    background: $surface-darken-3;
+    color: $text;
+    layout: horizontal;
+    padding: 0 2;
+    border-top: solid $surface-darken-3;
+}
+
+.status-badge {
+    margin-right: 2;
+    text-style: bold;
+}
+
+#status-shell {
+    color: $accent;
+    background: $surface-darken-2;
+    padding: 0 1;
+}
+
+#status-cwd {
+    color: $text-muted;
+}
+
+#status-exit {
+    color: $text;
+}
+
+#status-state {
+    color: $warning;
 }
 
 /* ==========================================================================

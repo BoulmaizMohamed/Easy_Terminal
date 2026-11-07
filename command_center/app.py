@@ -86,7 +86,7 @@ class CommandCenterApp(App):
             yield Label("⚡ COMMAND CENTER", id="app-title")
             yield Label("• Modern Windows Terminal", id="app-subtitle")
             yield Static("", id="header-spacer")
-            yield Label("[F2] Shell  •  [Ctrl+P] Palette  •  [Ctrl+L] Library  •  [Ctrl+H] History  •  [F10] Settings", id="header-hints")
+            yield Label(f"[bold {prompt_color}]{self.shell.shell_type.upper()}[/bold {prompt_color}]  •  [dim]F10 Settings[/dim]", id="header-hints")
 
         with Container(id="output-container"):
             yield RichLog(
@@ -540,6 +540,11 @@ class CommandCenterApp(App):
         prompt_glyph = "PS ❯" if new_shell == "powershell" else "CMD ❯"
         prompt_color = "cyan" if new_shell == "powershell" else "yellow"
         self.query_one("#prompt-symbol", Static).update(f"[{prompt_color}]{prompt_glyph}[/{prompt_color}]")
+
+        # Update header status
+        self.query_one("#header-hints", Label).update(
+            f"[bold {prompt_color}]{new_shell.upper()}[/bold {prompt_color}]  •  [dim]F10 Settings[/dim]"
+        )
 
         # Update status bar
         status_shell = self.query_one("#status-shell", Static)
