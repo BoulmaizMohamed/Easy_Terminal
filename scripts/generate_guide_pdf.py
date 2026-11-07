@@ -1,7 +1,7 @@
 """
-Easy_Terminal - PDF User Guide Generator
-Captures live screenshots from the Textual application and compiles a
-professional, multi-page PDF user guide via headless Chrome.
+Easy_Terminal - PDF User Guide Generator (English & French)
+Captures live screenshots from the Textual application (in both languages)
+and compiles professional, multi-page PDF user guides via headless Chrome.
 
 Author: B.Mohammed_Amin
 License: MIT
@@ -26,12 +26,14 @@ SCREENSHOTS_DIR = DOCS_DIR / "screenshots"
 DIST_DIR = ROOT_DIR / "dist"
 
 
-async def capture_screenshots() -> None:
-    """Captures high-resolution vector SVG screenshots of all key screens."""
-    print("==> Capturing application screens...")
+async def capture_screenshots(lang: str = "en") -> None:
+    """Captures high-resolution vector SVG screenshots for the given language."""
+    prefix = "" if lang == "en" else "fr_"
+    print(f"==> Capturing application screens ({lang.upper()})...")
     SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
     app = CommandCenterApp()
+    app.settings.language = lang
     async with app.run_test(size=(110, 32)) as pilot:
         await pilot.pause(0.2)
 
@@ -40,48 +42,38 @@ async def capture_screenshots() -> None:
         inp.value = "git status"
         await pilot.press("enter")
         await pilot.pause(0.4)
-        (SCREENSHOTS_DIR / "screen_main.svg").write_text(app.export_screenshot(), encoding="utf-8")
+        (SCREENSHOTS_DIR / f"screen_{prefix}main.svg").write_text(app.export_screenshot(), encoding="utf-8")
 
         # 2. Command Library Screen (Ctrl+L)
         await pilot.press("ctrl+l")
         await pilot.pause(0.3)
-        (SCREENSHOTS_DIR / "screen_library.svg").write_text(app.export_screenshot(), encoding="utf-8")
+        (SCREENSHOTS_DIR / f"screen_{prefix}library.svg").write_text(app.export_screenshot(), encoding="utf-8")
 
         # 3. Command Palette Screen (Ctrl+P)
         await pilot.press("escape")
         await pilot.pause(0.2)
         await pilot.press("ctrl+p")
         await pilot.pause(0.3)
-        (SCREENSHOTS_DIR / "screen_palette.svg").write_text(app.export_screenshot(), encoding="utf-8")
+        (SCREENSHOTS_DIR / f"screen_{prefix}palette.svg").write_text(app.export_screenshot(), encoding="utf-8")
 
         # 4. Git Repositories Screen (Ctrl+G)
         await pilot.press("escape")
         await pilot.pause(0.2)
         await pilot.press("ctrl+g")
         await pilot.pause(0.3)
-        (SCREENSHOTS_DIR / "screen_repos.svg").write_text(app.export_screenshot(), encoding="utf-8")
+        (SCREENSHOTS_DIR / f"screen_{prefix}repos.svg").write_text(app.export_screenshot(), encoding="utf-8")
 
         # 5. Settings Screen (F10)
         await pilot.press("escape")
         await pilot.pause(0.2)
         await pilot.press("f10")
         await pilot.pause(0.3)
-        (SCREENSHOTS_DIR / "screen_settings.svg").write_text(app.export_screenshot(), encoding="utf-8")
+        (SCREENSHOTS_DIR / f"screen_{prefix}settings.svg").write_text(app.export_screenshot(), encoding="utf-8")
 
-    print("    All 5 screen captures completed successfully.")
+    print(f"    Screenshots for {lang.upper()} saved successfully.")
 
 
-def build_guide_html() -> Path:
-    """Generates the comprehensive HTML user guide with embedded styling."""
-    html_file = DOCS_DIR / "Easy_Terminal_User_Guide.html"
-    print(f"==> Generating HTML guide at {html_file}...")
-
-    html_content = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Easy_Terminal - User Guide & Quick Reference</title>
-<style>
+COMMON_CSS = """
     @page {
         size: A4;
         margin: 10mm 14mm 12mm 14mm;
@@ -301,6 +293,21 @@ def build_guide_html() -> Path:
         font-size: 7.5pt;
         color: #94a3b8;
     }
+"""
+
+
+def build_guide_html_en() -> Path:
+    """Generates the English HTML user guide."""
+    html_file = DOCS_DIR / "Easy_Terminal_User_Guide.html"
+    print(f"==> Generating English HTML guide at {html_file}...")
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Easy_Terminal - User Guide & Quick Reference</title>
+<style>
+{COMMON_CSS}
 </style>
 </head>
 <body>
@@ -759,13 +766,487 @@ def build_guide_html() -> Path:
 </html>
 """
     html_file.write_text(html_content, encoding="utf-8")
-    print(f"    HTML guide generated ({len(html_content)} bytes).")
+    print(f"    English HTML guide generated ({len(html_content)} bytes).")
     return html_file
 
 
-def compile_pdf_with_chrome(html_file: Path) -> Path:
+def build_guide_html_fr() -> Path:
+    """Generates the French HTML user guide with localized text and screenshots."""
+    html_file = DOCS_DIR / "Easy_Terminal_Guide_Utilisateur.html"
+    print(f"==> Generating French HTML guide at {html_file}...")
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Easy_Terminal - Guide d'Utilisation & Référence Rapide</title>
+<style>
+{COMMON_CSS}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: PRÉSENTATION & ÉCRAN PRINCIPAL -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+            <span class="badge">v1.0.0</span>
+        </div>
+        <div class="meta">
+            Guide d'Utilisation & Référence Rapide<br>
+            <strong>Auteur : B.Mohammed_Amin • Licence MIT</strong>
+        </div>
+    </div>
+
+    <h1>Bienvenue sur Easy_Terminal</h1>
+    <div class="tagline">Le terminal Windows moderne, sécurisé et visuel</div>
+
+    <p>
+        <strong>Easy_Terminal</strong> transforme les lignes de commande quotidiennes en une expérience visuelle, productive et accessible à tous. Construit sur les shells natifs de Windows (PowerShell, Invite de commandes CMD, et WSL/Bash), il offre des boutons visuels, l'autocomplétion intelligente, la navigation rapide entre projets et des gardes de sécurité.
+    </p>
+
+    <div class="grid-3">
+        <div class="card">
+            <h4>🚀 Moteur Multi-Shell</h4>
+            <p>Basculez entre <strong>PowerShell</strong>, <strong>CMD</strong> et <strong>WSL/Bash</strong> à tout moment avec la touche <span class="key">F2</span>.</p>
+        </div>
+        <div class="card">
+            <h4>📚 86+ Commandes Prêtes</h4>
+            <p>Bibliothèque de commandes divisée en tâches <strong>Quotidiennes</strong> et outils <strong>Spécialisés</strong> (<span class="key">Ctrl+L</span>).</p>
+        </div>
+        <div class="card">
+            <h4>🌐 Bilingue (FR / EN)</h4>
+            <p>Interface intégrale en français et en anglais commutable dans les paramètres (<span class="key">F10</span>).</p>
+        </div>
+    </div>
+
+    <h2>Interface Principale du Terminal</h2>
+    <div class="screenshot-card">
+        <img src="screenshots/screen_fr_main.svg" alt="Interface Principale Easy_Terminal">
+    </div>
+    <div class="caption">Figure 1 : Vue principale avec indicateur de référentiel Git, bannière d'accueil et barre d'actions rapides en 1 clic.</div>
+
+    <div class="tip-box">
+        <strong>💡 Astuce de démarrage :</strong> Commencez à taper une commande ou un chemin et appuyez sur <span class="key">Tab</span> pour l'autocomplétion instantanée. Tapez <code>clear</code> ou <code>cls</code> pour effacer l'écran.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Développé par B.Mohammed_Amin</span>
+        <span>Page 1 sur 7</span>
+    </div>
+</div>
+
+<!-- PAGE 2: INSTALLATION & INTÉGRATION WINDOWS -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 1 : Installation & Démarrage</div>
+    </div>
+
+    <h2>1. Options d'Installation</h2>
+    <p>Easy_Terminal est distribué sous deux formes prêtes à l'emploi selon vos besoins :</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>A. Assistant d'Installation Windows (Recommandé)</h4>
+            <p><strong>Fichier :</strong> <code>Easy_Terminal-Setup.exe</code></p>
+            <ul style="padding-left: 16px; margin-top: 4px; font-size: 8.5pt;">
+                <li>Assistant guidé d'installation Inno Setup.</li>
+                <li>Crée des raccourcis sur le Bureau et dans le Menu Démarrer.</li>
+                <li>Intègre <em>« Ouvrir dans le Terminal »</em> dans le menu clic droit de l'Explorateur Windows.</li>
+                <li>Désinstallation standard et propre via les Paramètres Windows.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>B. Édition Portable (Sans Installation)</h4>
+            <p><strong>Fichier :</strong> <code>Easy_Terminal-Portable.zip</code></p>
+            <ul style="padding-left: 16px; margin-top: 4px; font-size: 8.5pt;">
+                <li>100% autonome : parfait pour les clés USB et disques externes.</li>
+                <li>Historique, paramètres et favoris stockés dans le dossier local <code>data/</code>.</li>
+                <li>Aucune trace laissée dans <code>%APPDATA%</code> sur la machine hôte.</li>
+                <li>Scripts batch inclus pour activer/désactiver le menu contextuel.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>2. Intégration au Menu Clic Droit Windows</h2>
+    <p>
+        Lancez Easy_Terminal directement à l'emplacement exact d'un projet ou d'un disque depuis l'Explorateur Windows :
+    </p>
+
+    <div style="display: flex; gap: 14px; align-items: center; margin: 8px 0;">
+        <div style="flex: 0 0 180px; text-align: center;">
+            <div class="screenshot-card" style="padding: 4px; display: inline-block;">
+                <img src="screenshots/context_menu.png" alt="Menu Contextuel Windows" style="max-height: 160px; width: auto;">
+            </div>
+            <div class="caption">Figure 2 : Menu Clic Droit Windows</div>
+        </div>
+        <div style="flex: 1;">
+            <div class="info-box">
+                <strong>Utilisation du menu contextuel :</strong>
+                <ol style="padding-left: 16px; margin-top: 4px; line-height: 1.5; font-size: 8.5pt;">
+                    <li>Faites un clic droit sur un dossier ou un disque dans l'Explorateur.</li>
+                    <li>Cliquez sur <strong>Open in Terminal</strong> (ou <em>Afficher plus d'options</em> sous Win 11).</li>
+                    <li>Easy_Terminal s'ouvre directement positionné dans ce dossier.</li>
+                    <li>Si le dossier est un référentiel Git, la branche courante est détectée !</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <h2>3. Premier Démarrage & Bannière d'Accueil</h2>
+    <p>
+        Dès le premier lancement, Easy_Terminal affiche un guide visuel rappelant les raccourcis essentiels. La barre d'état indique en permanence votre dossier de travail et votre branche Git active.
+    </p>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Développé par B.Mohammed_Amin</span>
+        <span>Page 2 sur 7</span>
+    </div>
+</div>
+
+<!-- PAGE 3: ANATOMIE DE L'INTERFACE & ACTIONS RAPIDES -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 2 : Anatomie de l'Interface</div>
+    </div>
+
+    <h2>Anatomie de l'Interface & Agencement</h2>
+    <p>Easy_Terminal est structuré en quatre zones visuelles conçues pour optimiser votre concentration :</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>Zone 1 : Barre Supérieure d'En-tête</h4>
+            <p>Affiche le shell actif (<code>Shell: PowerShell / CMD / WSL</code>), le badge du référentiel Git (ex: <code>cli (master)</code>) et les raccourcis d'accès rapide.</p>
+        </div>
+        <div class="card">
+            <h4>Zone 2 : Écran de Sortie Enrichi</h4>
+            <p>Historique défilant avec affichage du code de retour et du temps d'exécution en direct (ex: <code>exit: 0 | 502ms ✓</code>).</p>
+        </div>
+        <div class="card">
+            <h4>Zone 3 : Barre d'Actions Rapides</h4>
+            <p>Sept boutons visuels préconfigurés permettant d'exécuter des actions courantes d'un simple clic sans rien taper.</p>
+        </div>
+        <div class="card">
+            <h4>Zone 4 : Invite Intelligente & Complétion</h4>
+            <p>Champ de saisie avec coloration, autocomplétion par tabulation (<span class="key">Tab</span>), historique (<span class="key">↑</span>/<span class="key">↓</span>) et sécurité intégrée.</p>
+        </div>
+    </div>
+
+    <h2>La Barre d'Actions Rapides en 1 Clic</h2>
+    <p>Située juste au-dessus de l'invite de commande, elle donne un accès immédiat aux opérations fréquentes :</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 110px;">Bouton</th>
+                <th style="width: 140px;">Action Exécutée</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>📁 Fichiers</strong></td>
+                <td><code>Get-ChildItem / dir</code></td>
+                <td>Liste les fichiers et dossiers du répertoire courant avec tailles et dates.</td>
+            </tr>
+            <tr>
+                <td><strong>⚡ Top Apps</strong></td>
+                <td>Gestionnaire processus</td>
+                <td>Affiche les applications et processus les plus gourmands en mémoire et CPU.</td>
+            </tr>
+            <tr>
+                <td><strong>💾 Disques</strong></td>
+                <td><code>Get-PSDrive / wmic</code></td>
+                <td>Présente l'espace libre, la capacité et les partitions de vos disques durs.</td>
+            </tr>
+            <tr>
+                <td><strong>🌐 Ping</strong></td>
+                <td><code>Test-Connection</code></td>
+                <td>Effectue un test de latence réseau pour vérifier la connectivité Internet.</td>
+            </tr>
+            <tr>
+                <td><strong>📚 Bibliothèque</strong></td>
+                <td><span class="key">Ctrl+L</span></td>
+                <td>Ouvre la bibliothèque intégrée de 86+ commandes organisées.</td>
+            </tr>
+            <tr>
+                <td><strong>🐚 Shell</strong></td>
+                <td><span class="key">F2</span></td>
+                <td>Bascule instantanément entre PowerShell, l'Invite CMD et WSL.</td>
+            </tr>
+            <tr>
+                <td><strong>🧹 Effacer</strong></td>
+                <td><code>Clear-Host / cls</code></td>
+                <td>Nettoie l'écran d'affichage pour repartir sur un terminal propre.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="tip-box">
+        <strong>⚡ Garde de Sécurité :</strong> Lorsqu'une commande dangereuse ou destructrice (comme <code>rm -rf /</code>, <code>del /s *</code> ou <code>format</code>) est saisie, Easy_Terminal suspend l'exécution et demande une confirmation pour éviter toute perte de données.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Développé par B.Mohammed_Amin</span>
+        <span>Page 3 sur 7</span>
+    </div>
+</div>
+
+<!-- PAGE 4: BIBLIOTHÈQUE DE COMMANDES -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 3 : Bibliothèque de Commandes (Ctrl+L)</div>
+    </div>
+
+    <h2>La Bibliothèque Intégrée de 86+ Commandes (<span class="key">Ctrl+L</span>)</h2>
+    <p>
+        Plus besoin de mémoriser des syntaxes ou options complexes. Easy_Terminal intègre un catalogue complet de 86 commandes, réparties judicieusement en deux catégories principales :
+    </p>
+
+    <div class="screenshot-card">
+        <img src="screenshots/screen_fr_library.svg" alt="Modal Bibliothèque de Commandes">
+    </div>
+    <div class="caption">Figure 3 : Modal de la bibliothèque avec séparation (Quotidiennes vs Spécialisées) et recherche instantanée.</div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>🌟 Commandes Quotidiennes & Fréquentes</h4>
+            <p>Les outils indispensables pour tous les jours :</p>
+            <ul style="padding-left: 16px; font-size: 8pt; line-height: 1.4;">
+                <li><strong>Fichiers & Dossiers :</strong> Lister, chercher du contenu, arborescence, stockage.</li>
+                <li><strong>Réseau & Web :</strong> Adresse IP, diagnostic ping, résolution DNS, vitesse.</li>
+                <li><strong>Santé Système :</strong> Utilisation CPU/RAM, processus actifs, autonomie batterie.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>⚙️ Commandes Spécialisées</h4>
+            <p>Outils techniques pour développeurs et administrateurs :</p>
+            <ul style="padding-left: 16px; font-size: 8pt; line-height: 1.4;">
+                <li><strong>Git & Versions :</strong> Statut des branches, diff indexé, journal de commits, stash.</li>
+                <li><strong>Conteneurs & Docker :</strong> Liste des conteneurs, nettoyage d'images, docker compose.</li>
+                <li><strong>Environnements Dév :</strong> Venv Python, audit packages Node, ports d'écoute.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>Comment utiliser la bibliothèque :</strong>
+        <ul style="padding-left: 16px; margin-top: 3px; font-size: 8.5pt;">
+            <li>Appuyez sur <span class="key">Entrée</span> pour exécuter immédiatement la commande sélectionnée.</li>
+            <li>Appuyez sur <span class="key">Inser</span> pour insérer la commande dans l'invite et la modifier avant exécution.</li>
+        </ul>
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Développé par B.Mohammed_Amin</span>
+        <span>Page 4 sur 7</span>
+    </div>
+</div>
+
+<!-- PAGE 5: RÉFÉRENTIELS GIT -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 4 : Navigation de Référentiels Git</div>
+    </div>
+
+    <h2>Navigateur de Référentiels Git (<span class="key">Ctrl+G</span>)</h2>
+    <p>
+        Vous gérez plusieurs projets de code ? Easy_Terminal mémorise et détecte automatiquement vos dépôts Git locaux, vous permettant de passer d'un projet à l'autre en un éclair sans retaper de chemins fastidieux.
+    </p>
+
+    <div class="screenshot-card">
+        <img src="screenshots/screen_fr_repos.svg" alt="Navigateur Référentiels Git">
+    </div>
+    <div class="caption">Figure 4 : Sélecteur de dépôts avec badges de branches actives, statut courant et chemins de dossiers.</div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>⭐ Découverte Automatique</h4>
+            <p>Dès que vous naviguez dans un dossier contenant un sous-dossier <code>.git</code>, Easy_Terminal l'enregistre et mémorise la branche courante.</p>
+        </div>
+        <div class="card">
+            <h4>⚡ Navigation Instantanée</h4>
+            <p>Sélectionnez n'importe quel dépôt dans la liste et appuyez sur <span class="key">Entrée</span>. Le terminal se déplace instantanément et met à jour l'en-tête.</p>
+        </div>
+    </div>
+
+    <div class="tip-box">
+        <strong>⚡ Raccourcis en Ligne de Commande :</strong> Vous pouvez également sauter directement vers un projet en tapant <code>goto &lt;nom-du-projet&gt;</code> ou <code>repos</code> dans l'invite.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Développé par B.Mohammed_Amin</span>
+        <span>Page 5 sur 7</span>
+    </div>
+</div>
+
+<!-- PAGE 6: PALETTE DE COMMANDES -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 5 : Palette de Commandes Rapide</div>
+    </div>
+
+    <h2>Palette de Commandes & Recherche Rapide (<span class="key">Ctrl+P</span>)</h2>
+    <p>
+        Appuyez sur <span class="key">Ctrl+P</span> à tout moment pour faire apparaître la palette globale. Recherchez instantanément parmi toutes les fonctions de l'application, les réglages et les outils en tapant quelques lettres.
+    </p>
+
+    <div class="screenshot-card">
+        <img src="screenshots/screen_fr_palette.svg" alt="Palette de Commandes">
+    </div>
+    <div class="caption">Figure 5 : Palette de recherche rapide pour contrôler le terminal intégralement au clavier.</div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>🔍 Recherche Floue (Fuzzy Search)</h4>
+            <p>Tapez des lettres même non consécutives (ex: <code>pows</code> pour PowerShell ou <code>param</code> pour Paramètres) pour trouver une action.</p>
+        </div>
+        <div class="card">
+            <h4>⚡ Apprentissage des Raccourcis</h4>
+            <p>Chaque ligne de la palette indique son raccourci direct associé, facilitant la mémorisation naturelle des commandes.</p>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>Astuce :</strong> Appuyez sur <span class="key">Échap</span> pour fermer n'importe quelle fenêtre modale et revenir instantanément à l'invite de commande.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Développé par B.Mohammed_Amin</span>
+        <span>Page 6 sur 7</span>
+    </div>
+</div>
+
+<!-- PAGE 7: PARAMÈTRES & AIDE-MÉMOIRE DES RACCOURCIS -->
+<div class="page">
+    <div class="header-bar">
+        <div>
+            <span class="logo-title">⚡ EASY_TERMINAL</span>
+        </div>
+        <div class="meta">Section 6 : Paramètres & Aide-Mémoire</div>
+    </div>
+
+    <h2>1. Paramètres & Bilinguisme (<span class="key">F10</span>)</h2>
+    <p>
+        Personnalisez Easy_Terminal selon vos préférences dans la fenêtre Paramètres (<span class="key">F10</span>) :
+    </p>
+
+    <div class="screenshot-card" style="margin-bottom: 4px;">
+        <img src="screenshots/screen_fr_settings.svg" alt="Fenêtre Paramètres" style="max-height: 80mm;">
+    </div>
+    <div class="caption">Figure 6 : Paramètres avec sélection de langue (Français / English), shell par défaut et crédits d'auteur.</div>
+
+    <h2>2. Aide-Mémoire Complet des Raccourcis Clavier</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 120px;">Raccourci</th>
+                <th style="width: 180px;">Action Associée</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="key">Ctrl+L</span></td>
+                <td><strong>Bibliothèque</strong></td>
+                <td>Parcourir les 86+ commandes quotidiennes et spécialisées.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+P</span></td>
+                <td><strong>Palette d'Actions</strong></td>
+                <td>Recherche rapide globale dans l'application.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+G</span></td>
+                <td><strong>Référentiels Git</strong></td>
+                <td>Navigation rapide entre dépôts et projets enregistrés.</td>
+            </tr>
+            <tr>
+                <td><span class="key">F2</span></td>
+                <td><strong>Changer de Shell</strong></td>
+                <td>Bascule dynamique entre PowerShell, Invite CMD et WSL.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+H</span></td>
+                <td><strong>Historique</strong></td>
+                <td>Consulter, filtrer et relancer d'anciennes commandes.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+T</span></td>
+                <td><strong>Changer de Thème</strong></td>
+                <td>Basculer entre les thèmes (Dark Moderne, Matrix Green, etc.).</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+Y</span></td>
+                <td><strong>Copier la Sortie</strong></td>
+                <td>Copie le texte de la dernière sortie dans le presse-papiers Windows.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+R</span></td>
+                <td><strong>Redémarrer Shell</strong></td>
+                <td>Relance le processus de shell actif sans fermer l'application.</td>
+            </tr>
+            <tr>
+                <td><span class="key">F10</span></td>
+                <td><strong>Paramètres</strong></td>
+                <td>Modifier la langue (Français/Anglais), shell par défaut, sécurité.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Tab</span></td>
+                <td><strong>Autocomplétion</strong></td>
+                <td>Complète automatiquement chemins, dossiers et noms de commandes.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+C</span></td>
+                <td><strong>Interrompre / Vider</strong></td>
+                <td>Interrompt un processus en cours ou vide la ligne de saisie.</td>
+            </tr>
+            <tr>
+                <td><span class="key">Ctrl+Q</span></td>
+                <td><strong>Quitter</strong></td>
+                <td>Ferme proprement l'application Easy_Terminal.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="info-box" style="text-align: center; margin-top: 6px;">
+        <strong>Easy_Terminal v1.0.0</strong> — Conçu et développé par <strong>B.Mohammed_Amin</strong><br>
+        Distribué sous licence open-source <strong>Licence MIT</strong>.
+    </div>
+
+    <div class="footer-bar">
+        <span>Easy_Terminal v1.0.0 — Développé par B.Mohammed_Amin</span>
+        <span>Page 7 sur 7</span>
+    </div>
+</div>
+
+</body>
+</html>
+"""
+    html_file.write_text(html_content, encoding="utf-8")
+    print(f"    French HTML guide generated ({len(html_content)} bytes).")
+    return html_file
+
+
+def compile_pdf_with_chrome(html_file: Path, output_pdf_name: str) -> Path:
     """Compiles the HTML document to PDF using headless Chrome."""
-    pdf_file = DOCS_DIR / "Easy_Terminal_User_Guide.pdf"
+    pdf_file = DOCS_DIR / output_pdf_name
     print(f"==> Compiling PDF via Chrome to {pdf_file}...")
 
     chrome_candidates = [
@@ -804,7 +1285,7 @@ def compile_pdf_with_chrome(html_file: Path) -> Path:
 
     # Also copy to dist folder if dist exists
     if DIST_DIR.exists():
-        dist_pdf = DIST_DIR / "Easy_Terminal_User_Guide.pdf"
+        dist_pdf = DIST_DIR / output_pdf_name
         shutil.copyfile(pdf_file, dist_pdf)
         print(f"    Copied PDF to {dist_pdf}")
 
@@ -812,10 +1293,19 @@ def compile_pdf_with_chrome(html_file: Path) -> Path:
 
 
 async def main() -> None:
-    await capture_screenshots()
-    html_path = build_guide_html()
-    pdf_path = compile_pdf_with_chrome(html_path)
-    print(f"\n[SUCCESS] Easy_Terminal User Guide generated at:\n  {pdf_path}")
+    # 1. Capture English screens & compile English guide
+    await capture_screenshots("en")
+    html_en = build_guide_html_en()
+    pdf_en = compile_pdf_with_chrome(html_en, "Easy_Terminal_User_Guide.pdf")
+
+    # 2. Capture French screens & compile French guide
+    await capture_screenshots("fr")
+    html_fr = build_guide_html_fr()
+    pdf_fr = compile_pdf_with_chrome(html_fr, "Easy_Terminal_Guide_Utilisateur.pdf")
+
+    print("\n[SUCCESS] Easy_Terminal User Guides generated:")
+    print(f"  English: {pdf_en}")
+    print(f"  Français: {pdf_fr}")
 
 
 if __name__ == "__main__":

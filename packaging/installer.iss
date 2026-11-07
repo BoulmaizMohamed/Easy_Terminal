@@ -46,11 +46,13 @@ Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal\command"; ValueTy
 [Files]
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\docs\Easy_Terminal_User_Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\docs\Easy_Terminal_Guide_Utilisateur.pdf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\dist\Easy_Terminal\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\assets\app.ico"
-Name: "{autoprograms}\Easy_Terminal User Guide"; Filename: "{app}\Easy_Terminal_User_Guide.pdf"
+Name: "{autoprograms}\Easy_Terminal User Guide (EN)"; Filename: "{app}\Easy_Terminal_User_Guide.pdf"
+Name: "{autoprograms}\Easy_Terminal Guide Utilisateur (FR)"; Filename: "{app}\Easy_Terminal_Guide_Utilisateur.pdf"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\assets\app.ico"; Tasks: desktopicon
 
 [Run]
