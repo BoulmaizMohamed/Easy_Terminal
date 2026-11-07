@@ -7,10 +7,14 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Optional
 
-import platformdirs
+from command_center.db import get_data_dir
 
-DEFAULT_SETTINGS_DIR = Path(platformdirs.user_data_dir("command_center", appauthor=False, roaming=True))
-DEFAULT_SETTINGS_FILE = DEFAULT_SETTINGS_DIR / "settings.json"
+
+def get_settings_file(file_path: Optional[str | Path] = None) -> Path:
+    """Returns the resolved settings file path."""
+    if file_path:
+        return Path(file_path)
+    return get_data_dir() / "settings.json"
 
 
 @dataclass
@@ -26,7 +30,7 @@ class AppSettings:
 
 def load_settings(file_path: Optional[str | Path] = None) -> AppSettings:
     """Loads settings from disk or returns defaults if not present."""
-    path = Path(file_path) if file_path else DEFAULT_SETTINGS_FILE
+    path = get_settings_file(file_path)
     if not path.exists():
         return AppSettings()
 
@@ -46,7 +50,7 @@ def load_settings(file_path: Optional[str | Path] = None) -> AppSettings:
 
 def save_settings(settings: AppSettings, file_path: Optional[str | Path] = None) -> None:
     """Saves user settings to disk as JSON."""
-    path = Path(file_path) if file_path else DEFAULT_SETTINGS_FILE
+    path = get_settings_file(file_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(asdict(settings), f, indent=2)

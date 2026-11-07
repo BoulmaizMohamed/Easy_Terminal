@@ -141,6 +141,41 @@ Command Center is designed to be fully navigable without a mouse:
 
 ---
 
+## Distribution & Installation
+
+Command Center provides automated release packaging for both an **Install Wizard** and a **Portable Edition**:
+
+### One-Command Release Builder
+Build all targets with a single command:
+```powershell
+python scripts/package_release.py
+```
+This generates:
+1. `dist/CommandCenter-Portable/` and `dist/CommandCenter-Portable.zip` (15 MB self-contained).
+2. `dist/CommandCenter-Setup/` (Complete setup wizard package).
+3. `packaging/installer.iss` (Inno Setup compiler script).
+
+---
+
+### 1. Portable Version
+The Portable Edition requires **no installation** and can run directly from a USB flash drive or any folder:
+- **How to use**: Unzip `CommandCenter-Portable.zip` anywhere and launch `CommandCenter.exe`.
+- **Zero footprint**: A `portable.flag` marker routes all database records, settings, and library cache into the local `data/` folder inside the app directory, leaving nothing behind in `%APPDATA%`.
+
+---
+
+### 2. Install Wizard
+The setup package allows clean installation without requiring administrator privileges:
+- **One-click install**: Double-click `setup.bat` (or execute `.\Setup-CommandCenter.ps1`).
+- **Features**:
+  - Installs to `%LOCALAPPDATA%\Programs\CommandCenter`.
+  - Creates **Start Menu** and optional **Desktop** shortcuts.
+  - Optionally registers `commandcenter` in user `PATH` (launch from any terminal).
+  - Registers into Windows **Add/Remove Programs** for clean uninstallation.
+- **Uninstallation**: Run `uninstall.bat` or uninstall via Windows Settings / Control Panel.
+
+---
+
 ## Packaging as Standalone Windows Executable
 
 You can package Command Center into a self-contained `.exe` using [PyInstaller](https://pyinstaller.org):

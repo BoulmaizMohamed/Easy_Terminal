@@ -4,12 +4,25 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import sys
 from pathlib import Path
 from typing import Optional
 
 import platformdirs
 
-DEFAULT_DB_DIR = Path(platformdirs.user_data_dir("command_center", appauthor=False, roaming=True))
+
+def get_data_dir() -> Path:
+    """Returns the data directory, respecting portable mode (portable.flag)."""
+    if os.environ.get("COMMAND_CENTER_PORTABLE") == "1":
+        base = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path.cwd()
+        return base / "data"
+    exe_dir = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path.cwd()
+    if (exe_dir / "portable.flag").exists():
+        return exe_dir / "data"
+    return Path(platformdirs.user_data_dir("command_center", appauthor=False, roaming=True))
+
+
+DEFAULT_DB_DIR = get_data_dir()
 DEFAULT_DB_PATH = DEFAULT_DB_DIR / "command_center.db"
 
 
@@ -18,7 +31,7 @@ def get_db_path(custom_path: Optional[str | Path] = None) -> Path:
     if custom_path:
         path = Path(custom_path)
     else:
-        path = DEFAULT_DB_PATH
+        path = get_data_dir() / "command_center.db"
     path.parent.mkdir(parents=True, exist_ok=True)
     return path
 
