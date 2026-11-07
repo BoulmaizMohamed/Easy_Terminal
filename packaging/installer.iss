@@ -27,20 +27,20 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "contextmenu"; Description: "Add 'Open in Terminal' to Windows Explorer right-click menu"; GroupDescription: "Windows Explorer Integration:"; Flags: checkablefirst
+Name: "contextmenu"; Description: "Add 'Open in Terminal' to Windows Explorer right-click menu"; GroupDescription: "Windows Explorer Integration:"
 
 [Registry]
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\EasyTerminal"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: ""{app}\{#MyAppExeName}""; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\EasyTerminal\command"; ValueType: string; ValueName: ""; ValueData: ""{app}\{#MyAppExeName}" "%V""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#MyAppExeName}"""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\EasyTerminal\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%V"""; Tasks: contextmenu
 
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\EasyTerminal"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: ""{app}\{#MyAppExeName}""; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\EasyTerminal\command"; ValueType: string; ValueName: ""; ValueData: ""{app}\{#MyAppExeName}" "%1""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#MyAppExeName}"""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\EasyTerminal\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: contextmenu
 
 Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: ""{app}\{#MyAppExeName}""; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal\command"; ValueType: string; ValueName: ""; ValueData: ""{app}\{#MyAppExeName}" "%1""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#MyAppExeName}"""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: contextmenu
 
 [Files]
 Source: "..\dist\Easy_Terminal\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

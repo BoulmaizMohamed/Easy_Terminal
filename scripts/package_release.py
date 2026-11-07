@@ -268,68 +268,56 @@ Write-Host "Uninstallation complete." -ForegroundColor Green
     return setup_dir
 
 
+def find_iscc_compiler() -> Optional[Path]:
+    """Finds Inno Setup command-line compiler (ISCC.exe) if installed."""
+    which_path = shutil.which("ISCC.exe")
+    if which_path and Path(which_path).exists():
+        return Path(which_path)
+
+    local_app_data = os.environ.get("LOCALAPPDATA", "")
+    candidates = [
+        Path(local_app_data) / "Programs" / "Inno Setup 6" / "ISCC.exe",
+        Path("C:/Program Files (x86)/Inno Setup 6/ISCC.exe"),
+        Path("C:/Program Files/Inno Setup 6/ISCC.exe"),
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return None
+
+
+def compile_inno_setup_installer(iss_path: Path) -> Optional[Path]:
+    """Compiles the .iss script into a standalone Easy_Terminal-Setup.exe installer wizard."""
+    iscc = find_iscc_compiler()
+    if not iscc:
+        print("==> Inno Setup compiler (ISCC.exe) not found; skipping installer exe generation.")
+        return None
+
+    print(f"==> Compiling native Windows Install Wizard using {iscc.name}...")
+    try:
+        subprocess.run([str(iscc), str(iss_path)], check=True)
+        setup_exe = DIST_DIR / "Easy_Terminal-Setup-v1.0.0.exe"
+        alias_exe = DIST_DIR / "Easy_Terminal-Setup.exe"
+        if setup_exe.exists():
+            shutil.copyfile(setup_exe, alias_exe)
+            print(f"==> Install Wizard executable created: {alias_exe}")
+            return alias_exe
+    except Exception as e:
+        print(f"==> Failed to compile Inno Setup script: {e}")
+    return None
+
+
 def make_inno_setup_script() -> Path:
-    """Generates an Inno Setup script (.iss) for optional native installer compilation."""
+    """Ensures Inno Setup script (.iss) exists and compiles standalone installer wizard."""
     iss_dir = ROOT_DIR / "packaging"
     iss_dir.mkdir(exist_ok=True)
     iss_path = iss_dir / "installer.iss"
 
-    iss_content = """#define MyAppName "Easy_Terminal"
-#define MyAppVersion "1.0.0"
-#define MyAppPublisher "Easy_Terminal Contributors"
-#define MyAppURL "https://github.com/your-username/easy-terminal"
-#define MyAppExeName "Easy_Terminal.exe"
+    if not iss_path.exists():
+        raise FileNotFoundError(f"Missing {iss_path}")
 
-[Setup]
-AppId={{D3A1B5F2-8921-4A55-9B21-82C40B8F91A2}
-AppName={#MyAppName}
-AppVersion={#MyAppVersion}
-AppPublisher={#MyAppPublisher}
-AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL}
-AppUpdatesURL={#MyAppURL}
-DefaultDirName={localappdata}\\Programs\\{#MyAppName}
-DisableProgramGroupPage=yes
-PrivilegesRequired=lowest
-OutputDir=..\\dist
-OutputBaseFilename=Easy_Terminal-Setup-v{#MyAppVersion}
-Compression=lzma
-SolidCompression=yes
-WizardStyle=modern
-SetupIconFile=..\\assets\\app.ico
-
-[Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
-
-[Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "contextmenu"; Description: "Add 'Open in Terminal' to Windows Explorer right-click menu"; GroupDescription: "Windows Explorer Integration:"; Flags: checkablefirst
-
-[Registry]
-Root: HKCU; Subkey: "Software\\Classes\\Directory\\Background\\shell\\EasyTerminal"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\\Classes\\Directory\\Background\\shell\\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: "\"{app}\\{#MyAppExeName}\""; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\\Classes\\Directory\\Background\\shell\\EasyTerminal\\command"; ValueType: string; ValueName: ""; ValueData: "\"{app}\\{#MyAppExeName}\" \"%V\""; Tasks: contextmenu
-
-Root: HKCU; Subkey: "Software\\Classes\\Directory\\shell\\EasyTerminal"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\\Classes\\Directory\\shell\\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: "\"{app}\\{#MyAppExeName}\""; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\\Classes\\Directory\\shell\\EasyTerminal\\command"; ValueType: string; ValueName: ""; ValueData: "\"{app}\\{#MyAppExeName}\" \"%1\""; Tasks: contextmenu
-
-Root: HKCU; Subkey: "Software\\Classes\\Drive\\shell\\EasyTerminal"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\\Classes\\Drive\\shell\\EasyTerminal"; ValueType: string; ValueName: "Icon"; ValueData: "\"{app}\\{#MyAppExeName}\""; Tasks: contextmenu
-Root: HKCU; Subkey: "Software\\Classes\\Drive\\shell\\EasyTerminal\\command"; ValueType: string; ValueName: ""; ValueData: "\"{app}\\{#MyAppExeName}\" \"%1\""; Tasks: contextmenu
-
-[Files]
-Source: "..\\dist\\Easy_Terminal\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-[Icons]
-Name: "{autoprograms}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; IconFilename: "{app}\\assets\\app.ico"
-Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; IconFilename: "{app}\\assets\\app.ico"; Tasks: desktopicon
-
-[Run]
-Filename: "{app}\\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-"""
-    iss_path.write_text(iss_content, encoding="utf-8")
-    print(f"==> Inno Setup script generated at: {iss_path}")
+    print(f"==> Inno Setup script located at: {iss_path}")
+    compile_inno_setup_installer(iss_path)
     return iss_path
 
 
@@ -346,10 +334,11 @@ def main() -> None:
     make_inno_setup_script()
 
     print("\n[SUCCESS] All distribution targets built successfully:")
-    print(f"  1. Portable Package: {DIST_DIR / 'Easy_Terminal-Portable'}")
-    print(f"  2. Portable ZIP:     {DIST_DIR / 'Easy_Terminal-Portable.zip'}")
-    print(f"  3. Install Wizard:   {DIST_DIR / 'Easy_Terminal-Setup'}")
-    print(f"  4. Inno Script:      {ROOT_DIR / 'packaging' / 'installer.iss'}")
+    print(f"  1. Portable Package:      {DIST_DIR / 'Easy_Terminal-Portable'}")
+    print(f"  2. Portable ZIP:          {DIST_DIR / 'Easy_Terminal-Portable.zip'}")
+    print(f"  3. Install Wizard Folder: {DIST_DIR / 'Easy_Terminal-Setup'}")
+    print(f"  4. Install Wizard EXE:    {DIST_DIR / 'Easy_Terminal-Setup.exe'}")
+    print(f"  5. Inno Setup Script:     {ROOT_DIR / 'packaging' / 'installer.iss'}")
 
 
 if __name__ == "__main__":
