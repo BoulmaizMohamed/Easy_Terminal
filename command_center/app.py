@@ -19,6 +19,10 @@ from command_center.history_screen import HistoryScreen
 from command_center.library import load_seed_library
 from command_center.library_screen import LibraryScreen
 from command_center.palette_screen import PaletteScreen
+from command_center.safety import is_dangerous_command
+from command_center.safety_dialog import SafetyConfirmationDialog
+from command_center.settings import AppSettings, load_settings, save_settings
+from command_center.settings_screen import SettingsScreen
 from command_center.shell import ShellManager, ShellSession
 from command_center.suggest import Suggestion, rank_suggestions
 
@@ -46,6 +50,7 @@ class CommandCenterApp(App):
         Binding("ctrl+p", "open_palette", "Palette/Help", show=True),
         Binding("ctrl+l", "open_library", "Library", show=True),
         Binding("ctrl+h", "open_history", "History", show=True),
+        Binding("f10", "open_settings", "Settings (F10)", show=True),
         Binding("ctrl+c", "interrupt_or_clear", "Interrupt/Clear", show=True),
         Binding("ctrl+r", "restart_shell", "Restart Shell", show=True),
         Binding("ctrl+y", "copy_last_output", "Copy Output", show=True),
@@ -53,9 +58,10 @@ class CommandCenterApp(App):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        self.shell_manager = ShellManager("powershell")
-        self.theme_index = 0
-        self.theme = THEMES[0]
+        self.settings = load_settings()
+        self.shell_manager = ShellManager(self.settings.default_shell)
+        self.theme = self.settings.theme
+        self.theme_index = THEMES.index(self.theme) if self.theme in THEMES else 0
         self.command_history: List[str] = []
         self.history_index: int = -1
         self.last_output_buffer: List[str] = []
@@ -145,6 +151,30 @@ class CommandCenterApp(App):
 
         input_widget = self.query_one(Input)
         input_widget.value = ""
+
+        # Check safety if enabled
+        if self.settings.safety_enabled:
+            is_danger, reason = is_dangerous_command(cmd)
+            if is_danger:
+                self.push_screen(
+                    SafetyConfirmationDialog(cmd, reason),
+                    lambda confirmed: self._on_safety_confirm_result(confirmed, cmd),
+                )
+                return
+
+        self._execute_command(cmd)
+
+    def _on_safety_confirm_result(self, confirmed: bool, cmd: str) -> None:
+        """Callback from dangerous command confirmation modal."""
+        if confirmed:
+            self._execute_command(cmd)
+        else:
+            log = self.query_one(RichLog)
+            log.write(f"\n[dim yellow]> Cancelled dangerous command: {cmd}[/dim yellow]")
+            self.query_one(Input).focus()
+
+    def _execute_command(self, cmd: str) -> None:
+        """Executes a validated command."""
         self.current_running_command = cmd
 
         # Track in history
@@ -193,7 +223,7 @@ class CommandCenterApp(App):
 
         # Log into SQLite history
         if self.current_running_command:
-            preview = "".join(self.last_output_buffer)
+            preview = "" if self.settings.history_retention == "off" else "".join(self.last_output_buffer)
             try:
                 log_command(
                     command=self.current_running_command,
@@ -349,8 +379,21 @@ class CommandCenterApp(App):
             self._suppress_next_suggest = True
             input_widget = self.query_one(Input)
             input_widget.value = cmd
+            input_widget.cursor_position = len(cmd)
             input_widget.focus()
-            self.handle_command_submit(Input.Submitted(input_widget, cmd))
+            if self.settings.library_enter_action == "run":
+                self.handle_command_submit(Input.Submitted(input_widget, cmd))
+
+    def action_open_settings(self) -> None:
+        """Opens the Settings configuration screen (F10)."""
+        self.push_screen(SettingsScreen(self.settings), self._on_settings_result)
+
+    def _on_settings_result(self, new_settings: Optional[AppSettings]) -> None:
+        """Callback when settings are saved."""
+        if new_settings:
+            self.settings = new_settings
+            self.theme = new_settings.theme
+            self.notify("Settings saved successfully!", timeout=2)
 
     def action_open_palette(self) -> None:
         """Opens the Command Palette and Help screen (Ctrl+P)."""

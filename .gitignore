@@ -3,3 +3,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 command_center.db
+.agents/
+skills-lock.json
+dist/
+build/
+*.spec
+settings.json
+
