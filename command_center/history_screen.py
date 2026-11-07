@@ -6,6 +6,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import pyperclip
+from rich.markup import escape
+from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -79,7 +81,7 @@ class HistoryScreen(ModalScreen[Optional[str]]):
                 row_key = f"most_{idx}"
                 self.rows_cache[row_key] = entry
                 time_str = entry["last_ran"][:19].replace("T", " ") if entry.get("last_ran") else "-"
-                cmd_str = entry["command"]
+                cmd_str = escape(entry["command"])
                 cnt_str = f"{entry['count']} runs"
                 table.add_row(
                     time_str,
@@ -104,7 +106,7 @@ class HistoryScreen(ModalScreen[Optional[str]]):
                 table.add_row(
                     time_str,
                     entry["shell"],
-                    entry["command"],
+                    escape(entry["command"]),
                     exit_str,
                     f"{entry['duration_ms']}ms",
                     key=row_key,
@@ -182,10 +184,11 @@ class HistoryScreen(ModalScreen[Optional[str]]):
 
         cmd = entry.get("command", "")
         preview = entry.get("output_preview", "")
-        preview_log.write(f"[bold cyan]Command:[/bold cyan] {cmd}")
+        safe_cmd = escape(cmd)
+        preview_log.write(f"[bold cyan]Command:[/bold cyan] {safe_cmd}")
         if preview:
             preview_log.write("[dim]Preview output:[/dim]")
-            preview_log.write(preview.strip())
+            preview_log.write(Text(preview.strip()))
         else:
             preview_log.write("[dim](No output recorded)[/dim]")
 

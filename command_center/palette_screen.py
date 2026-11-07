@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
+from rich.markup import escape
 from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -20,10 +21,10 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
 
     BINDINGS = [
         Binding("escape", "dismiss_palette", "Close", show=True),
-        Binding("tab", "action_insert", "Insert to Input", show=True),
-        Binding("enter", "action_run", "Run", show=True),
-        Binding("down", "action_cursor_down", "Down", show=False),
-        Binding("up", "action_cursor_up", "Up", show=False),
+        Binding("tab", "insert", "Insert to Input", show=True),
+        Binding("enter", "run", "Run", show=True),
+        Binding("down", "cursor_down", "Down", show=False),
+        Binding("up", "cursor_up", "Up", show=False),
     ]
 
     def __init__(self, active_shell: str = "powershell", **kwargs) -> None:
@@ -60,8 +61,8 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
 
         for idx, entry in enumerate(self.entries):
             fav_marker = "[yellow]*[/yellow] " if entry["favorite"] else ""
-            desc = f" [dim]-- {entry['description']}[/dim]" if entry.get("description") else ""
-            prompt = f"{fav_marker}[bold]{entry['name']}[/bold]: [cyan]{entry['command']}[/cyan]{desc}"
+            desc = f" [dim]-- {escape(entry['description'])}[/dim]" if entry.get("description") else ""
+            prompt = f"{fav_marker}[bold]{escape(entry['name'])}[/bold]: [cyan]{escape(entry['command'])}[/cyan]{desc}"
             option_list.add_option(Option(prompt, id=str(idx)))
 
         if self.entries:
@@ -89,14 +90,14 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
         log.clear()
         if 0 <= index < len(self.entries):
             item = self.entries[index]
-            log.write(f"[bold cyan]{item['name']}[/bold cyan] [dim]({item['category']} • {item['shell'].upper()})[/dim]")
-            log.write(f"[bold white]> {item['command']}[/bold white]")
+            log.write(f"[bold cyan]{escape(item['name'])}[/bold cyan] [dim]({item['category']} • {item['shell'].upper()})[/dim]")
+            log.write(f"[bold white]> {escape(item['command'])}[/bold white]")
             if item.get("description"):
-                log.write(f"[dim]Description:[/dim] {item['description']}")
+                log.write(f"[dim]Description:[/dim] {escape(item['description'])}")
             if item.get("example"):
-                log.write(f"[dim]Example:[/dim] [cyan]{item['example']}[/cyan]")
+                log.write(f"[dim]Example:[/dim] [cyan]{escape(item['example'])}[/cyan]")
             if item.get("tags"):
-                log.write(f"[dim]Tags:[/dim] {item['tags']}")
+                log.write(f"[dim]Tags:[/dim] {escape(item['tags'])}")
 
     def action_dismiss_palette(self) -> None:
         self.dismiss(None)

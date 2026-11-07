@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 import pyperclip
+from rich.markup import escape
 from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -139,14 +140,14 @@ class LibraryScreen(ModalScreen[Optional[str]]):
     BINDINGS = [
         Binding("escape", "dismiss_screen", "Close", show=True),
         Binding("enter", "run_selected", "Run", show=True),
-        Binding("a", "action_add", "Add", show=True),
-        Binding("e", "action_edit", "Edit", show=True),
-        Binding("f", "action_toggle_fav", "Favorite", show=True),
-        Binding("s", "action_sync_tldr", "Sync tldr", show=True),
-        Binding("x", "action_export", "Export", show=True),
-        Binding("i", "action_import", "Import", show=True),
-        Binding("delete", "action_delete", "Delete", show=True),
-        Binding("c", "action_copy", "Copy", show=True),
+        Binding("a", "add", "Add", show=True),
+        Binding("e", "edit", "Edit", show=True),
+        Binding("f", "toggle_fav", "Favorite", show=True),
+        Binding("s", "sync_tldr", "Sync tldr", show=True),
+        Binding("x", "export", "Export", show=True),
+        Binding("i", "import", "Import", show=True),
+        Binding("delete", "delete", "Delete", show=True),
+        Binding("c", "copy", "Copy", show=True),
     ]
 
     SORTS = ["most_used", "alphabetical", "category", "favorites_first", "recently_used", "newest"]
@@ -223,8 +224,8 @@ class LibraryScreen(ModalScreen[Optional[str]]):
             fav_icon = "[yellow]*[/yellow]" if entry["favorite"] else "-"
             table.add_row(
                 fav_icon,
-                entry["name"],
-                entry["command"],
+                escape(entry["name"]),
+                escape(entry["command"]),
                 entry["shell"].upper(),
                 entry["category"],
                 str(entry["use_count"]),
@@ -318,14 +319,14 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         if not entry:
             return
 
-        detail_log.write(f"[bold cyan]{entry['name']}[/bold cyan] [dim]({entry['shell'].upper()} • {entry['category']})[/dim]")
-        detail_log.write(f"[bold white]> {entry['command']}[/bold white]")
+        detail_log.write(f"[bold cyan]{escape(entry['name'])}[/bold cyan] [dim]({entry['shell'].upper()} • {entry['category']})[/dim]")
+        detail_log.write(f"[bold white]> {escape(entry['command'])}[/bold white]")
         if entry.get("description"):
-            detail_log.write(f"[dim]Description:[/dim] {entry['description']}")
+            detail_log.write(f"[dim]Description:[/dim] {escape(entry['description'])}")
         if entry.get("example"):
-            detail_log.write(f"[dim]Example:[/dim] [cyan]{entry['example']}[/cyan]")
+            detail_log.write(f"[dim]Example:[/dim] [cyan]{escape(entry['example'])}[/cyan]")
         if entry.get("tags"):
-            detail_log.write(f"[dim]Tags:[/dim] {entry['tags']}")
+            detail_log.write(f"[dim]Tags:[/dim] {escape(entry['tags'])}")
 
     def get_selected_entry(self) -> Optional[Dict[str, Any]]:
         table = self.query_one(DataTable)

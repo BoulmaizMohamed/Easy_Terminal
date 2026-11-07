@@ -11,10 +11,13 @@ from command_center.settings_screen import SettingsScreen
 def test_dangerous_command_detection():
     # Dangerous commands
     assert is_dangerous_command("del /s *.*")[0] is True
+    assert is_dangerous_command("del/s *.*")[0] is True
     assert is_dangerous_command("del /s /q C:\\temp")[0] is True
+    assert is_dangerous_command("rd/s C:\\temp")[0] is True
     assert is_dangerous_command("rd /s /q C:\\temp")[0] is True
     assert is_dangerous_command("rmdir /s mydir")[0] is True
     assert is_dangerous_command("format C:")[0] is True
+    assert is_dangerous_command("Remove-Item -Recurse C:\\dir")[0] is True
     assert is_dangerous_command("Remove-Item -Recurse -Force C:\\dir")[0] is True
     assert is_dangerous_command("rm -rf /")[0] is True
     assert is_dangerous_command("diskpart")[0] is True
@@ -24,6 +27,8 @@ def test_dangerous_command_detection():
     # Safe commands
     assert is_dangerous_command("dir")[0] is False
     assert is_dangerous_command("Get-Process")[0] is False
+    assert is_dangerous_command("Get-Process | Format-Table")[0] is False
+    assert is_dangerous_command("Get-Service | format-list")[0] is False
     assert is_dangerous_command("echo del")[0] is False
     assert is_dangerous_command("git status")[0] is False
 

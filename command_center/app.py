@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import os
-from typing import List
+from typing import List, Optional
 
 import pyperclip
+from rich.markup import escape
+from rich.text import Text
 from textual import events, on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -67,6 +69,7 @@ class CommandCenterApp(App):
         self.last_output_buffer: List[str] = []
         self.current_running_command: str = ""
         self.current_suggestions: List[Suggestion] = []
+        self._active_run_id: int = 0
 
     @property
     def shell(self) -> ShellSession:
@@ -85,6 +88,7 @@ class CommandCenterApp(App):
                 highlight=True,
                 markup=True,
                 wrap=True,
+                max_lines=5000,
             )
 
         with Vertical(id="bottom-dock"):
@@ -184,26 +188,31 @@ class CommandCenterApp(App):
 
         # Render command banner in output
         log = self.query_one(RichLog)
-        log.write(f"\n[bold magenta]>[/bold magenta] [bold white]{cmd}[/bold white]")
+        safe_cmd = escape(cmd)
+        log.write(f"\n[bold magenta]>[/bold magenta] [bold white]{safe_cmd}[/bold white]")
 
         # Update status
         self._set_state_running()
 
         # Execute off the UI thread
-        self.run_command_in_background(cmd)
+        self._active_run_id += 1
+        self.run_command_in_background(cmd, self._active_run_id)
 
     @work(thread=True)
-    def run_command_in_background(self, cmd: str) -> None:
+    def run_command_in_background(self, cmd: str, run_id: int) -> None:
         """Runs the command in the persistent shell worker thread."""
         current_buffer: List[str] = []
+        current_bytes = 0
 
         def on_chunk(chunk: str) -> None:
-            current_buffer.append(chunk)
+            nonlocal current_bytes
+            if current_bytes < 4096:
+                current_buffer.append(chunk)
+                current_bytes += len(chunk)
             self.call_from_thread(self._append_chunk, chunk)
 
         exit_code, new_cwd, duration_ms = self.shell.execute(cmd, on_output=on_chunk)
-        self.last_output_buffer = current_buffer
-        self.call_from_thread(self._on_command_finished, exit_code, new_cwd, duration_ms)
+        self.call_from_thread(self._on_command_finished, exit_code, new_cwd, duration_ms, run_id, current_buffer)
 
     def _append_chunk(self, chunk: str) -> None:
         """Appends output chunks safely onto the RichLog widget."""
@@ -211,10 +220,23 @@ class CommandCenterApp(App):
         # Strip trailing newline because RichLog.write appends one
         clean_text = chunk.rstrip("\r\n")
         if clean_text:
-            log.write(clean_text)
+            log.write(Text(clean_text))
 
-    def _on_command_finished(self, exit_code: int, new_cwd: str, duration_ms: int) -> None:
+    def _on_command_finished(
+        self,
+        exit_code: int,
+        new_cwd: str,
+        duration_ms: int,
+        run_id: int = 0,
+        output_buffer: Optional[List[str]] = None,
+    ) -> None:
         """Updates the status and UI once command execution completes."""
+        if run_id != self._active_run_id:
+            return
+
+        if output_buffer is not None:
+            self.last_output_buffer = output_buffer
+
         log = self.query_one(RichLog)
         ec_color = "green" if exit_code == 0 else "red"
         log.write(
@@ -282,9 +304,9 @@ class CommandCenterApp(App):
 
         for idx, s in enumerate(suggestions):
             if s.description:
-                prompt_text = f"{s.command}  [dim]-- {s.description}[/dim]"
+                prompt_text = f"{escape(s.command)}  [dim]-- {escape(s.description)}[/dim]"
             else:
-                prompt_text = s.command
+                prompt_text = escape(s.command)
             if s.favorite:
                 prompt_text = f"[yellow]*[/yellow] {prompt_text}"
             sugg_list.add_option(Option(prompt_text, id=str(idx)))
@@ -448,10 +470,11 @@ class CommandCenterApp(App):
         """Interrupts running command or clears current input text."""
         input_widget = self.query_one(Input)
         if self.shell.is_running_command:
+            self._active_run_id += 1
             self.shell.interrupt()
             log = self.query_one(RichLog)
             log.write("[bold yellow]^C (Interrupted / Session Reset)[/bold yellow]")
-            self._on_command_finished(130, self.shell.cwd, 0)
+            self._on_command_finished(130, self.shell.cwd, 0, self._active_run_id, self.last_output_buffer)
         elif input_widget.value:
             input_widget.value = ""
 

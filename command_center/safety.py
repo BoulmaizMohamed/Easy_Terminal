@@ -7,20 +7,20 @@ from typing import List, Tuple
 
 DANGEROUS_PATTERNS: List[Tuple[str, str]] = [
     (
-        r"(?i)\bdel\b\s+.*(/s|/q)",
+        r"(?i)\bdel(?:\s+.*)?(/s|/q)",
         "Recursive or quiet file deletion (del /s /q)",
     ),
     (
-        r"(?i)\b(rd|rmdir)\b\s+.*(/s|/q)",
+        r"(?i)\b(?:rd|rmdir)(?:\s+.*)?(/s|/q)",
         "Recursive directory removal (rd /s)",
     ),
     (
-        r"(?i)\bformat(\s+[a-z]:)?\b",
+        r"(?i)(?<!-)\bformat(\s+[a-z]:)?(\s|$)",
         "Disk volume formatting (format)",
     ),
     (
-        r"(?i)\b(remove-item|ri|rm)\b\s+.*(-recurse\s+-force|-force\s+-recurse|-r\s+-f|-rf)\b",
-        "Forced recursive deletion (Remove-Item -Recurse -Force)",
+        r"(?i)\b(?:remove-item|ri|rm)\b\s+.*(?:-recurse|-rf|-r\b)",
+        "Recursive deletion (Remove-Item -Recurse)",
     ),
     (
         r"(?i)\bdiskpart\b",

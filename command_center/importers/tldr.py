@@ -115,7 +115,7 @@ def sync_tldr_pages(
             on_progress("Downloading latest tldr-pages archive...")
         req = urllib.request.Request(TLDR_ZIP_URL, headers={"User-Agent": "CommandCenter/1.0"})
         with urllib.request.urlopen(req, timeout=25) as resp:
-            zip_bytes = resp.read()
+            zip_bytes = resp.read(50 * 1024 * 1024)
 
     if on_progress:
         on_progress("Extracting Windows and common command pages...")

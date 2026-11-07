@@ -98,7 +98,8 @@ class ShellSession:
         if not target_cwd or target_cwd == self.cwd:
             return
         if self.shell_type == "powershell":
-            self.execute(f"Set-Location -LiteralPath '{target_cwd}'")
+            escaped = target_cwd.replace("'", "''")
+            self.execute(f"Set-Location -LiteralPath '{escaped}'")
         else:
             self.execute(f'cd /d "{target_cwd}"')
 

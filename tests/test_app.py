@@ -183,3 +183,31 @@ def test_merged_library_suggestions():
         app.shell_manager.close_all()
 
     asyncio.run(_test())
+
+
+def test_markup_safety_and_interrupt():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            inp = app.query_one("#command-input")
+
+            # 1. Output containing unescaped markup must not crash
+            inp.value = "echo [/red]"
+            await pilot.press("enter")
+            await pilot.pause(0.5)
+
+            # 2. Interruption must produce single 130 exit line
+            inp.value = "Start-Sleep -Seconds 5"
+            await pilot.press("enter")
+            await pilot.pause(0.2)
+            await pilot.press("ctrl+c")
+            await pilot.pause(0.5)
+
+            log = app.query_one("#output-log")
+            lines = [l.text for l in log.lines]
+            assert any("^C (Interrupted / Session Reset)" in l for l in lines)
+            assert any("-- exit: 130" in l for l in lines)
+
+        app.shell_manager.close_all()
+
+    asyncio.run(_test())
