@@ -58,6 +58,23 @@ def load_seed_library(db_path: Optional[str | Path] = None) -> int:
             )
             if cursor.rowcount > 0:
                 inserted += 1
+            else:
+                conn.execute(
+                    """
+                    UPDATE library
+                    SET tags = ?, category = ?, description = ?, example = ?, name = ?
+                    WHERE command = ? AND shell = ? AND source = 'seed'
+                    """,
+                    (
+                        item.get("tags", ""),
+                        item.get("category", "General"),
+                        item.get("description", ""),
+                        item.get("example", ""),
+                        item["name"],
+                        item["command"],
+                        item.get("shell", "both").lower(),
+                    ),
+                )
 
     conn.close()
     return inserted
@@ -69,6 +86,7 @@ def get_library_entries(
     shell: Optional[str] = None,
     favorites_only: bool = False,
     source: Optional[str] = None,
+    tier: Optional[str] = None,
     sort_by: str = "most_used",
     ascending: bool = False,
     limit: int = 200,
@@ -99,6 +117,13 @@ def get_library_entries(
     if source and source.lower() != "all":
         query += " AND source = ?"
         params.append(source.lower())
+
+    if tier and tier.lower() != "all":
+        t = tier.lower()
+        if t == "specialized":
+            query += " AND tags LIKE '%specialized%'"
+        elif t == "everyday":
+            query += " AND (tags LIKE '%everyday%' OR tags NOT LIKE '%specialized%')"
 
     # Sort order
     order_clause = SORT_OPTIONS.get(sort_by, "use_count DESC, name ASC")

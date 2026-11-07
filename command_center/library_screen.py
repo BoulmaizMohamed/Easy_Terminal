@@ -148,6 +148,9 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         Binding("i", "import", "Import", show=True),
         Binding("delete", "delete", "Delete", show=True),
         Binding("c", "copy", "Copy", show=True),
+        Binding("1", "tier_all", "All Commands", show=False),
+        Binding("2", "tier_everyday", "Everyday", show=False),
+        Binding("3", "tier_specialized", "Specialized", show=False),
     ]
 
     SORTS = ["most_used", "alphabetical", "category", "favorites_first", "recently_used", "newest"]
@@ -159,6 +162,7 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         self.filter_category: Optional[str] = None
         self.filter_shell: Optional[str] = None
         self.filter_favorites: bool = False
+        self.filter_tier: Optional[str] = None
 
     def compose(self) -> ComposeResult:
         with Vertical(id="library-dialog"):
@@ -168,6 +172,11 @@ class LibraryScreen(ModalScreen[Optional[str]]):
                     placeholder="Search library by name, command, description, or tags... (Esc to close)",
                     id="library-search",
                 )
+
+            with Horizontal(id="library-tier-bar"):
+                yield Button("All Commands (1)", id="btn-tier-all", classes="tier-btn active")
+                yield Button("★ Everyday Commands (2)", id="btn-tier-everyday", classes="tier-btn")
+                yield Button("⚙ Specialized Commands (3)", id="btn-tier-specialized", classes="tier-btn")
 
             with Horizontal(id="library-filter-bar"):
                 yield Button("All Shells", id="btn-shell-all", classes="lib-filter-btn active")
@@ -214,6 +223,7 @@ class LibraryScreen(ModalScreen[Optional[str]]):
             category=self.filter_category,
             shell=self.filter_shell,
             favorites_only=self.filter_favorites,
+            tier=self.filter_tier,
             sort_by=self.current_sort,
             limit=250,
         )
@@ -276,6 +286,41 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         self.query_one("#btn-sort-cycle", Button).label = f"Sort: {self.current_sort_label}"
         self.refresh_table()
 
+    @on(Button.Pressed, "#btn-tier-all")
+    def on_tier_all(self) -> None:
+        self.action_tier_all()
+
+    @on(Button.Pressed, "#btn-tier-everyday")
+    def on_tier_everyday(self) -> None:
+        self.action_tier_everyday()
+
+    @on(Button.Pressed, "#btn-tier-specialized")
+    def on_tier_specialized(self) -> None:
+        self.action_tier_specialized()
+
+    def action_tier_all(self) -> None:
+        self.filter_tier = None
+        self._update_tier_btn_active("btn-tier-all")
+        self.refresh_table()
+
+    def action_tier_everyday(self) -> None:
+        self.filter_tier = "everyday"
+        self._update_tier_btn_active("btn-tier-everyday")
+        self.refresh_table()
+
+    def action_tier_specialized(self) -> None:
+        self.filter_tier = "specialized"
+        self._update_tier_btn_active("btn-tier-specialized")
+        self.refresh_table()
+
+    def _update_tier_btn_active(self, active_id: str) -> None:
+        for btn_id in ("btn-tier-all", "btn-tier-everyday", "btn-tier-specialized"):
+            btn = self.query_one(f"#{btn_id}", Button)
+            if btn_id == active_id:
+                btn.add_class("active")
+            else:
+                btn.remove_class("active")
+
     @on(Button.Pressed, "#btn-sync-tldr")
     def on_sync_button_pressed(self) -> None:
         self.action_sync_tldr()
@@ -319,7 +364,8 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         if not entry:
             return
 
-        detail_log.write(f"[bold cyan]{escape(entry['name'])}[/bold cyan] [dim]({entry['shell'].upper()} • {entry['category']})[/dim]")
+        tier_tag = "Specialized" if "specialized" in entry.get("tags", "").lower() else "Everyday"
+        detail_log.write(f"[bold cyan]{escape(entry['name'])}[/bold cyan] [dim]({entry['shell'].upper()} • {entry['category']} • {tier_tag})[/dim]")
         detail_log.write(f"[bold white]> {escape(entry['command'])}[/bold white]")
         if entry.get("description"):
             detail_log.write(f"[dim]Description:[/dim] {escape(entry['description'])}")

@@ -112,3 +112,16 @@ def test_library_sorting_and_filters(temp_db):
     # Category filter
     cat1_only = get_library_entries(category="Cat1", db_path=temp_db)
     assert len(cat1_only) == 2
+
+
+def test_library_tier_filtering(temp_db):
+    add_library_entry("Ping Local", "ping 127.0.0.1", "both", "Network", tags="ping,everyday", db_path=temp_db)
+    add_library_entry("DISM Repair", "DISM /Online", "both", "System", tags="dism,repair,specialized", db_path=temp_db)
+
+    everyday = get_library_entries(tier="everyday", db_path=temp_db)
+    assert any(e["name"] == "Ping Local" for e in everyday)
+    assert not any(e["name"] == "DISM Repair" for e in everyday)
+
+    specialized = get_library_entries(tier="specialized", db_path=temp_db)
+    assert any(e["name"] == "DISM Repair" for e in specialized)
+    assert not any(e["name"] == "Ping Local" for e in specialized)

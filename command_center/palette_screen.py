@@ -8,9 +8,9 @@ from rich.markup import escape
 from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Vertical
+from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Footer, Input, Label, OptionList, RichLog
+from textual.widgets import Button, Footer, Input, Label, OptionList, RichLog
 from textual.widgets.option_list import Option
 
 from command_center.library import get_library_entries
@@ -31,10 +31,15 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
         super().__init__(**kwargs)
         self.active_shell = active_shell
         self.entries: List[Dict[str, Any]] = []
+        self.filter_tier: Optional[str] = None
 
     def compose(self) -> ComposeResult:
         with Vertical(id="palette-dialog"):
             yield Label("COMMAND PALETTE & HELP", id="palette-title")
+            with Horizontal(id="palette-tier-bar"):
+                yield Button("All Commands", id="btn-pal-all", classes="pal-tier-btn active")
+                yield Button("★ Everyday", id="btn-pal-everyday", classes="pal-tier-btn")
+                yield Button("⚙ Specialized", id="btn-pal-specialized", classes="pal-tier-btn")
             yield Input(
                 placeholder="Type to search all commands, descriptions, or tags... (Enter=Run, Tab=Insert)",
                 id="palette-search",
@@ -53,6 +58,7 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
         self.entries = get_library_entries(
             search=search_term,
             shell=self.active_shell,
+            tier=self.filter_tier,
             limit=50,
         )
 
@@ -62,7 +68,8 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
         for idx, entry in enumerate(self.entries):
             fav_marker = "[yellow]*[/yellow] " if entry["favorite"] else ""
             desc = f" [dim]-- {escape(entry['description'])}[/dim]" if entry.get("description") else ""
-            prompt = f"{fav_marker}[bold]{escape(entry['name'])}[/bold]: [cyan]{escape(entry['command'])}[/cyan]{desc}"
+            tier_badge = "[magenta]SPEC[/magenta] " if "specialized" in entry.get("tags", "").lower() else "[green]EVRY[/green] "
+            prompt = f"{fav_marker}{tier_badge}[bold]{escape(entry['name'])}[/bold]: [cyan]{escape(entry['command'])}[/cyan]{desc}"
             option_list.add_option(Option(prompt, id=str(idx)))
 
         if self.entries:
@@ -70,6 +77,32 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
             self.update_detail_at_index(0)
         else:
             self.query_one("#palette-detail-log", RichLog).clear()
+
+    @on(Button.Pressed, "#btn-pal-all")
+    def on_pal_tier_all(self) -> None:
+        self.filter_tier = None
+        self._update_tier_buttons("btn-pal-all")
+        self.refresh_results()
+
+    @on(Button.Pressed, "#btn-pal-everyday")
+    def on_pal_tier_everyday(self) -> None:
+        self.filter_tier = "everyday"
+        self._update_tier_buttons("btn-pal-everyday")
+        self.refresh_results()
+
+    @on(Button.Pressed, "#btn-pal-specialized")
+    def on_pal_tier_specialized(self) -> None:
+        self.filter_tier = "specialized"
+        self._update_tier_buttons("btn-pal-specialized")
+        self.refresh_results()
+
+    def _update_tier_buttons(self, active_id: str) -> None:
+        for btn_id in ("btn-pal-all", "btn-pal-everyday", "btn-pal-specialized"):
+            btn = self.query_one(f"#{btn_id}", Button)
+            if btn_id == active_id:
+                btn.add_class("active")
+            else:
+                btn.remove_class("active")
 
     @on(Input.Changed, "#palette-search")
     def on_search_changed(self, event: Input.Changed) -> None:
@@ -90,7 +123,8 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
         log.clear()
         if 0 <= index < len(self.entries):
             item = self.entries[index]
-            log.write(f"[bold cyan]{escape(item['name'])}[/bold cyan] [dim]({item['category']} • {item['shell'].upper()})[/dim]")
+            tier_label = "Specialized" if "specialized" in item.get("tags", "").lower() else "Everyday"
+            log.write(f"[bold cyan]{escape(item['name'])}[/bold cyan] [dim]({item['category']} • {item['shell'].upper()} • {tier_label})[/dim]")
             log.write(f"[bold white]> {escape(item['command'])}[/bold white]")
             if item.get("description"):
                 log.write(f"[dim]Description:[/dim] {escape(item['description'])}")

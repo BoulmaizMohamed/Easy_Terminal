@@ -318,6 +318,32 @@ Footer {
     border: solid $primary;
 }
 
+#library-tier-bar {
+    height: 3;
+    layout: horizontal;
+    margin-bottom: 1;
+}
+
+.tier-btn {
+    margin-right: 1;
+    min-width: 18;
+    height: 3;
+    border: none;
+    background: $surface;
+    color: $text-muted;
+}
+
+.tier-btn:hover {
+    background: $surface-lighten-1;
+    color: $text;
+}
+
+.tier-btn.active {
+    background: $accent;
+    color: $surface;
+    text-style: bold;
+}
+
 #library-filter-bar {
     height: 3;
     layout: horizontal;
@@ -444,7 +470,7 @@ Footer {
 
 #palette-dialog {
     width: 86;
-    height: 28;
+    height: 32;
     background: $surface-darken-1;
     border: solid $primary;
     padding: 1 2;
@@ -456,6 +482,32 @@ Footer {
     color: $primary;
     margin-bottom: 1;
     text-align: center;
+}
+
+#palette-tier-bar {
+    height: 3;
+    layout: horizontal;
+    margin-bottom: 1;
+}
+
+.pal-tier-btn {
+    margin-right: 1;
+    min-width: 14;
+    height: 3;
+    border: none;
+    background: $surface;
+    color: $text-muted;
+}
+
+.pal-tier-btn:hover {
+    background: $surface-lighten-1;
+    color: $text;
+}
+
+.pal-tier-btn.active {
+    background: $primary;
+    color: $surface;
+    text-style: bold;
 }
 
 #palette-search {
