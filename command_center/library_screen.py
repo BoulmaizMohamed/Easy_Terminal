@@ -5,13 +5,15 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 import pyperclip
-from textual import on
+from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, DataTable, Footer, Input, Label, RichLog, Static
 
+from command_center.importers.json_sync import export_library_json, import_library_json
+from command_center.importers.tldr import sync_tldr_pages
 from command_center.library import (
     add_library_entry,
     delete_library_entry,
@@ -140,6 +142,9 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         Binding("a", "action_add", "Add", show=True),
         Binding("e", "action_edit", "Edit", show=True),
         Binding("f", "action_toggle_fav", "Favorite", show=True),
+        Binding("s", "action_sync_tldr", "Sync tldr", show=True),
+        Binding("x", "action_export", "Export", show=True),
+        Binding("i", "action_import", "Import", show=True),
         Binding("delete", "action_delete", "Delete", show=True),
         Binding("c", "action_copy", "Copy", show=True),
     ]
@@ -169,6 +174,9 @@ class LibraryScreen(ModalScreen[Optional[str]]):
                 yield Button("CMD", id="btn-shell-cmd", classes="lib-filter-btn")
                 yield Button("Favorites Only", id="btn-filter-favs", classes="lib-filter-btn")
                 yield Button(f"Sort: {self.current_sort_label}", id="btn-sort-cycle", classes="lib-filter-btn")
+                yield Button("Sync tldr (s)", id="btn-sync-tldr", classes="lib-filter-btn")
+                yield Button("Export (x)", id="btn-export-json", classes="lib-filter-btn")
+                yield Button("Import (i)", id="btn-import-json", classes="lib-filter-btn")
                 yield Button("+ Add (a)", variant="success", id="btn-add-command")
 
             with Container(id="library-table-container"):
@@ -267,6 +275,18 @@ class LibraryScreen(ModalScreen[Optional[str]]):
         self.query_one("#btn-sort-cycle", Button).label = f"Sort: {self.current_sort_label}"
         self.refresh_table()
 
+    @on(Button.Pressed, "#btn-sync-tldr")
+    def on_sync_button_pressed(self) -> None:
+        self.action_sync_tldr()
+
+    @on(Button.Pressed, "#btn-export-json")
+    def on_export_button_pressed(self) -> None:
+        self.action_export()
+
+    @on(Button.Pressed, "#btn-import-json")
+    def on_import_button_pressed(self) -> None:
+        self.action_import()
+
     @on(Button.Pressed, "#btn-add-command")
     def on_add_button_pressed(self) -> None:
         self.action_add()
@@ -336,6 +356,41 @@ class LibraryScreen(ModalScreen[Optional[str]]):
             entry["favorite"] = 1 if new_state else 0
             self.notify(f"{'* Favorited' if new_state else 'Unfavorited'}: {entry['name']}", timeout=1)
             self.refresh_table()
+
+    @work(thread=True)
+    def action_sync_tldr(self) -> None:
+        """Synchronizes tldr-pages from the official repository."""
+        self.notify("Syncing tldr-pages in background...", timeout=3)
+        try:
+            added, updated = sync_tldr_pages()
+            self.call_from_thread(self._on_sync_finished, added, updated)
+        except Exception as e:
+            self.notify(f"Sync error: {e}", severity="error", timeout=5)
+
+    def _on_sync_finished(self, added: int, updated: int) -> None:
+        self.notify(f"tldr sync complete: {added} added, {updated} updated!", timeout=4)
+        self.refresh_table()
+
+    def action_export(self) -> None:
+        """Exports user library entries to library_export.json."""
+        dest = "library_export.json"
+        try:
+            count = export_library_json(dest, user_only=True)
+            self.notify(f"Exported {count} user commands to {dest}", timeout=4)
+        except Exception as e:
+            self.notify(f"Export failed: {e}", severity="error", timeout=4)
+
+    def action_import(self) -> None:
+        """Imports library entries from library_export.json."""
+        src = "library_export.json"
+        try:
+            added, skipped = import_library_json(src)
+            self.notify(f"Imported {added} commands ({skipped} duplicates skipped)", timeout=4)
+            self.refresh_table()
+        except FileNotFoundError:
+            self.notify(f"File not found: {src} (export first or place file here)", severity="warning", timeout=4)
+        except Exception as e:
+            self.notify(f"Import failed: {e}", severity="error", timeout=4)
 
     def action_add(self) -> None:
         def on_add_result(data: Optional[Dict[str, Any]]) -> None:
