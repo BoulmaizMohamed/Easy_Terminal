@@ -94,3 +94,44 @@ def test_f2_shell_toggle():
         app.shell_manager.close_all()
 
     asyncio.run(_test())
+
+
+def test_auto_suggest_flow():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            # 1. Execute a command to seed history
+            inp = app.query_one("#command-input")
+            inp.value = "Get-UniqueProcessXYZ"
+            await pilot.press("enter")
+            await pilot.pause(1.0)
+
+            # 2. Type partial prefix
+            inp.value = "Get-Unique"
+            await pilot.pause(0.5)
+
+            sugg_box = app.query_one("#suggestions-container")
+            assert sugg_box.has_class("visible")
+
+            sugg_list = app.query_one("#suggestions-list")
+            assert sugg_list.option_count > 0
+
+            # 3. Press Tab to accept suggestion
+            await pilot.press("tab")
+            await pilot.pause(0.2)
+
+            assert inp.value == "Get-UniqueProcessXYZ"
+            assert not sugg_box.has_class("visible")
+
+            # 4. Type partial prefix again and press Escape to close
+            inp.value = "Get-Un"
+            await pilot.pause(0.5)
+            assert sugg_box.has_class("visible")
+
+            await pilot.press("escape")
+            await pilot.pause(0.2)
+            assert not sugg_box.has_class("visible")
+
+        app.shell_manager.close_all()
+
+    asyncio.run(_test())

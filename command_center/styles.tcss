@@ -191,3 +191,39 @@ Footer {
     background: transparent;
     color: $text;
 }
+
+/* Auto-Suggest Dropdown Styles */
+
+#bottom-dock {
+    dock: bottom;
+    height: auto;
+}
+
+#suggestions-container {
+    display: none;
+    max-height: 9;
+    height: auto;
+    background: $surface-darken-2;
+    border-top: solid $primary-darken-2;
+    border-bottom: solid $primary-darken-3;
+    padding: 0;
+}
+
+#suggestions-container.visible {
+    display: block;
+}
+
+#suggestions-list {
+    background: transparent;
+    border: none;
+    height: auto;
+    max-height: 8;
+    padding: 0;
+    scrollbar-gutter: stable;
+}
+
+#suggestions-list > .option-list--option-highlighted {
+    background: $primary-darken-1;
+    color: $text;
+    text-style: bold;
+}

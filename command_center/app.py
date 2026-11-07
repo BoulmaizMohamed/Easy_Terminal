@@ -6,16 +6,18 @@ import os
 from typing import List
 
 import pyperclip
-from textual import on, work
+from textual import events, on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Horizontal
-from textual.widgets import Footer, Input, Label, RichLog, Static
+from textual.containers import Container, Horizontal, Vertical
+from textual.widgets import Footer, Input, Label, OptionList, RichLog, Static
+from textual.widgets.option_list import Option
 
 from command_center.db import init_db
 from command_center.history import get_recent_unique_commands, log_command
 from command_center.history_screen import HistoryScreen
 from command_center.shell import ShellManager, ShellSession
+from command_center.suggest import Suggestion, rank_suggestions
 
 THEMES = [
     "catppuccin-mocha",
@@ -52,6 +54,7 @@ class CommandCenterApp(App):
         self.history_index: int = -1
         self.last_output_buffer: List[str] = []
         self.current_running_command: str = ""
+        self.current_suggestions: List[Suggestion] = []
 
     @property
     def shell(self) -> ShellSession:
@@ -72,34 +75,38 @@ class CommandCenterApp(App):
                 wrap=True,
             )
 
-        with Horizontal(id="input-container"):
-            yield Static(">", id="prompt-symbol")
-            yield Input(
-                id="command-input",
-                placeholder="Type a PowerShell command and press Enter...",
-            )
+        with Vertical(id="bottom-dock"):
+            with Horizontal(id="input-container"):
+                yield Static(">", id="prompt-symbol")
+                yield Input(
+                    id="command-input",
+                    placeholder="Type a PowerShell command and press Enter...",
+                )
 
-        with Horizontal(id="status-bar"):
-            yield Static(
-                f"{self.shell.shell_type.upper()}",
-                id="status-shell",
-                classes="status-badge",
-            )
-            yield Static(
-                f"{self.shell.cwd}",
-                id="status-cwd",
-                classes="status-badge",
-            )
-            yield Static(
-                "Exit: 0",
-                id="status-exit",
-                classes="status-badge",
-            )
-            yield Static(
-                "Ready",
-                id="status-state",
-                classes="status-badge",
-            )
+            with Container(id="suggestions-container"):
+                yield OptionList(id="suggestions-list")
+
+            with Horizontal(id="status-bar"):
+                yield Static(
+                    f"{self.shell.shell_type.upper()}",
+                    id="status-shell",
+                    classes="status-badge",
+                )
+                yield Static(
+                    f"{self.shell.cwd}",
+                    id="status-cwd",
+                    classes="status-badge",
+                )
+                yield Static(
+                    "Exit: 0",
+                    id="status-exit",
+                    classes="status-badge",
+                )
+                yield Static(
+                    "Ready",
+                    id="status-state",
+                    classes="status-badge",
+                )
 
         yield Footer()
 
@@ -124,6 +131,7 @@ class CommandCenterApp(App):
     @on(Input.Submitted, "#command-input")
     def handle_command_submit(self, event: Input.Submitted) -> None:
         """Called when a command is submitted from the input line."""
+        self._hide_suggestions()
         cmd = event.value.strip()
         if not cmd:
             return
@@ -215,8 +223,101 @@ class CommandCenterApp(App):
 
     @on(Input.Changed, "#command-input")
     def on_input_changed(self, event: Input.Changed) -> None:
-        """Hook for future auto-suggest integration."""
-        pass
+        """Trigger auto-suggest ranking as the user types."""
+        if getattr(self, "_suppress_next_suggest", False):
+            self._suppress_next_suggest = False
+            self._hide_suggestions()
+            return
+
+        query = event.value.strip()
+        if not query:
+            self._hide_suggestions()
+            return
+
+        suggestions = rank_suggestions(query, self.shell.shell_type)
+        if not suggestions:
+            self._hide_suggestions()
+            return
+
+        self.current_suggestions = suggestions
+        sugg_list = self.query_one("#suggestions-list", OptionList)
+        sugg_list.clear_options()
+
+        for idx, s in enumerate(suggestions):
+            if s.description:
+                prompt_text = f"{s.command}  [dim]-- {s.description}[/dim]"
+            else:
+                prompt_text = s.command
+            if s.favorite:
+                prompt_text = f"[yellow]*[/yellow] {prompt_text}"
+            sugg_list.add_option(Option(prompt_text, id=str(idx)))
+
+        sugg_list.highlighted = 0
+        self.query_one("#suggestions-container").add_class("visible")
+
+    def _hide_suggestions(self) -> None:
+        """Hides the suggestions dropdown."""
+        try:
+            container = self.query_one("#suggestions-container")
+            container.remove_class("visible")
+            self.query_one("#suggestions-list", OptionList).clear_options()
+        except Exception:
+            pass
+        self.current_suggestions = []
+
+    def _accept_suggestion(self, index: Optional[int] = None) -> None:
+        """Accepts a suggestion and fills the input widget."""
+        if not self.current_suggestions:
+            return
+        if index is None:
+            sugg_list = self.query_one("#suggestions-list", OptionList)
+            index = sugg_list.highlighted if sugg_list.highlighted is not None else 0
+
+        if 0 <= index < len(self.current_suggestions):
+            cmd = self.current_suggestions[index].command
+            input_widget = self.query_one("#command-input", Input)
+            self._suppress_next_suggest = True
+            input_widget.value = cmd
+            input_widget.cursor_position = len(cmd)
+            self._hide_suggestions()
+            input_widget.focus()
+
+    @on(OptionList.OptionSelected, "#suggestions-list")
+    def on_suggestion_selected(self, event: OptionList.OptionSelected) -> None:
+        """Handle mouse click or selection on suggestions list."""
+        self._accept_suggestion(event.option_index)
+
+    def on_key(self, event: events.Key) -> None:
+        """Intercepts Tab, Esc, Up, Down when navigating suggestions."""
+        input_widget = self.query_one("#command-input", Input)
+        if not input_widget.has_focus:
+            return
+
+        sugg_container = self.query_one("#suggestions-container")
+        is_sugg_visible = sugg_container.has_class("visible")
+
+        if event.key == "tab":
+            if is_sugg_visible and self.current_suggestions:
+                event.prevent_default()
+                event.stop()
+                self._accept_suggestion()
+        elif event.key == "escape":
+            if is_sugg_visible:
+                event.prevent_default()
+                event.stop()
+                self._hide_suggestions()
+        elif event.key == "down":
+            if is_sugg_visible:
+                event.prevent_default()
+                event.stop()
+                sugg_list = self.query_one("#suggestions-list", OptionList)
+                sugg_list.action_cursor_down()
+        elif event.key == "up":
+            if is_sugg_visible:
+                event.prevent_default()
+                event.stop()
+                sugg_list = self.query_one("#suggestions-list", OptionList)
+                sugg_list.action_cursor_up()
 
     def action_open_history(self) -> None:
         """Opens the History screen."""
@@ -294,6 +395,11 @@ class CommandCenterApp(App):
 
     def key_up(self) -> None:
         """Cycle up through command history."""
+        try:
+            if self.query_one("#suggestions-container").has_class("visible"):
+                return
+        except Exception:
+            pass
         input_widget = self.query_one(Input)
         if not input_widget.has_focus or not self.command_history:
             return
@@ -308,6 +414,11 @@ class CommandCenterApp(App):
 
     def key_down(self) -> None:
         """Cycle down through command history."""
+        try:
+            if self.query_one("#suggestions-container").has_class("visible"):
+                return
+        except Exception:
+            pass
         input_widget = self.query_one(Input)
         if not input_widget.has_focus or not self.command_history:
             return
