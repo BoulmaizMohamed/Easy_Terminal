@@ -146,9 +146,10 @@ def get_recent_unique_commands(
 
     query += """
             GROUP BY command
-            ORDER BY max_id ASC
+            ORDER BY max_id DESC
             LIMIT ?
         )
+        ORDER BY max_id ASC
     """
     params.append(limit)
 

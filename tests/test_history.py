@@ -96,6 +96,13 @@ def test_recent_unique_commands(temp_db):
     assert recent == ["cmd2", "cmd1"]
 
 
+def test_recent_unique_commands_selects_newest_under_limit(temp_db):
+    for i in range(1, 61):
+        log_command(f"cmd_{i}", "powershell", "C:\\", 0, 1, db_path=temp_db)
+    recent = get_recent_unique_commands(limit=10, db_path=temp_db)
+    assert recent == [f"cmd_{i}" for i in range(51, 61)]
+
+
 def test_library_use_count_increment(temp_db):
     conn = get_connection(temp_db)
     with conn:
