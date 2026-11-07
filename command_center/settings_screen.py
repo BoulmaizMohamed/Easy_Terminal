@@ -111,6 +111,8 @@ class SettingsScreen(ModalScreen[Optional[AppSettings]]):
                 yield Button(t("settings_save_btn", lang), variant="primary", id="btn-settings-save")
                 yield Button(t("settings_cancel_btn", lang), variant="default", id="btn-settings-cancel")
 
+            yield Label("Easy_Terminal v1.0.0 • Created by B.Mohammed_Amin • MIT License", id="settings-credits")
+
     def _refresh_labels(self) -> None:
         """Updates dialog texts to match active language and settings."""
         lang = self.settings.language

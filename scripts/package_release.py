@@ -61,13 +61,16 @@ def make_portable_distribution(source_dir: Path) -> Path:
         encoding="utf-8",
     )
 
-    # 2. Pre-create local data folder
+    # 2. Pre-create local data folder & copy LICENSE
     (portable_dir / "data").mkdir(exist_ok=True)
+    if (ROOT_DIR / "LICENSE").exists():
+        shutil.copyfile(ROOT_DIR / "LICENSE", portable_dir / "LICENSE")
 
     # 3. Add Portable README
     readme_content = (
         "Easy_Terminal - Portable Edition\n"
-        "================================\n\n"
+        "================================\n"
+        "Author: B.Mohammed_Amin  •  License: MIT\n\n"
         "This version is 100% self-contained. It can run from a USB drive,\n"
         "Desktop, or network share without installing or leaving files in AppData.\n\n"
         "HOW TO RUN:\n"
@@ -214,7 +217,7 @@ if (!(Test-Path $RegPath)) {
 }
 Set-ItemProperty -Path $RegPath -Name "DisplayName" -Value "Easy_Terminal"
 Set-ItemProperty -Path $RegPath -Name "DisplayVersion" -Value "1.0.0"
-Set-ItemProperty -Path $RegPath -Name "Publisher" -Value "Easy_Terminal Contributors"
+Set-ItemProperty -Path $RegPath -Name "Publisher" -Value "B.Mohammed_Amin"
 Set-ItemProperty -Path $RegPath -Name "InstallLocation" -Value $TargetDir
 Set-ItemProperty -Path $RegPath -Name "UninstallString" -Value "`"$TargetDir\\uninstall.bat`""
 

@@ -752,3 +752,10 @@ Footer {
 #settings-actions Button {
     margin-left: 1;
 }
+
+#settings-credits {
+    text-align: center;
+    color: $text-muted;
+    margin-top: 1;
+    height: 1;
+}

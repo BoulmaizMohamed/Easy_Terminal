@@ -1,6 +1,6 @@
 #define MyAppName "Easy_Terminal"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "Easy_Terminal Contributors"
+#define MyAppPublisher "B.Mohammed_Amin"
 #define MyAppURL "https://github.com/your-username/easy-terminal"
 #define MyAppExeName "Easy_Terminal.exe"
 
@@ -21,6 +21,7 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 SetupIconFile=..\assets\app.ico
+LicenseFile=..\LICENSE
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -43,6 +44,7 @@ Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal"; ValueType: stri
 Root: HKCU; Subkey: "Software\Classes\Drive\shell\EasyTerminal\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: contextmenu
 
 [Files]
+Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\dist\Easy_Terminal\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]

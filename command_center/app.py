@@ -236,7 +236,8 @@ class CommandCenterApp(App):
             welcome_body.append("  • Appuyez sur [Ctrl+L] pour parcourir 86 commandes quotidiennes et spécialisées\n", style="cyan")
             welcome_body.append("  • Appuyez sur [Ctrl+P] pour la palette de commandes et recherche rapide\n", style="cyan")
             welcome_body.append("  • Tapez 'clear' ou 'cls' à tout moment pour effacer l'écran, 'exit' pour quitter\n\n", style="dim")
-            welcome_body.append("Astuce : Tapez une commande ou un chemin et appuyez sur [Tab] pour l'autocomplétion.", style="italic dim")
+            welcome_body.append("Astuce : Tapez une commande ou un chemin et appuyez sur [Tab] pour l'autocomplétion.\n", style="italic dim")
+            welcome_body.append("Easy_Terminal v1.0.0  •  Développé par B.Mohammed_Amin  •  Licence MIT", style="dim green")
             panel_title = "[bold cyan]Bienvenue[/bold cyan]"
         else:
             welcome_body.append("⚡ EASY_TERMINAL ", style="bold cyan")
@@ -255,7 +256,8 @@ class CommandCenterApp(App):
             welcome_body.append("  • Press [Ctrl+L] to browse 86 everyday & specialized commands\n", style="cyan")
             welcome_body.append("  • Press [Ctrl+P] for fuzzy command palette & instant search\n", style="cyan")
             welcome_body.append("  • Type 'clear' or 'cls' anytime to wipe screen, 'exit' to close\n\n", style="dim")
-            welcome_body.append("Pro Tip: Start typing any command or file name and press [Tab] for auto-completion.", style="italic dim")
+            welcome_body.append("Pro Tip: Start typing any command or file name and press [Tab] for auto-completion.\n", style="italic dim")
+            welcome_body.append("Easy_Terminal v1.0.0  •  Created by B.Mohammed_Amin  •  MIT License", style="dim green")
             panel_title = "[bold cyan]Welcome[/bold cyan]"
 
         log.write(Panel(welcome_body, title=panel_title, border_style="cyan", padding=(0, 1)))
