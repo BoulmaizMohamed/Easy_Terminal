@@ -1,7 +1,7 @@
 #define MyAppName "Easy_Terminal"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "B.Mohammed_Amin"
-#define MyAppURL "https://github.com/your-username/easy-terminal"
+#define MyAppURL "https://github.com/b-mohammed-amin/Easy_Terminal"
 #define MyAppExeName "Easy_Terminal.exe"
 
 [Setup]

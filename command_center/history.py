@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 from command_center.db import get_connection
 
 PREVIEW_MAX_BYTES = 2048
+MAX_HISTORY_ENTRIES = 10000
 
 
 def log_command(
@@ -58,6 +59,17 @@ def log_command(
             WHERE command = ? AND (shell = ? OR shell = 'both')
             """,
             (ran_at, command, shell.lower()),
+        )
+
+        # Prune old history entries beyond cap
+        conn.execute(
+            """
+            DELETE FROM history
+            WHERE id NOT IN (
+                SELECT id FROM history ORDER BY id DESC LIMIT ?
+            )
+            """,
+            (MAX_HISTORY_ENTRIES,),
         )
 
     conn.close()

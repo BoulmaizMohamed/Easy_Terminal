@@ -127,8 +127,9 @@ class ShellSession:
         lead_word = stripped_cmd.split()[0].lower()
         if lead_word in INTERACTIVE_COMMANDS:
             msg = (
-                f"[Command Center] '{lead_word}' is an interactive full-screen program, "
-                "which is not supported in v1.\n"
+                f"[Easy_Terminal] '{lead_word}' is an interactive full-screen program, "
+                "which is not supported in the embedded stream console.\n"
+                "Tip: To edit files, use 'notepad <filename>'; to view contents, use 'type <filename>'.\n"
             )
             if on_output:
                 on_output(msg)
