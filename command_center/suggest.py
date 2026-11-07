@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,11 +23,56 @@ class Suggestion:
     score: float = 0.0
 
 
+def _get_path_suggestions(query: str, cwd: Optional[str | Path]) -> List[Suggestion]:
+    """Generates file and directory completion suggestions like cmd.exe."""
+    if not cwd or not query.strip():
+        return []
+
+    parts = query.rsplit(" ", 1)
+    prefix = (parts[0] + " ") if len(parts) > 1 else ""
+    token = parts[-1]
+
+    token_dir, _, token_file = token.rpartition("\\")
+    if not token_dir:
+        token_dir, _, token_file = token.rpartition("/")
+
+    try:
+        search_dir = Path(cwd) / token_dir if token_dir else Path(cwd)
+        if not search_dir.exists() or not search_dir.is_dir():
+            return []
+    except Exception:
+        return []
+
+    results: List[Suggestion] = []
+    target = token_file.lower()
+    try:
+        for entry in os.scandir(search_dir):
+            if entry.name.lower().startswith(target):
+                sub = (token_dir + "\\" if token_dir else "") + entry.name
+                if entry.is_dir():
+                    sub += "\\"
+                desc = "Directory" if entry.is_dir() else "File"
+                results.append(
+                    Suggestion(
+                        command=prefix + sub,
+                        description=desc,
+                        source="path",
+                        count=1,
+                        favorite=False,
+                        score=850.0,
+                    )
+                )
+    except Exception:
+        pass
+    return results[:10]
+
+
 def rank_suggestions(
     query: str,
     shell: str,
     db_path: Optional[str | Path] = None,
     limit: int = 8,
+    cwd: Optional[str | Path] = None,
 ) -> List[Suggestion]:
     """
     Ranks auto-suggestions based on prefix/substring match, frequency, recency, and favorites.
@@ -127,6 +173,12 @@ def rank_suggestions(
                 favorite=fav,
                 score=lib_score,
             )
+
+    # 3. Path & file completion candidates from cwd (like cmd.exe)
+    if cwd:
+        for p in _get_path_suggestions(clean_query, cwd):
+            if p.command not in candidates_map:
+                candidates_map[p.command] = p
 
     # Sort candidates by score descending
     sorted_suggestions = sorted(

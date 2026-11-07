@@ -143,7 +143,10 @@ class CommandCenterApp(App):
             f"[dim]Running real persistent [bold]{self.shell.shell_type}[/bold] session. "
             f"Directory: {self.shell.cwd}[/dim]\n"
         )
-        self.query_one(Input).focus()
+        shell_label = "PowerShell" if self.shell.shell_type == "powershell" else "Command Prompt (CMD)"
+        inp = self.query_one("#command-input", Input)
+        inp.placeholder = f"Type a {shell_label} command and press Enter..."
+        inp.focus()
 
     @on(Input.Submitted, "#command-input")
     def handle_command_submit(self, event: Input.Submitted) -> None:
@@ -155,6 +158,26 @@ class CommandCenterApp(App):
 
         input_widget = self.query_one(Input)
         input_widget.value = ""
+
+        # Built-in terminal commands
+        cmd_lower = cmd.lower()
+        if cmd_lower in ("cls", "clear"):
+            self.query_one(RichLog).clear()
+            return
+
+        if cmd_lower == "cmd":
+            if self.shell.shell_type != "cmd":
+                self.action_toggle_shell()
+            return
+
+        if cmd_lower in ("powershell", "pwsh"):
+            if self.shell.shell_type != "powershell":
+                self.action_toggle_shell()
+            return
+
+        if cmd_lower in ("exit", "quit"):
+            self.action_quit()
+            return
 
         # Check safety if enabled
         if self.settings.safety_enabled:
@@ -293,7 +316,7 @@ class CommandCenterApp(App):
             self._hide_suggestions()
             return
 
-        suggestions = rank_suggestions(query, self.shell.shell_type)
+        suggestions = rank_suggestions(query, self.shell.shell_type, cwd=self.shell.cwd)
         if not suggestions:
             self._hide_suggestions()
             return

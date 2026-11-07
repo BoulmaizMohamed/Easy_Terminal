@@ -49,9 +49,7 @@ def make_portable_distribution(source_dir: Path) -> Path:
     """Creates a standalone portable distribution folder and ZIP archive."""
     print("==> Creating Portable distribution...")
     portable_dir = DIST_DIR / "CommandCenter-Portable"
-    if portable_dir.exists():
-        shutil.rmtree(portable_dir)
-    shutil.copytree(source_dir, portable_dir)
+    shutil.copytree(source_dir, portable_dir, dirs_exist_ok=True)
 
     # 1. Add portable.flag to route data into ./data/ rather than %APPDATA%
     (portable_dir / "portable.flag").write_text(
@@ -90,9 +88,7 @@ def make_installer_package(source_dir: Path) -> Path:
     """Prepares the install wizard package with one-click setup & uninstall scripts."""
     print("==> Creating Install Wizard package...")
     setup_dir = DIST_DIR / "CommandCenter-Setup"
-    if setup_dir.exists():
-        shutil.rmtree(setup_dir)
-    shutil.copytree(source_dir, setup_dir)
+    shutil.copytree(source_dir, setup_dir, dirs_exist_ok=True)
 
     # Setup batch launcher
     (setup_dir / "setup.bat").write_text(

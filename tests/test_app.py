@@ -211,3 +211,45 @@ def test_markup_safety_and_interrupt():
         app.shell_manager.close_all()
 
     asyncio.run(_test())
+
+
+def test_cmd_style_builtins_and_path_completion():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            inp = app.query_one("#command-input")
+            log = app.query_one("#output-log")
+
+            # 1. Test cls clears output
+            log.write("Line to clear")
+            inp.value = "cls"
+            await pilot.press("enter")
+            await pilot.pause(0.2)
+            assert len(log.lines) == 0
+
+            # 2. Test typing 'cmd' switches shell
+            assert app.shell.shell_type == "powershell"
+            inp.value = "cmd"
+            await pilot.press("enter")
+            await pilot.pause(0.2)
+            assert app.shell.shell_type == "cmd"
+
+            # 3. Test typing 'powershell' switches back
+            inp.value = "powershell"
+            await pilot.press("enter")
+            await pilot.pause(0.2)
+            assert app.shell.shell_type == "powershell"
+
+            # 4. Test path completion in suggestions
+            inp.value = "type RE"
+            await pilot.pause(0.2)
+            assert any("readme.md" in s.command.lower() for s in app.current_suggestions)
+
+            # 5. Tab accepts path completion
+            await pilot.press("tab")
+            await pilot.pause(0.2)
+            assert "README.md" in inp.value
+
+        app.shell_manager.close_all()
+
+    asyncio.run(_test())
