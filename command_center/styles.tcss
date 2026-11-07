@@ -1,0 +1,107 @@
+/* Command Center - Clean, Modern Terminal UI Theme */
+
+Screen {
+    layout: vertical;
+    background: $surface;
+    color: $text;
+}
+
+#header-bar {
+    dock: top;
+    height: 3;
+    background: $surface-darken-1;
+    color: $text;
+    padding: 0 1;
+    border-bottom: solid $primary-darken-2;
+    layout: horizontal;
+    align: left middle;
+}
+
+#app-title {
+    text-style: bold;
+    color: $primary;
+    margin-right: 2;
+}
+
+#app-subtitle {
+    color: $text-muted;
+}
+
+#output-container {
+    height: 1fr;
+    background: $surface;
+    padding: 1 1 0 1;
+}
+
+#output-log {
+    height: 100%;
+    background: $surface;
+    color: $text;
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+}
+
+#status-bar {
+    height: 1;
+    dock: bottom;
+    background: $surface-darken-2;
+    color: $text;
+    layout: horizontal;
+    padding: 0 1;
+}
+
+.status-badge {
+    margin-right: 1;
+    text-style: bold;
+}
+
+#status-shell {
+    color: $accent;
+}
+
+#status-cwd {
+    color: $text-muted;
+}
+
+#status-exit {
+    color: $text;
+}
+
+#status-state {
+    color: $warning;
+}
+
+#input-container {
+    dock: bottom;
+    height: 3;
+    layout: horizontal;
+    background: $surface-darken-1;
+    padding: 0 1;
+    border-top: solid $primary-darken-2;
+    align: left middle;
+}
+
+#prompt-symbol {
+    width: 3;
+    height: 1;
+    color: $primary;
+    text-style: bold;
+    margin-top: 1;
+}
+
+#command-input {
+    width: 1fr;
+    background: transparent;
+    border: none;
+    color: $text;
+    padding: 0;
+}
+
+#command-input:focus {
+    border: none;
+}
+
+Footer {
+    background: $surface-darken-3;
+    color: $text-muted;
+}
