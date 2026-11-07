@@ -135,3 +135,51 @@ def test_auto_suggest_flow():
         app.shell_manager.close_all()
 
     asyncio.run(_test())
+
+
+def test_library_screen_flow():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            # Open Library via Ctrl+L
+            await pilot.press("ctrl+l")
+            await pilot.pause(0.5)
+
+            from command_center.library_screen import LibraryScreen
+            assert isinstance(app.screen, LibraryScreen)
+
+            table = app.screen.query_one("#library-table")
+            assert table.row_count >= 40
+
+            # Press escape to close
+            await pilot.press("escape")
+            await pilot.pause(0.5)
+            assert not isinstance(app.screen, LibraryScreen)
+
+        app.shell_manager.close_all()
+
+    asyncio.run(_test())
+
+
+def test_merged_library_suggestions():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            inp = app.query_one("#command-input")
+            # Type 'robocopy' which is in seed library
+            inp.value = "robocopy"
+            await pilot.pause(0.5)
+
+            sugg_box = app.query_one("#suggestions-container")
+            assert sugg_box.has_class("visible")
+
+            sugg_list = app.query_one("#suggestions-list")
+            assert sugg_list.option_count > 0
+
+            # First suggestion should be robocopy with description
+            first_opt = sugg_list.get_option_at_index(0)
+            assert "robocopy" in str(first_opt.prompt).lower()
+
+        app.shell_manager.close_all()
+
+    asyncio.run(_test())

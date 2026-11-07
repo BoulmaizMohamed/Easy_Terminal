@@ -227,3 +227,190 @@ Footer {
     color: $text;
     text-style: bold;
 }
+
+/* Library Screen Styles */
+
+#library-dialog {
+    width: 100%;
+    height: 100%;
+    background: $surface;
+    padding: 1;
+}
+
+#library-header {
+    height: 3;
+    layout: horizontal;
+    align: left middle;
+    margin-bottom: 1;
+}
+
+#library-title {
+    width: 22;
+    text-style: bold;
+    color: $primary;
+}
+
+#library-search {
+    width: 1fr;
+    background: $surface-darken-1;
+    border: solid $primary-darken-2;
+    padding: 0 1;
+}
+
+#library-filter-bar {
+    height: 3;
+    layout: horizontal;
+    margin-bottom: 1;
+}
+
+.lib-filter-btn {
+    margin-right: 1;
+    min-width: 12;
+    height: 3;
+    border: none;
+    background: $surface-darken-1;
+    color: $text-muted;
+}
+
+.lib-filter-btn:hover {
+    background: $surface-lighten-1;
+    color: $text;
+}
+
+.lib-filter-btn.active {
+    background: $primary;
+    color: $text;
+    text-style: bold;
+}
+
+#btn-add-command {
+    margin-left: 2;
+}
+
+#library-table-container {
+    height: 1fr;
+    border: solid $surface-darken-2;
+    background: $surface;
+    margin-bottom: 1;
+}
+
+#library-table {
+    height: 100%;
+    background: $surface;
+}
+
+#library-detail-container {
+    height: 8;
+    background: $surface-darken-1;
+    border: solid $surface-darken-2;
+    padding: 0 1;
+}
+
+#library-detail-title {
+    text-style: bold;
+    color: $text-muted;
+}
+
+#library-detail-log {
+    height: 6;
+    background: transparent;
+    color: $text;
+}
+
+/* Editor Dialog Styles */
+
+#editor-dialog {
+    width: 70;
+    height: auto;
+    max-height: 90%;
+    background: $surface-darken-1;
+    border: solid $primary;
+    padding: 1 2;
+    align: center middle;
+}
+
+#editor-title {
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 1;
+    text-align: center;
+}
+
+.field-label {
+    color: $text-muted;
+    margin-top: 1;
+    text-style: bold;
+}
+
+.editor-row {
+    height: auto;
+    layout: horizontal;
+}
+
+.half-col {
+    width: 1fr;
+    margin-right: 1;
+}
+
+#editor-actions {
+    height: 3;
+    layout: horizontal;
+    align: right middle;
+    margin-top: 1;
+}
+
+#editor-actions Button {
+    margin-left: 1;
+}
+
+/* Palette Screen Styles */
+
+#palette-dialog {
+    width: 84;
+    height: 28;
+    background: $surface-darken-1;
+    border: solid $primary;
+    padding: 1 2;
+    align: center middle;
+}
+
+#palette-title {
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 1;
+    text-align: center;
+}
+
+#palette-search {
+    width: 1fr;
+    background: $surface;
+    border: solid $primary-darken-2;
+    margin-bottom: 1;
+}
+
+#palette-list {
+    height: 10;
+    background: $surface;
+    border: solid $surface-darken-2;
+    margin-bottom: 1;
+}
+
+#palette-detail-container {
+    height: 7;
+    background: $surface;
+    border: solid $surface-darken-2;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+#palette-detail-log {
+    height: 100%;
+    background: transparent;
+    color: $text;
+}
+
+#palette-hint {
+    text-align: center;
+    color: $text-muted;
+    text-style: italic;
+}

@@ -16,6 +16,9 @@ from textual.widgets.option_list import Option
 from command_center.db import init_db
 from command_center.history import get_recent_unique_commands, log_command
 from command_center.history_screen import HistoryScreen
+from command_center.library import load_seed_library
+from command_center.library_screen import LibraryScreen
+from command_center.palette_screen import PaletteScreen
 from command_center.shell import ShellManager, ShellSession
 from command_center.suggest import Suggestion, rank_suggestions
 
@@ -34,11 +37,14 @@ class CommandCenterApp(App):
     """Command Center Desktop Terminal Front-End."""
 
     CSS_PATH = "styles.tcss"
+    ENABLE_COMMAND_PALETTE = False
 
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True),
         Binding("f2", "toggle_shell", "Switch Shell (F2)", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
+        Binding("ctrl+p", "open_palette", "Palette/Help", show=True),
+        Binding("ctrl+l", "open_library", "Library", show=True),
         Binding("ctrl+h", "open_history", "History", show=True),
         Binding("ctrl+c", "interrupt_or_clear", "Interrupt/Clear", show=True),
         Binding("ctrl+r", "restart_shell", "Restart Shell", show=True),
@@ -114,6 +120,7 @@ class CommandCenterApp(App):
         """Run on application startup."""
         try:
             init_db()
+            load_seed_library()
             saved_recent = get_recent_unique_commands(shell=self.shell.shell_type)
             if saved_recent:
                 self.command_history.extend(saved_recent)
@@ -326,9 +333,41 @@ class CommandCenterApp(App):
     def _on_history_screen_result(self, cmd: Optional[str]) -> None:
         """Callback when a command is selected from the History screen."""
         if cmd:
+            self._suppress_next_suggest = True
             input_widget = self.query_one(Input)
             input_widget.value = cmd
             input_widget.focus()
+            self.handle_command_submit(Input.Submitted(input_widget, cmd))
+
+    def action_open_library(self) -> None:
+        """Opens the Command Library screen (Ctrl+L)."""
+        self.push_screen(LibraryScreen(), self._on_library_screen_result)
+
+    def _on_library_screen_result(self, cmd: Optional[str]) -> None:
+        """Callback when a command is selected to run from the Library screen."""
+        if cmd:
+            self._suppress_next_suggest = True
+            input_widget = self.query_one(Input)
+            input_widget.value = cmd
+            input_widget.focus()
+            self.handle_command_submit(Input.Submitted(input_widget, cmd))
+
+    def action_open_palette(self) -> None:
+        """Opens the Command Palette and Help screen (Ctrl+P)."""
+        self.push_screen(PaletteScreen(active_shell=self.shell.shell_type), self._on_palette_screen_result)
+
+    def _on_palette_screen_result(self, result: Optional[Tuple[str, str]]) -> None:
+        """Callback when an action is selected from the Command Palette."""
+        if not result:
+            return
+        action, cmd = result
+        self._suppress_next_suggest = True
+        input_widget = self.query_one(Input)
+        input_widget.value = cmd
+        input_widget.cursor_position = len(cmd)
+        input_widget.focus()
+
+        if action == "run":
             self.handle_command_submit(Input.Submitted(input_widget, cmd))
 
     def action_toggle_shell(self) -> None:
