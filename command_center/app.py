@@ -106,7 +106,7 @@ class CommandCenterApp(App):
         prompt_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
 
         with Horizontal(id="header-bar"):
-            yield Label("⚡ COMMAND CENTER", id="app-title")
+            yield Label("⚡ EASY_TERMINAL", id="app-title")
             yield Label(t("app_subtitle", lang), id="app-subtitle")
             yield Static("", id="header-spacer")
             yield Label(f"[bold {prompt_color}]{self.shell.shell_type.upper()}[/bold {prompt_color}]  •  [dim]{t('header_settings', lang)}[/dim]", id="header-hints")
@@ -220,7 +220,7 @@ class CommandCenterApp(App):
         welcome_body = Text()
 
         if lang == "fr":
-            welcome_body.append("⚡ COMMAND CENTER ", style="bold cyan")
+            welcome_body.append("⚡ EASY_TERMINAL ", style="bold cyan")
             welcome_body.append("— Espace de travail terminal moderne pour Windows\n\n", style="bold white")
             welcome_body.append("Shell actif : ", style="bold")
             welcome_body.append(f"{self.shell.shell_type.upper()} ", style=f"bold {shell_badge_color}")
@@ -239,7 +239,7 @@ class CommandCenterApp(App):
             welcome_body.append("Astuce : Tapez une commande ou un chemin et appuyez sur [Tab] pour l'autocomplétion.", style="italic dim")
             panel_title = "[bold cyan]Bienvenue[/bold cyan]"
         else:
-            welcome_body.append("⚡ COMMAND CENTER ", style="bold cyan")
+            welcome_body.append("⚡ EASY_TERMINAL ", style="bold cyan")
             welcome_body.append("— Modern Terminal Workspace for Windows\n\n", style="bold white")
             welcome_body.append("Active Shell: ", style="bold")
             welcome_body.append(f"{self.shell.shell_type.upper()} ", style=f"bold {shell_badge_color}")
@@ -849,6 +849,10 @@ def main() -> None:
 
     app = CommandCenterApp(initial_cwd=initial_cwd)
     app.run()
+
+
+# Backward compatibility alias
+EasyTerminalApp = CommandCenterApp
 
 
 if __name__ == "__main__":

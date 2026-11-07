@@ -12,7 +12,7 @@ from command_center.context_menu import (
 
 
 def test_context_menu_registration_and_cleanup(tmp_path):
-    dummy_exe = tmp_path / "CommandCenter.exe"
+    dummy_exe = tmp_path / "Easy_Terminal.exe"
     dummy_exe.write_text("dummy", encoding="utf-8")
 
     # 1. Clean state
@@ -28,7 +28,7 @@ def test_context_menu_registration_and_cleanup(tmp_path):
     import winreg
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER,
-        r"Software\Classes\Directory\Background\shell\CommandCenter",
+        r"Software\Classes\Directory\Background\shell\EasyTerminal",
     ) as key:
         val, _ = winreg.QueryValueEx(key, "")
         assert val == "Open in Terminal"
@@ -37,7 +37,7 @@ def test_context_menu_registration_and_cleanup(tmp_path):
 
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER,
-        r"Software\Classes\Directory\Background\shell\CommandCenter\command",
+        r"Software\Classes\Directory\Background\shell\EasyTerminal\command",
     ) as cmd_key:
         cmd_val, _ = winreg.QueryValueEx(cmd_key, "")
         assert str(dummy_exe) in cmd_val
