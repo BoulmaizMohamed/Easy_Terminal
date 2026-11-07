@@ -1,4 +1,4 @@
-/* Command Center - Clean, Modern Terminal UI Theme */
+/* Command Center - Premium Modern Terminal UI Design System */
 
 Screen {
     layout: vertical;
@@ -6,13 +6,17 @@ Screen {
     color: $text;
 }
 
+/* ==========================================================================
+   Header Bar
+   ========================================================================== */
+
 #header-bar {
     dock: top;
     height: 3;
     background: $surface-darken-1;
     color: $text;
-    padding: 0 1;
-    border-bottom: solid $primary-darken-2;
+    padding: 0 2;
+    border-bottom: solid $surface-lighten-1;
     layout: horizontal;
     align: left middle;
 }
@@ -20,17 +24,30 @@ Screen {
 #app-title {
     text-style: bold;
     color: $primary;
-    margin-right: 2;
+    margin-right: 1;
 }
 
 #app-subtitle {
     color: $text-muted;
 }
 
+#header-spacer {
+    width: 1fr;
+}
+
+#header-hints {
+    color: $text-muted;
+    text-style: dim;
+}
+
+/* ==========================================================================
+   Output Log Terminal Area
+   ========================================================================== */
+
 #output-container {
     height: 1fr;
     background: $surface;
-    padding: 1 1 0 1;
+    padding: 1 2 0 2;
 }
 
 #output-log {
@@ -39,7 +56,12 @@ Screen {
     color: $text;
     scrollbar-gutter: stable;
     overflow-y: scroll;
+    scrollbar-size-vertical: 1;
 }
+
+/* ==========================================================================
+   Status Bar
+   ========================================================================== */
 
 #status-bar {
     height: 1;
@@ -47,16 +69,19 @@ Screen {
     background: $surface-darken-2;
     color: $text;
     layout: horizontal;
-    padding: 0 1;
+    padding: 0 2;
+    border-top: solid $surface-darken-3;
 }
 
 .status-badge {
-    margin-right: 1;
+    margin-right: 2;
     text-style: bold;
 }
 
 #status-shell {
     color: $accent;
+    background: $surface-darken-1;
+    padding: 0 1;
 }
 
 #status-cwd {
@@ -71,22 +96,30 @@ Screen {
     color: $warning;
 }
 
-#input-container {
+/* ==========================================================================
+   Bottom Dock & Command Input
+   ========================================================================== */
+
+#bottom-dock {
     dock: bottom;
+    height: auto;
+}
+
+#input-container {
     height: 3;
     layout: horizontal;
     background: $surface-darken-1;
-    padding: 0 1;
-    border-top: solid $primary-darken-2;
+    padding: 0 2;
+    border-top: solid $primary;
     align: left middle;
 }
 
 #prompt-symbol {
-    width: 3;
+    width: auto;
     height: 1;
     color: $primary;
     text-style: bold;
-    margin-top: 1;
+    margin-right: 1;
 }
 
 #command-input {
@@ -101,112 +134,18 @@ Screen {
     border: none;
 }
 
-Footer {
-    background: $surface-darken-3;
-    color: $text-muted;
-}
-
-/* History Screen Styles */
-
-#history-dialog {
-    width: 100%;
-    height: 100%;
-    background: $surface;
-    padding: 1;
-}
-
-#history-header {
-    height: 3;
-    layout: horizontal;
-    align: left middle;
-    margin-bottom: 1;
-}
-
-#history-title {
-    width: 22;
-    text-style: bold;
-    color: $primary;
-}
-
-#history-search {
-    width: 1fr;
-    background: $surface-darken-1;
-    border: solid $primary-darken-2;
-    padding: 0 1;
-}
-
-#history-filter-bar {
-    height: 3;
-    layout: horizontal;
-    margin-bottom: 1;
-}
-
-.filter-btn {
-    margin-right: 1;
-    min-width: 10;
-    height: 3;
-    border: none;
-    background: $surface-darken-1;
-    color: $text-muted;
-}
-
-.filter-btn:hover {
-    background: $surface-lighten-1;
-    color: $text;
-}
-
-.filter-btn.active {
-    background: $primary;
-    color: $text;
-    text-style: bold;
-}
-
-#history-table-container {
-    height: 1fr;
-    border: solid $surface-darken-2;
-    background: $surface;
-    margin-bottom: 1;
-}
-
-#history-table {
-    height: 100%;
-    background: $surface;
-}
-
-#history-preview-container {
-    height: 8;
-    background: $surface-darken-1;
-    border: solid $surface-darken-2;
-    padding: 0 1;
-}
-
-#history-preview-title {
-    text-style: bold;
-    color: $text-muted;
-    margin-bottom: 0;
-}
-
-#history-preview-log {
-    height: 6;
-    background: transparent;
-    color: $text;
-}
-
-/* Auto-Suggest Dropdown Styles */
-
-#bottom-dock {
-    dock: bottom;
-    height: auto;
-}
+/* ==========================================================================
+   Auto-Suggest Dropdown
+   ========================================================================== */
 
 #suggestions-container {
     display: none;
-    max-height: 9;
+    max-height: 10;
     height: auto;
     background: $surface-darken-2;
-    border-top: solid $primary-darken-2;
-    border-bottom: solid $primary-darken-3;
-    padding: 0;
+    border-top: solid $accent;
+    border-bottom: solid $surface-darken-3;
+    padding: 0 1;
 }
 
 #suggestions-container.visible {
@@ -217,24 +156,142 @@ Footer {
     background: transparent;
     border: none;
     height: auto;
-    max-height: 8;
+    max-height: 9;
     padding: 0;
     scrollbar-gutter: stable;
 }
 
 #suggestions-list > .option-list--option-highlighted {
-    background: $primary-darken-1;
-    color: $text;
+    background: $primary;
+    color: $surface;
     text-style: bold;
 }
 
-/* Library Screen Styles */
+/* ==========================================================================
+   Footer
+   ========================================================================== */
 
-#library-dialog {
-    width: 100%;
+Footer {
+    background: $surface-darken-3;
+    color: $text-muted;
+}
+
+/* ==========================================================================
+   History Screen Styles
+   ========================================================================== */
+
+#history-dialog {
+    width: 94%;
+    height: 90%;
+    background: $surface-darken-1;
+    border: solid $primary;
+    padding: 1 2;
+    align: center middle;
+}
+
+#history-header {
+    height: 3;
+    layout: horizontal;
+    align: left middle;
+    margin-bottom: 1;
+}
+
+#history-title {
+    width: 24;
+    text-style: bold;
+    color: $primary;
+}
+
+#history-search {
+    width: 1fr;
+    background: $surface;
+    border: solid $primary-darken-2;
+    padding: 0 1;
+}
+
+#history-search:focus {
+    border: solid $accent;
+}
+
+#history-filter-bar {
+    height: 3;
+    layout: horizontal;
+    margin-bottom: 1;
+}
+
+.filter-btn {
+    margin-right: 1;
+    min-width: 12;
+    height: 3;
+    border: none;
+    background: $surface;
+    color: $text-muted;
+}
+
+.filter-btn:hover {
+    background: $surface-lighten-1;
+    color: $text;
+}
+
+.filter-btn.active {
+    background: $primary;
+    color: $surface;
+    text-style: bold;
+}
+
+#history-table-container {
+    height: 1fr;
+    border: solid $surface-darken-3;
+    background: $surface;
+    margin-bottom: 1;
+}
+
+#history-table {
     height: 100%;
     background: $surface;
-    padding: 1;
+}
+
+#history-table > .datatable--header {
+    background: $surface-darken-2;
+    color: $primary;
+    text-style: bold;
+}
+
+#history-table > .datatable--cursor {
+    background: $primary;
+    color: $surface;
+    text-style: bold;
+}
+
+#history-preview-container {
+    height: 8;
+    background: $surface;
+    border: solid $surface-darken-3;
+    padding: 0 1;
+}
+
+#history-preview-title {
+    text-style: bold;
+    color: $text-muted;
+}
+
+#history-preview-log {
+    height: 6;
+    background: transparent;
+    color: $text;
+}
+
+/* ==========================================================================
+   Library Screen Styles
+   ========================================================================== */
+
+#library-dialog {
+    width: 94%;
+    height: 90%;
+    background: $surface-darken-1;
+    border: solid $accent;
+    padding: 1 2;
+    align: center middle;
 }
 
 #library-header {
@@ -245,16 +302,20 @@ Footer {
 }
 
 #library-title {
-    width: 22;
+    width: 24;
     text-style: bold;
-    color: $primary;
+    color: $accent;
 }
 
 #library-search {
     width: 1fr;
-    background: $surface-darken-1;
-    border: solid $primary-darken-2;
+    background: $surface;
+    border: solid $accent-darken-2;
     padding: 0 1;
+}
+
+#library-search:focus {
+    border: solid $primary;
 }
 
 #library-filter-bar {
@@ -268,7 +329,7 @@ Footer {
     min-width: 12;
     height: 3;
     border: none;
-    background: $surface-darken-1;
+    background: $surface;
     color: $text-muted;
 }
 
@@ -278,18 +339,18 @@ Footer {
 }
 
 .lib-filter-btn.active {
-    background: $primary;
-    color: $text;
+    background: $accent;
+    color: $surface;
     text-style: bold;
 }
 
 #btn-add-command {
-    margin-left: 2;
+    margin-left: 1;
 }
 
 #library-table-container {
     height: 1fr;
-    border: solid $surface-darken-2;
+    border: solid $surface-darken-3;
     background: $surface;
     margin-bottom: 1;
 }
@@ -299,10 +360,22 @@ Footer {
     background: $surface;
 }
 
+#library-table > .datatable--header {
+    background: $surface-darken-2;
+    color: $accent;
+    text-style: bold;
+}
+
+#library-table > .datatable--cursor {
+    background: $accent;
+    color: $surface;
+    text-style: bold;
+}
+
 #library-detail-container {
     height: 8;
-    background: $surface-darken-1;
-    border: solid $surface-darken-2;
+    background: $surface;
+    border: solid $surface-darken-3;
     padding: 0 1;
 }
 
@@ -317,21 +390,23 @@ Footer {
     color: $text;
 }
 
-/* Editor Dialog Styles */
+/* ==========================================================================
+   Editor Dialog Styles
+   ========================================================================== */
 
 #editor-dialog {
-    width: 70;
+    width: 72;
     height: auto;
     max-height: 90%;
     background: $surface-darken-1;
-    border: solid $primary;
+    border: solid $accent;
     padding: 1 2;
     align: center middle;
 }
 
 #editor-title {
     text-style: bold;
-    color: $primary;
+    color: $accent;
     margin-bottom: 1;
     text-align: center;
 }
@@ -363,10 +438,12 @@ Footer {
     margin-left: 1;
 }
 
-/* Palette Screen Styles */
+/* ==========================================================================
+   Palette Screen Styles
+   ========================================================================== */
 
 #palette-dialog {
-    width: 84;
+    width: 86;
     height: 28;
     background: $surface-darken-1;
     border: solid $primary;
@@ -388,17 +465,27 @@ Footer {
     margin-bottom: 1;
 }
 
+#palette-search:focus {
+    border: solid $accent;
+}
+
 #palette-list {
     height: 10;
     background: $surface;
-    border: solid $surface-darken-2;
+    border: solid $surface-darken-3;
     margin-bottom: 1;
+}
+
+#palette-list > .option-list--option-highlighted {
+    background: $primary;
+    color: $surface;
+    text-style: bold;
 }
 
 #palette-detail-container {
     height: 7;
     background: $surface;
-    border: solid $surface-darken-2;
+    border: solid $surface-darken-3;
     padding: 0 1;
     margin-bottom: 1;
 }
@@ -415,13 +502,15 @@ Footer {
     text-style: italic;
 }
 
-/* Safety Dialog Styles */
+/* ==========================================================================
+   Safety Dialog Styles
+   ========================================================================== */
 
 #safety-dialog {
-    width: 70;
+    width: 72;
     height: auto;
     background: $surface-darken-1;
-    border: solid $error;
+    border: heavy $error;
     padding: 1 2;
     align: center middle;
 }
@@ -466,10 +555,12 @@ Footer {
     margin-left: 1;
 }
 
-/* Settings Screen Styles */
+/* ==========================================================================
+   Settings Screen Styles
+   ========================================================================== */
 
 #settings-dialog {
-    width: 74;
+    width: 76;
     height: auto;
     max-height: 92%;
     background: $surface-darken-1;
@@ -507,6 +598,7 @@ Footer {
 
 .settings-btn:hover {
     background: $surface-lighten-1;
+    color: $text;
 }
 
 #settings-actions {

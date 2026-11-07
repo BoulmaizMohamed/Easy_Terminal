@@ -282,7 +282,7 @@ def main() -> None:
     print("   Command Center - Distribution Builder          ")
     print("==================================================")
     compiled_dir = DIST_DIR / "CommandCenter"
-    if not (compiled_dir / "CommandCenter.exe").exists():
+    if "--rebuild" in sys.argv or not (compiled_dir / "CommandCenter.exe").exists():
         compiled_dir = build_pyinstaller_binary()
 
     make_portable_distribution(compiled_dir)

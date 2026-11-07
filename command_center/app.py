@@ -7,6 +7,7 @@ from typing import List, Optional
 
 import pyperclip
 from rich.markup import escape
+from rich.panel import Panel
 from rich.text import Text
 from textual import events, on, work
 from textual.app import App, ComposeResult
@@ -78,9 +79,14 @@ class CommandCenterApp(App):
 
     def compose(self) -> ComposeResult:
         """Compose the layout of the terminal UI."""
+        prompt_glyph = "PS ❯" if self.shell.shell_type == "powershell" else "CMD ❯"
+        prompt_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
+
         with Horizontal(id="header-bar"):
-            yield Label("COMMAND CENTER", id="app-title")
-            yield Label("v0.1.0 - Modern Terminal Front-End", id="app-subtitle")
+            yield Label("⚡ COMMAND CENTER", id="app-title")
+            yield Label("• Modern Windows Terminal", id="app-subtitle")
+            yield Static("", id="header-spacer")
+            yield Label("[F2] Shell  •  [Ctrl+P] Palette  •  [Ctrl+L] Library  •  [Ctrl+H] History  •  [F10] Settings", id="header-hints")
 
         with Container(id="output-container"):
             yield RichLog(
@@ -93,7 +99,7 @@ class CommandCenterApp(App):
 
         with Vertical(id="bottom-dock"):
             with Horizontal(id="input-container"):
-                yield Static(">", id="prompt-symbol")
+                yield Static(f"[{prompt_color}]{prompt_glyph}[/{prompt_color}]", id="prompt-symbol")
                 yield Input(
                     id="command-input",
                     placeholder="Type a PowerShell command and press Enter...",
@@ -138,11 +144,21 @@ class CommandCenterApp(App):
             pass
 
         log = self.query_one(RichLog)
-        log.write("[bold cyan]Welcome to Command Center[/bold cyan]")
-        log.write(
-            f"[dim]Running real persistent [bold]{self.shell.shell_type}[/bold] session. "
-            f"Directory: {self.shell.cwd}[/dim]\n"
-        )
+        shell_badge_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
+        welcome_body = Text()
+        welcome_body.append("⚡ COMMAND CENTER ", style="bold cyan")
+        welcome_body.append("— Modern Windows Terminal Workspace\n", style="bold white")
+        welcome_body.append("Active Shell: ", style="dim")
+        welcome_body.append(f"{self.shell.shell_type.upper()}", style=f"bold {shell_badge_color}")
+        welcome_body.append(" (Persistent)   ", style="dim")
+        welcome_body.append("Directory: ", style="dim")
+        welcome_body.append(f"{self.shell.cwd}\n\n", style="dim cyan")
+        welcome_body.append("Quick Keys: ", style="bold white")
+        welcome_body.append("[F2] Switch Shell  •  [Ctrl+P] Palette  •  [Ctrl+L] Library  •  [Ctrl+H] History  •  [F10] Settings\n", style="dim")
+        welcome_body.append("Tip: Type 'clear' or 'cls' to reset screen, or type 'cmd' / 'powershell' to switch shells instantly.", style="italic dim")
+
+        log.write(Panel(welcome_body, border_style="cyan", padding=(0, 1)))
+
         shell_label = "PowerShell" if self.shell.shell_type == "powershell" else "Command Prompt (CMD)"
         inp = self.query_one("#command-input", Input)
         inp.placeholder = f"Type a {shell_label} command and press Enter..."
@@ -212,7 +228,8 @@ class CommandCenterApp(App):
         # Render command banner in output
         log = self.query_one(RichLog)
         safe_cmd = escape(cmd)
-        log.write(f"\n[bold magenta]>[/bold magenta] [bold white]{safe_cmd}[/bold white]")
+        prompt_arrow = "[bold cyan]❯[/bold cyan]" if self.shell.shell_type == "powershell" else "[bold yellow]❯[/bold yellow]"
+        log.write(f"\n{prompt_arrow} [bold white]{safe_cmd}[/bold white]")
 
         # Update status
         self._set_state_running()
@@ -262,8 +279,9 @@ class CommandCenterApp(App):
 
         log = self.query_one(RichLog)
         ec_color = "green" if exit_code == 0 else "red"
+        ec_symbol = "✔" if exit_code == 0 else "✘"
         log.write(
-            f"[dim]-- exit: [{ec_color}]{exit_code}[/{ec_color}] | {duration_ms}ms[/dim]"
+            f"[dim]-- exit: [{ec_color}]{exit_code}[/{ec_color}] | {duration_ms}ms {ec_symbol}[/dim]"
         )
 
         # Log into SQLite history
@@ -326,12 +344,17 @@ class CommandCenterApp(App):
         sugg_list.clear_options()
 
         for idx, s in enumerate(suggestions):
-            if s.description:
-                prompt_text = f"{escape(s.command)}  [dim]-- {escape(s.description)}[/dim]"
-            else:
-                prompt_text = escape(s.command)
-            if s.favorite:
-                prompt_text = f"[yellow]*[/yellow] {prompt_text}"
+            source_badge = ""
+            if s.source == "path":
+                source_badge = "[cyan]PATH[/cyan] "
+            elif s.source == "library":
+                source_badge = "[green]LIB [/green] "
+            elif s.source == "history":
+                source_badge = "[yellow]HIST[/yellow] "
+
+            fav_star = "[yellow]★ [/yellow]" if s.favorite else ""
+            desc = f"  [dim]— {escape(s.description)}[/dim]" if s.description else ""
+            prompt_text = f"{fav_star}{source_badge}{escape(s.command)}{desc}"
             sugg_list.add_option(Option(prompt_text, id=str(idx)))
 
         sugg_list.highlighted = 0
@@ -464,6 +487,11 @@ class CommandCenterApp(App):
         shell_name = "PowerShell" if new_shell == "powershell" else "Command Prompt (CMD)"
         log = self.query_one(RichLog)
         log.write(f"\n[dim]-- Switched active shell to [bold cyan]{shell_name}[/bold cyan] --[/dim]")
+
+        # Update prompt symbol
+        prompt_glyph = "PS ❯" if new_shell == "powershell" else "CMD ❯"
+        prompt_color = "cyan" if new_shell == "powershell" else "yellow"
+        self.query_one("#prompt-symbol", Static).update(f"[{prompt_color}]{prompt_glyph}[/{prompt_color}]")
 
         # Update status bar
         status_shell = self.query_one("#status-shell", Static)
