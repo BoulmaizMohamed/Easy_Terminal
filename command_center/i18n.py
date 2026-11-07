@@ -25,6 +25,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "repo_dialog_title": "GIT REPOSITORIES & NAVIGATION",
         "repo_search_placeholder": "Search repositories by name, branch, or path... (Esc to close)",
         "repo_dialog_hint": "[Enter] Navigate to Repo  •  [Esc] Close",
+        "repo_btn_navigate": "➔ Navigate to Repo (Enter)",
+        "repo_btn_cancel": "Cancel (Esc)",
         "repo_active_badge": "★ Current",
         "repo_switched": "Switched to repository:",
         # Input Placeholders
@@ -113,6 +115,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "repo_dialog_title": "DÉPÔTS GIT & NAVIGATION",
         "repo_search_placeholder": "Rechercher dépôts par nom, branche ou chemin... (Échap pour fermer)",
         "repo_dialog_hint": "[Entrée] Naviguer vers le dépôt  •  [Échap] Fermer",
+        "repo_btn_navigate": "➔ Naviguer vers le dépôt (Entrée)",
+        "repo_btn_cancel": "Annuler (Échap)",
         "repo_active_badge": "★ Actuel",
         "repo_switched": "Navigation vers le dépôt :",
         # Input Placeholders

@@ -9,9 +9,9 @@ from rich.markup import escape
 from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical
+from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Input, Label, OptionList
+from textual.widgets import Button, Input, Label, OptionList
 from textual.widgets.option_list import Option
 
 from command_center.git_info import get_known_repositories, get_location_info
@@ -45,7 +45,9 @@ class RepoScreen(ModalScreen[Optional[str]]):
                 id="repo-search",
             )
             yield OptionList(id="repo-list")
-            yield Label(t("repo_dialog_hint", lang), id="repo-hint")
+            with Horizontal(id="repo-actions"):
+                yield Button(t("repo_btn_navigate", lang), variant="primary", id="btn-repo-navigate")
+                yield Button(t("repo_btn_cancel", lang), variant="default", id="btn-repo-cancel")
 
     def on_mount(self) -> None:
         self.all_repos = get_known_repositories(cwd=self.current_cwd)
@@ -103,6 +105,14 @@ class RepoScreen(ModalScreen[Optional[str]]):
         if 0 <= event.option_index < len(self.filtered_repos):
             self.dismiss(self.filtered_repos[event.option_index]["path"])
 
+    @on(Button.Pressed, "#btn-repo-navigate")
+    def on_btn_navigate(self) -> None:
+        self.action_select_repo()
+
+    @on(Button.Pressed, "#btn-repo-cancel")
+    def on_btn_cancel(self) -> None:
+        self.action_cancel()
+
     def action_select_repo(self) -> None:
         option_list = self.query_one("#repo-list", OptionList)
         idx = option_list.highlighted
@@ -117,3 +127,22 @@ class RepoScreen(ModalScreen[Optional[str]]):
 
     def action_cancel(self) -> None:
         self.dismiss(None)
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle keyboard navigation directly from search input."""
+        if event.key == "enter":
+            event.prevent_default()
+            event.stop()
+            self.action_select_repo()
+        elif event.key == "escape":
+            event.prevent_default()
+            event.stop()
+            self.action_cancel()
+        elif event.key == "down":
+            event.prevent_default()
+            event.stop()
+            self.action_cursor_down()
+        elif event.key == "up":
+            event.prevent_default()
+            event.stop()
+            self.action_cursor_up()

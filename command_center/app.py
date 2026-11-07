@@ -346,6 +346,17 @@ class CommandCenterApp(App):
                 self.action_open_repos()
             return
 
+        if len(cmd_parts) == 2 and cmd_parts[0].lower() in ("cd", "chdir", "sl", "set-location"):
+            raw_target = cmd_parts[1].strip().strip('"').strip("'")
+            local_target = Path(raw_target)
+            if not local_target.is_absolute():
+                local_target = Path(self.shell.cwd) / raw_target
+            if not local_target.exists():
+                match = find_repository(raw_target, cwd=self.shell.cwd)
+                if match:
+                    self._switch_to_repository(match["path"])
+                    return
+
         if cmd_lower == "cmd":
             if self.shell.shell_type != "cmd":
                 self.action_toggle_shell()
@@ -466,6 +477,11 @@ class CommandCenterApp(App):
             self.current_running_command = ""
 
         # Update status bar
+        if new_cwd and Path(new_cwd).exists():
+            try:
+                os.chdir(new_cwd)
+            except Exception:
+                pass
         status_state = self.query_one("#status-state", Static)
         status_state.update(t("status_ready", self.settings.language))
 
@@ -674,6 +690,10 @@ class CommandCenterApp(App):
         log = self.query_one(RichLog)
         repo_name = Path(resolved).name
         log.write(f"\n[dim cyan]-- {t('repo_switched', self.settings.language)} [bold]{repo_name}[/bold] ({resolved}) --[/dim cyan]")
+        try:
+            os.chdir(resolved)
+        except Exception:
+            pass
         if self.shell.shell_type == "powershell":
             cmd = f'Set-Location -LiteralPath "{resolved}"'
         else:

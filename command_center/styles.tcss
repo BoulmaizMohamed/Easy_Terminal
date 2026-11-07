@@ -537,6 +537,16 @@ Footer {
     margin-bottom: 1;
 }
 
+#repo-actions {
+    height: 3;
+    layout: horizontal;
+    align: right middle;
+}
+
+#repo-actions Button {
+    margin-left: 1;
+}
+
 #repo-hint {
     text-align: center;
     color: $text-muted;
