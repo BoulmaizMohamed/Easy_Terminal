@@ -14,12 +14,19 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "header_settings": "F10 Settings",
         # Quick Action Buttons
         "qa_files": "📁 Files",
+        "qa_repos": "🌿 Repos",
         "qa_procs": "⚡ Top Apps",
         "qa_disks": "💾 Disks",
         "qa_ping": "🌐 Ping",
         "qa_library": "📚 Library",
         "qa_shell": "🔄 Shell",
         "qa_clear": "🧹 Clear",
+        # Repo Navigator Screen
+        "repo_dialog_title": "GIT REPOSITORIES & NAVIGATION",
+        "repo_search_placeholder": "Search repositories by name, branch, or path... (Esc to close)",
+        "repo_dialog_hint": "[Enter] Navigate to Repo  •  [Esc] Close",
+        "repo_active_badge": "★ Current",
+        "repo_switched": "Switched to repository:",
         # Input Placeholders
         "placeholder_ps": "Type a PowerShell command or click a quick action above...",
         "placeholder_cmd": "Type a CMD command or click a quick action above...",
@@ -95,12 +102,19 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "header_settings": "F10 Paramètres",
         # Quick Action Buttons
         "qa_files": "📁 Fichiers",
+        "qa_repos": "🌿 Dépôts",
         "qa_procs": "⚡ Applications",
         "qa_disks": "💾 Disques",
         "qa_ping": "🌐 Ping",
         "qa_library": "📚 Bibliothèque",
         "qa_shell": "🔄 Shell",
         "qa_clear": "🧹 Effacer",
+        # Repo Navigator Screen
+        "repo_dialog_title": "DÉPÔTS GIT & NAVIGATION",
+        "repo_search_placeholder": "Rechercher dépôts par nom, branche ou chemin... (Échap pour fermer)",
+        "repo_dialog_hint": "[Entrée] Naviguer vers le dépôt  •  [Échap] Fermer",
+        "repo_active_badge": "★ Actuel",
+        "repo_switched": "Navigation vers le dépôt :",
         # Input Placeholders
         "placeholder_ps": "Tapez une commande PowerShell ou cliquez sur une action rapide...",
         "placeholder_cmd": "Tapez une commande CMD ou cliquez sur une action rapide...",

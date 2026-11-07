@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import List, Optional
 
 import pyperclip
@@ -17,13 +18,19 @@ from textual.widgets import Button, Footer, Input, Label, OptionList, RichLog, S
 from textual.widgets.option_list import Option
 
 from command_center.db import init_db
-from command_center.git_info import get_location_info
+from command_center.git_info import (
+    find_repository,
+    get_known_repositories,
+    get_location_info,
+    record_repository,
+)
 from command_center.history import get_recent_unique_commands, log_command
 from command_center.history_screen import HistoryScreen
 from command_center.i18n import t
 from command_center.library import load_seed_library
 from command_center.library_screen import LibraryScreen
 from command_center.palette_screen import PaletteScreen
+from command_center.repo_screen import RepoScreen
 from command_center.safety import is_dangerous_command
 from command_center.safety_dialog import SafetyConfirmationDialog
 from command_center.settings import AppSettings, load_settings, save_settings
@@ -53,6 +60,7 @@ class CommandCenterApp(App):
         Binding("f2", "toggle_shell", "Switch Shell (F2)", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
         Binding("ctrl+p", "open_palette", "Palette/Help", show=True),
+        Binding("ctrl+g", "open_repos", "Repos (Ctrl+G)", show=True),
         Binding("ctrl+l", "open_library", "Library", show=True),
         Binding("ctrl+h", "open_history", "History", show=True),
         Binding("f10", "open_settings", "Settings (F10)", show=True),
@@ -110,6 +118,7 @@ class CommandCenterApp(App):
         with Vertical(id="bottom-dock"):
             with Horizontal(id="quick-actions-bar"):
                 yield Button(t("qa_files", lang), id="qa-files", classes="qa-btn")
+                yield Button(t("qa_repos", lang), id="qa-repos", classes="qa-btn")
                 yield Button(t("qa_procs", lang), id="qa-procs", classes="qa-btn")
                 yield Button(t("qa_disks", lang), id="qa-disks", classes="qa-btn")
                 yield Button(t("qa_ping", lang), id="qa-ping", classes="qa-btn")
@@ -168,6 +177,7 @@ class CommandCenterApp(App):
                 f"[bold {prompt_color}]{self.shell.shell_type.upper()}[/bold {prompt_color}]  •  [dim]{t('header_settings', lang)}[/dim]"
             )
             self.query_one("#qa-files", Button).label = t("qa_files", lang)
+            self.query_one("#qa-repos", Button).label = t("qa_repos", lang)
             self.query_one("#qa-procs", Button).label = t("qa_procs", lang)
             self.query_one("#qa-disks", Button).label = t("qa_disks", lang)
             self.query_one("#qa-ping", Button).label = t("qa_ping", lang)
@@ -197,6 +207,8 @@ class CommandCenterApp(App):
             pass
 
         loc = get_location_info(self.shell.cwd)
+        if loc.is_git and loc.repo_root:
+            record_repository(loc.repo_root, loc.repo_name, loc.branch)
         lang = self.settings.language
         log = self.query_one(RichLog)
         shell_badge_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
@@ -253,6 +265,14 @@ class CommandCenterApp(App):
         self._execute_command(cmd)
         self.query_one("#command-input", Input).focus()
 
+    @on(Button.Pressed, "#qa-repos")
+    def on_qa_repos(self) -> None:
+        self.action_open_repos()
+
+    @on(events.Click, "#status-repo")
+    def on_status_repo_click(self) -> None:
+        self.action_open_repos()
+
     @on(Button.Pressed, "#qa-procs")
     def on_qa_procs(self) -> None:
         cmd = "Get-Process | Sort-Object CPU -Descending | Select-Object -First 8" if self.shell.shell_type == "powershell" else "tasklist"
@@ -299,6 +319,31 @@ class CommandCenterApp(App):
         cmd_lower = cmd.lower()
         if cmd_lower in ("cls", "clear"):
             self.query_one(RichLog).clear()
+            return
+
+        if cmd_lower in ("repo", "repos"):
+            self.action_open_repos()
+            return
+
+        cmd_parts = cmd.split(maxsplit=1)
+        if len(cmd_parts) == 2 and cmd_parts[0].lower() in ("repo", "repos", "cdrepo", "goto"):
+            target = cmd_parts[1].strip()
+            if target.lower() == "list":
+                repos = get_known_repositories(cwd=self.shell.cwd)
+                log = self.query_one(RichLog)
+                log.write("\n[bold cyan]🌿 Known Git Repositories:[/bold cyan]")
+                for r in repos:
+                    branch = f" [dim green]({escape(r['branch'])})[/dim green]" if r.get("branch") else ""
+                    log.write(f"  • [bold white]{escape(r['name'])}[/bold white]{branch} [dim]— {escape(r['path'])}[/dim]")
+                return
+
+            match = find_repository(target, cwd=self.shell.cwd)
+            if match:
+                self._switch_to_repository(match["path"])
+            else:
+                log = self.query_one(RichLog)
+                log.write(f"\n[yellow]Repository '{escape(target)}' not found. Opening selector...[/yellow]")
+                self.action_open_repos()
             return
 
         if cmd_lower == "cmd":
@@ -428,6 +473,8 @@ class CommandCenterApp(App):
         status_cwd.update(f"{new_cwd}")
 
         loc = get_location_info(new_cwd)
+        if loc.is_git and loc.repo_root:
+            record_repository(loc.repo_root, loc.repo_name, loc.branch)
         status_repo = self.query_one("#status-repo", Static)
         status_repo.update(loc.get_repo_badge(self.settings.language))
 
@@ -611,6 +658,27 @@ class CommandCenterApp(App):
 
         if action == "run":
             self.handle_command_submit(Input.Submitted(input_widget, cmd))
+
+    def action_open_repos(self) -> None:
+        """Opens the Repository Navigator modal (Ctrl+G)."""
+        self.push_screen(RepoScreen(current_cwd=self.shell.cwd), self._on_repo_screen_result)
+
+    def _on_repo_screen_result(self, selected_path: Optional[str]) -> None:
+        """Callback when a repository is selected from the navigator."""
+        if selected_path:
+            self._switch_to_repository(selected_path)
+
+    def _switch_to_repository(self, target_path: str) -> None:
+        """Navigates active shell to target repository path."""
+        resolved = str(Path(target_path).resolve())
+        log = self.query_one(RichLog)
+        repo_name = Path(resolved).name
+        log.write(f"\n[dim cyan]-- {t('repo_switched', self.settings.language)} [bold]{repo_name}[/bold] ({resolved}) --[/dim cyan]")
+        if self.shell.shell_type == "powershell":
+            cmd = f'Set-Location -LiteralPath "{resolved}"'
+        else:
+            cmd = f'cd /d "{resolved}"'
+        self._execute_command(cmd)
 
     def action_toggle_shell(self) -> None:
         """Toggles active shell between PowerShell and CMD with F2."""

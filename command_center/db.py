@@ -82,6 +82,13 @@ def init_db(db_path: Optional[str | Path] = None) -> None:
                 updated_at TEXT NOT NULL,
                 UNIQUE (command, shell, source)
             );
+            CREATE TABLE IF NOT EXISTS repositories (
+                path TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                branch TEXT,
+                last_visited_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_repo_visited ON repositories(last_visited_at);
             """
         )
     conn.close()
