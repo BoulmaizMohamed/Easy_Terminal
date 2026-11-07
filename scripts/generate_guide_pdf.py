@@ -338,7 +338,7 @@ def build_guide_html_en() -> Path:
             <p>Switch between <strong>PowerShell</strong>, <strong>CMD</strong>, and <strong>WSL/Bash</strong> instantly with <span class="key">F2</span>.</p>
         </div>
         <div class="card">
-            <h4>📚 86+ Curated Commands</h4>
+            <h4>📚 500+ Curated Commands</h4>
             <p>Built-in Command Library split into <strong>Everyday Common</strong> & <strong>Specialized</strong> developer tools (<span class="key">Ctrl+L</span>).</p>
         </div>
         <div class="card">
@@ -500,7 +500,7 @@ def build_guide_html_en() -> Path:
             <tr>
                 <td><strong>📚 Library</strong></td>
                 <td><span class="key">Ctrl+L</span></td>
-                <td>Opens the built-in library of 86+ categorized commands.</td>
+                <td>Opens the built-in library of 500+ categorized commands.</td>
             </tr>
             <tr>
                 <td><strong>🐚 Shell</strong></td>
@@ -534,9 +534,9 @@ def build_guide_html_en() -> Path:
         <div class="meta">Section 3: Command Library (Ctrl+L)</div>
     </div>
 
-    <h2>The 86+ Built-in Command Library (<span class="key">Ctrl+L</span>)</h2>
+    <h2>The 500+ Built-in Command Library (<span class="key">Ctrl+L</span>)</h2>
     <p>
-        Never memorize complex flags or shell syntax again. Easy_Terminal includes an organized library of 86 everyday and advanced commands, divided cleanly into two logical categories:
+        Never memorize complex flags or shell syntax again. Easy_Terminal includes an organized library of 500+ everyday and advanced commands, divided cleanly into two logical categories:
     </p>
 
     <div class="screenshot-card">
@@ -691,7 +691,7 @@ def build_guide_html_en() -> Path:
             <tr>
                 <td><span class="key">Ctrl+L</span></td>
                 <td><strong>Command Library</strong></td>
-                <td>Browse 86+ everyday and specialized commands.</td>
+                <td>Browse 500+ everyday and specialized commands.</td>
             </tr>
             <tr>
                 <td><span class="key">Ctrl+P</span></td>
@@ -812,7 +812,7 @@ def build_guide_html_fr() -> Path:
             <p>Basculez entre <strong>PowerShell</strong>, <strong>CMD</strong> et <strong>WSL/Bash</strong> à tout moment avec la touche <span class="key">F2</span>.</p>
         </div>
         <div class="card">
-            <h4>📚 86+ Commandes Prêtes</h4>
+            <h4>📚 500+ Commandes Prêtes</h4>
             <p>Bibliothèque de commandes divisée en tâches <strong>Quotidiennes</strong> et outils <strong>Spécialisés</strong> (<span class="key">Ctrl+L</span>).</p>
         </div>
         <div class="card">
@@ -974,7 +974,7 @@ def build_guide_html_fr() -> Path:
             <tr>
                 <td><strong>📚 Bibliothèque</strong></td>
                 <td><span class="key">Ctrl+L</span></td>
-                <td>Ouvre la bibliothèque intégrée de 86+ commandes organisées.</td>
+                <td>Ouvre la bibliothèque intégrée de 500+ commandes organisées.</td>
             </tr>
             <tr>
                 <td><strong>🐚 Shell</strong></td>
@@ -1008,9 +1008,9 @@ def build_guide_html_fr() -> Path:
         <div class="meta">Section 3 : Bibliothèque de Commandes (Ctrl+L)</div>
     </div>
 
-    <h2>La Bibliothèque Intégrée de 86+ Commandes (<span class="key">Ctrl+L</span>)</h2>
+    <h2>La Bibliothèque Intégrée de 500+ Commandes (<span class="key">Ctrl+L</span>)</h2>
     <p>
-        Plus besoin de mémoriser des syntaxes ou options complexes. Easy_Terminal intègre un catalogue complet de 86 commandes, réparties judicieusement en deux catégories principales :
+        Plus besoin de mémoriser des syntaxes ou options complexes. Easy_Terminal intègre un catalogue complet de 500+ commandes, réparties judicieusement en deux catégories principales :
     </p>
 
     <div class="screenshot-card">
@@ -1165,7 +1165,7 @@ def build_guide_html_fr() -> Path:
             <tr>
                 <td><span class="key">Ctrl+L</span></td>
                 <td><strong>Bibliothèque</strong></td>
-                <td>Parcourir les 86+ commandes quotidiennes et spécialisées.</td>
+                <td>Parcourir les 500+ commandes quotidiennes et spécialisées.</td>
             </tr>
             <tr>
                 <td><span class="key">Ctrl+P</span></td>

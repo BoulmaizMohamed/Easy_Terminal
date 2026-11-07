@@ -89,7 +89,7 @@ def get_library_entries(
     tier: Optional[str] = None,
     sort_by: str = "most_used",
     ascending: bool = False,
-    limit: int = 200,
+    limit: int = 1000,
     offset: int = 0,
     db_path: Optional[str | Path] = None,
 ) -> List[Dict[str, Any]]:
@@ -126,12 +126,26 @@ def get_library_entries(
             query += " AND (tags LIKE '%everyday%' OR tags NOT LIKE '%specialized%')"
 
     # Sort order
+    relevance_clause = ""
+    if search.strip() and sort_by == "most_used":
+        exact = search.strip().lower()
+        prefix = f"{exact}%"
+        relevance_clause = """
+            CASE
+                WHEN LOWER(command) = ? THEN 1
+                WHEN LOWER(command) LIKE ? THEN 2
+                WHEN LOWER(name) LIKE ? THEN 3
+                ELSE 4
+            END ASC,
+        """
+        params.extend([exact, prefix, prefix])
+
     order_clause = SORT_OPTIONS.get(sort_by, "use_count DESC, name ASC")
     if ascending:
         # Swap DESC and ASC
         order_clause = order_clause.replace("DESC", "__TMP__").replace("ASC", "DESC").replace("__TMP__", "ASC")
 
-    query += f" ORDER BY {order_clause} LIMIT ? OFFSET ?"
+    query += f" ORDER BY {relevance_clause} {order_clause} LIMIT ? OFFSET ?"
     params.extend([limit, offset])
 
     cursor = conn.execute(query, params)

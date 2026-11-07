@@ -1,88 +1,4763 @@
 [
-  {"name": "Check IP Configuration", "command": "ipconfig /all", "shell": "both", "category": "Network", "description": "Displays all current TCP/IP network configuration values.", "example": "ipconfig /all", "tags": "ip,network,dns,adapter,everyday"},
-  {"name": "Ping Host", "command": "ping -n 4 8.8.8.8", "shell": "both", "category": "Network", "description": "Sends ICMP echo requests to verify network connectivity.", "example": "ping -n 4 google.com", "tags": "ping,icmp,connectivity,everyday"},
-  {"name": "Active Network Connections", "command": "netstat -ano", "shell": "both", "category": "Network", "description": "Displays active TCP connections and listening ports with PID.", "example": "netstat -ano | findstr :8080", "tags": "netstat,ports,listening,socket,everyday"},
-  {"name": "DNS Lookup", "command": "nslookup google.com", "shell": "both", "category": "Network", "description": "Queries Domain Name System (DNS) to obtain domain name or IP address.", "example": "nslookup github.com 8.8.8.8", "tags": "dns,lookup,ip,everyday"},
-  {"name": "List IP Addresses", "command": "Get-NetIPAddress -AddressFamily IPv4", "shell": "powershell", "category": "Network", "description": "Retrieves local IP addresses configured on all network adapters.", "example": "Get-NetIPAddress -InterfaceAlias 'Wi-Fi'", "tags": "ip,adapters,interface,everyday"},
-  {"name": "Flush DNS Cache", "command": "ipconfig /flushdns", "shell": "both", "category": "Network", "description": "Clears and resets the contents of the DNS client resolver cache.", "example": "ipconfig /flushdns", "tags": "dns,flush,cache,everyday"},
-  {"name": "Local ARP Table", "command": "arp -a", "shell": "both", "category": "Network", "description": "Shows current ARP resolution tables displaying IP to MAC hardware addresses.", "example": "arp -a", "tags": "arp,mac,network,everyday"},
-  {"name": "Network Routing Table", "command": "route print", "shell": "both", "category": "Network", "description": "Prints current network routing table including gateway routes.", "example": "route print -4", "tags": "route,gateway,routing,everyday"},
-  {"name": "Active Network Adapters", "command": "Get-NetAdapter | Where-Object Status -eq 'Up'", "shell": "powershell", "category": "Network", "description": "Lists all active physical and virtual network adapters.", "example": "Get-NetAdapter", "tags": "adapters,nic,link,everyday"},
-  {"name": "Test Connection with Count", "command": "Test-Connection -ComputerName google.com -Count 3", "shell": "powershell", "category": "Network", "description": "Sends ICMP echo requests with structured output in PowerShell.", "example": "Test-Connection -ComputerName 1.1.1.1 -Count 2", "tags": "ping,icmp,connectivity,everyday"},
-  {"name": "Fetch HTTP Headers", "command": "curl.exe -I https://google.com", "shell": "both", "category": "Network", "description": "Fetches HTTP response status and headers from a web endpoint.", "example": "curl.exe -I https://github.com", "tags": "curl,http,headers,web,everyday"},
-  {"name": "Test TCP Port Connection", "command": "Test-NetConnection -ComputerName 1.1.1.1 -Port 443", "shell": "powershell", "category": "Network", "description": "Tests network connection to a remote computer on a specific port.", "example": "Test-NetConnection -ComputerName google.com -Port 443", "tags": "port,tcp,ping,firewall,specialized"},
-  {"name": "Trace Route to Host", "command": "tracert -d 8.8.8.8", "shell": "both", "category": "Network", "description": "Traces the path network packets take to a remote host.", "example": "tracert google.com", "tags": "traceroute,hops,routing,specialized"},
-  {"name": "Listening TCP Ports & PIDs", "command": "Get-NetTCPConnection -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess", "shell": "powershell", "category": "Network", "description": "Queries all local listening TCP sockets and mapped process IDs.", "example": "Get-NetTCPConnection -State Listen", "tags": "ports,listen,sockets,specialized"},
-  {"name": "Show Firewall Status", "command": "netsh advfirewall show allprofiles", "shell": "both", "category": "Network", "description": "Displays state and settings for Domain, Private, and Public firewall profiles.", "example": "netsh advfirewall show currentprofile", "tags": "firewall,netsh,security,specialized"},
-  {"name": "Open Inbound Firewall Port", "command": "netsh advfirewall firewall add rule name=\"Allow Port 8080\" dir=in action=allow protocol=TCP localport=8080", "shell": "both", "category": "Network", "description": "Creates a new inbound rule allowing traffic on a specified TCP port.", "example": "netsh advfirewall firewall show rule name=\"Allow Port 8080\"", "tags": "firewall,rule,port,specialized"},
-  {"name": "Port Forwarding Rules", "command": "netsh interface portproxy show all", "shell": "both", "category": "Network", "description": "Displays active IPv4 and IPv6 port forwarding proxy configurations.", "example": "netsh interface portproxy show all", "tags": "proxy,portproxy,forwarding,specialized"},
-  {"name": "Show Saved Wi-Fi Profiles", "command": "netsh wlan show profiles", "shell": "both", "category": "Network", "description": "Lists all wireless network profiles saved on the local machine.", "example": "netsh wlan show profiles", "tags": "wifi,wlan,wireless,specialized"},
-  {"name": "Export Wi-Fi Password", "command": "netsh wlan show profile name=\"Wi-Fi\" key=clear", "shell": "both", "category": "Network", "description": "Displays saved wireless profile settings and security key in plain text.", "example": "netsh wlan show profile name=\"Office\" key=clear", "tags": "wifi,key,password,specialized"},
-  {"name": "Find Files by Extension", "command": "Get-ChildItem -Recurse -Filter *.log", "shell": "powershell", "category": "Files", "description": "Recursively searches directory for files matching a pattern.", "example": "Get-ChildItem -Path C:\\Logs -Filter *.log -Recurse", "tags": "search,files,glob,everyday"},
-  {"name": "Quick Recursive File Listing", "command": "dir /s /b *.txt", "shell": "cmd", "category": "Files", "description": "Lists all matching files in current directory and subdirectories in bare format.", "example": "dir /s /b config.json", "tags": "dir,search,files,everyday"},
-  {"name": "Tail Log File", "command": "Get-Content -Path app.log -Tail 50 -Wait", "shell": "powershell", "category": "Files", "description": "Monitors a log file live as new lines are appended.", "example": "Get-Content -Path debug.log -Tail 100 -Wait", "tags": "tail,follow,log,stream,everyday"},
-  {"name": "Robust File Copy", "command": "robocopy src dest /E /Z /ZB /R:3 /W:5", "shell": "both", "category": "Files", "description": "Reliably copies files and directory trees with restartability and retries.", "example": "robocopy C:\\Data D:\\Backup /MIR", "tags": "copy,backup,sync,mirror,everyday"},
-  {"name": "Search Text Inside Files", "command": "findstr /i /s \"error\" *.log", "shell": "both", "category": "Files", "description": "Searches for text patterns inside files recursively.", "example": "findstr /s /n /i \"TODO\" *.py", "tags": "grep,find,search,text,everyday"},
-  {"name": "Display Directory Tree", "command": "tree /f", "shell": "both", "category": "Files", "description": "Graphically displays the directory structure of a path including files.", "example": "tree /f /a", "tags": "tree,folders,structure,everyday"},
-  {"name": "Create ZIP Archive", "command": "Compress-Archive -Path src\\* -DestinationPath backup.zip -Force", "shell": "powershell", "category": "Files", "description": "Creates a compressed zip archive from specified files or directories.", "example": "Compress-Archive -Path .\\docs -DestinationPath docs.zip", "tags": "zip,archive,compress,everyday"},
-  {"name": "Extract ZIP Archive", "command": "Expand-Archive -Path backup.zip -DestinationPath . -Force", "shell": "powershell", "category": "Files", "description": "Unpacks files from a specified zip archive.", "example": "Expand-Archive -Path package.zip -DestinationPath .\\output", "tags": "unzip,extract,archive,everyday"},
-  {"name": "Open in File Explorer", "command": "explorer .", "shell": "both", "category": "Files", "description": "Opens the current working directory in Windows File Explorer.", "example": "explorer .", "tags": "explorer,folder,gui,everyday"},
-  {"name": "Compute File SHA256 Hash", "command": "Get-FileHash -Algorithm SHA256 file.txt", "shell": "powershell", "category": "Files", "description": "Calculates the cryptographic SHA256 checksum of a file.", "example": "Get-FileHash setup.exe", "tags": "hash,sha256,checksum,everyday"},
-  {"name": "Check File Hash via CertUtil", "command": "certutil -hashfile file.txt SHA256", "shell": "both", "category": "Files", "description": "Calculates cryptographic hash of a file using Windows CertUtil.", "example": "certutil -hashfile archive.zip MD5", "tags": "certutil,hash,checksum,everyday"},
-  {"name": "Print File Content", "command": "type filename.txt", "shell": "both", "category": "Files", "description": "Displays the text contents of a file on standard output.", "example": "type README.md", "tags": "cat,type,print,everyday"},
-  {"name": "Count Lines and Words", "command": "Get-Content filename.txt | Measure-Object -Line -Word -Character", "shell": "powershell", "category": "Files", "description": "Counts total lines, words, and characters inside a file like wc.", "example": "Get-Content app.py | Measure-Object -Line", "tags": "wc,count,lines,measure,everyday"},
-  {"name": "Extract Tar/Gzip Archive", "command": "tar -xvf archive.tar.gz", "shell": "both", "category": "Files", "description": "Extracts files from a tar or compressed tarball using built-in Windows tar.", "example": "tar -xvf archive.zip", "tags": "tar,extract,archive,everyday"},
-  {"name": "Get System Information", "command": "systeminfo", "shell": "both", "category": "System", "description": "Displays detailed configuration information about the computer and operating system.", "example": "systeminfo | findstr /B /C:\"OS Name\"", "tags": "os,hardware,specs,info,everyday"},
-  {"name": "Check System Uptime", "command": "(Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime", "shell": "powershell", "category": "System", "description": "Calculates how long the Windows system has been running since last boot.", "example": "Get-Uptime", "tags": "uptime,boot,restart,everyday"},
-  {"name": "Generate Battery Report", "command": "powercfg /batteryreport", "shell": "both", "category": "System", "description": "Generates a detailed HTML battery performance and health report on laptops.", "example": "powercfg /batteryreport /output battery.html", "tags": "battery,power,laptop,health,everyday"},
-  {"name": "Get Computer Hostname", "command": "hostname", "shell": "both", "category": "System", "description": "Prints the NetBIOS name of the current computer.", "example": "hostname", "tags": "host,name,network,everyday"},
-  {"name": "Current Date and Time", "command": "Get-Date -Format \"yyyy-MM-dd HH:mm:ss\"", "shell": "powershell", "category": "System", "description": "Displays current local date and time with standard ISO formatting.", "example": "Get-Date", "tags": "date,time,clock,everyday"},
-  {"name": "Date and Time in CMD", "command": "date /t & time /t", "shell": "cmd", "category": "System", "description": "Displays the current system date and time in command prompt.", "example": "echo %DATE% %TIME%", "tags": "date,time,cmd,everyday"},
-  {"name": "Copy to Clipboard", "command": "Set-Clipboard -Value \"Sample text\"", "shell": "powershell", "category": "System", "description": "Copies text or pipeline objects directly to the Windows clipboard.", "example": "Get-Location | Set-Clipboard", "tags": "clip,clipboard,copy,everyday"},
-  {"name": "Read from Clipboard", "command": "Get-Clipboard", "shell": "powershell", "category": "System", "description": "Retrieves the current plain text contents of the Windows clipboard.", "example": "Get-Clipboard", "tags": "clip,paste,clipboard,everyday"},
-  {"name": "Search Installed Packages", "command": "winget search package_name", "shell": "both", "category": "System", "description": "Searches official Windows Package Manager repositories for applications.", "example": "winget search python", "tags": "winget,install,packages,everyday"},
-  {"name": "Upgrade All Packages", "command": "winget upgrade --all", "shell": "both", "category": "System", "description": "Upgrades all installed applications that have new releases in winget.", "example": "winget upgrade", "tags": "winget,update,upgrade,everyday"},
-  {"name": "Hardware Serial Number", "command": "wmic bios get serialnumber", "shell": "both", "category": "System", "description": "Queries BIOS firmware for the machine serial number.", "example": "wmic bios get serialnumber", "tags": "serial,bios,hardware,everyday"},
-  {"name": "Environment Variables in PowerShell", "command": "Get-ChildItem Env:", "shell": "powershell", "category": "System", "description": "Lists all current environment variables and their values.", "example": "Get-ChildItem Env:PATH", "tags": "env,variables,path,everyday"},
-  {"name": "Environment Variables in CMD", "command": "set", "shell": "cmd", "category": "System", "description": "Displays, sets, or removes cmd environment variables.", "example": "set PATH", "tags": "set,env,variables,everyday"},
-  {"name": "Detailed Computer Info", "command": "Get-ComputerInfo", "shell": "powershell", "category": "System", "description": "Retrieves comprehensive operating system and hardware properties in PowerShell.", "example": "Get-ComputerInfo | Select-Object OsName, WindowsVersion", "tags": "system,hardware,version,specialized"},
-  {"name": "System File Checker Scan", "command": "sfc /scannow", "shell": "both", "category": "System", "description": "Scans integrity of all protected system files and replaces corrupted ones.", "example": "sfc /scannow", "tags": "sfc,repair,integrity,corruption,specialized"},
-  {"name": "DISM Component Store Repair", "command": "DISM /Online /Cleanup-Image /RestoreHealth", "shell": "both", "category": "System", "description": "Scans and repairs the Windows image component store using Windows Update.", "example": "DISM /Online /Cleanup-Image /ScanHealth", "tags": "dism,repair,system,image,specialized"},
-  {"name": "Check Installed Hotfixes", "command": "Get-HotFix | Sort-Object InstalledOn -Descending", "shell": "powershell", "category": "System", "description": "Lists installed Windows updates and patches sorted by date.", "example": "Get-HotFix -Id KB5000000", "tags": "updates,patches,kb,hotfix,specialized"},
-  {"name": "Analyze Sleep & Energy Efficiency", "command": "powercfg /energy", "shell": "both", "category": "System", "description": "Analyzes system energy efficiency and common battery drain problems.", "example": "powercfg /energy /output energy.html", "tags": "power,energy,sleep,battery,specialized"},
-  {"name": "List Devices That Wake PC", "command": "powercfg /devicequery wake_armed", "shell": "both", "category": "System", "description": "Lists hardware devices currently configured to wake computer from sleep.", "example": "powercfg /devicequery wake_armed", "tags": "sleep,wake,powercfg,specialized"},
-  {"name": "Query System Event Log Errors", "command": "Get-WinEvent -LogName System -MaxEvents 20 | Where-Object LevelDisplayName -eq 'Error'", "shell": "powershell", "category": "System", "description": "Retrieves the latest 20 critical error entries from Windows System log.", "example": "Get-WinEvent -LogName Application -MaxEvents 10", "tags": "events,logs,errors,eventvwr,specialized"},
-  {"name": "Query Application Event Log", "command": "wevtutil qe Application /c:10 /rd:true /f:text", "shell": "both", "category": "System", "description": "Queries latest application event records directly from command line.", "example": "wevtutil qe System /c:5 /rd:true /f:text", "tags": "wevtutil,events,logs,specialized"},
-  {"name": "Inspect Startup Programs in Registry", "command": "reg query \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\"", "shell": "both", "category": "System", "description": "Queries Windows registry for autorun programs started on login.", "example": "reg query \"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\"", "tags": "registry,startup,autorun,specialized"},
-  {"name": "Set PowerShell Execution Policy", "command": "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser", "shell": "powershell", "category": "System", "description": "Sets script execution policy for the current user session.", "example": "Get-ExecutionPolicy -List", "tags": "executionpolicy,scripts,powershell,specialized"},
-  {"name": "Check Windows Defender Status", "command": "Get-MpComputerStatus", "shell": "powershell", "category": "Security", "description": "Retrieves status of Windows Defender antivirus signatures and engine.", "example": "Get-MpComputerStatus | Select-Object AntivirusEnabled", "tags": "defender,antivirus,security,specialized"},
-  {"name": "Trigger Antivirus Quick Scan", "command": "Start-MpScan -ScanType QuickScan", "shell": "powershell", "category": "Security", "description": "Initiates a Windows Defender antivirus scan on active processes and files.", "example": "Start-MpScan -ScanType FullScan", "tags": "defender,scan,antivirus,specialized"},
-  {"name": "Update Antivirus Signatures", "command": "Update-MpSignature", "shell": "powershell", "category": "Security", "description": "Immediately downloads and installs latest Microsoft Defender definitions.", "example": "Update-MpSignature", "tags": "defender,signatures,update,specialized"},
-  {"name": "View NTFS Permissions (ACL)", "command": "Get-Acl -Path C:\\Folder | Format-List", "shell": "powershell", "category": "Security", "description": "Displays security descriptors and access control rules for a path.", "example": "Get-Acl -Path . | Select-Object -ExpandProperty Access", "tags": "acl,permissions,security,ntfs,specialized"},
-  {"name": "Grant Permissions via icacls", "command": "icacls \"C:\\Folder\" /grant \"Users:(OI)(CI)F\"", "shell": "both", "category": "Security", "description": "Modifies discretionary access control lists to grant folder rights.", "example": "icacls file.txt /reset", "tags": "icacls,permissions,ntfs,specialized"},
-  {"name": "Top CPU Consuming Processes", "command": "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10", "shell": "powershell", "category": "Processes", "description": "Lists the top 10 processes consuming the most CPU time.", "example": "Get-Process | Sort-Object CPU -Descending | Select-Object -First 5", "tags": "top,cpu,processes,performance,everyday"},
-  {"name": "Top Memory Consuming Processes", "command": "Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 10", "shell": "powershell", "category": "Processes", "description": "Lists the top 10 processes using the largest amount of RAM.", "example": "Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object Name, WS", "tags": "ram,memory,processes,everyday"},
-  {"name": "Verbose Process List", "command": "tasklist /v", "shell": "both", "category": "Processes", "description": "Displays running processes with window titles and memory usage.", "example": "tasklist /FI \"STATUS eq running\"", "tags": "ps,tasklist,running,everyday"},
-  {"name": "Force Kill Process by Name", "command": "Stop-Process -Name notepad -Force", "shell": "powershell", "category": "Processes", "description": "Forcefully terminates all processes matching the specified name.", "example": "Stop-Process -Name chrome -Force", "tags": "kill,terminate,process,everyday"},
-  {"name": "Force Kill Process via CMD", "command": "taskkill /F /IM notepad.exe", "shell": "cmd", "category": "Processes", "description": "Terminates one or more tasks or processes by process image name.", "example": "taskkill /F /PID 1234", "tags": "kill,taskkill,terminate,everyday"},
-  {"name": "Find Process Command Line", "command": "Get-CimInstance Win32_Process | Select-Object ProcessId, CommandLine", "shell": "powershell", "category": "Processes", "description": "Inspects full command-line arguments used to launch running processes.", "example": "Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\"", "tags": "cli,arguments,args,inspect,specialized"},
-  {"name": "Check Disk Volumes", "command": "Get-Volume", "shell": "powershell", "category": "Disk", "description": "Lists local disk volumes, drive letters, file systems, and free space.", "example": "Get-Volume -DriveLetter C", "tags": "disk,volumes,storage,free,everyday"},
-  {"name": "List Disk Drives Space", "command": "wmic logicaldisk get caption,freespace,size", "shell": "both", "category": "Disk", "description": "Queries total capacity and remaining free bytes on logical drives.", "example": "wmic logicaldisk get caption,freespace,size", "tags": "disk,space,capacity,everyday"},
-  {"name": "PowerShell File System Drives", "command": "Get-PSDrive -PSProvider FileSystem", "shell": "powershell", "category": "Disk", "description": "Displays storage usage and free space on mapped filesystem drives.", "example": "Get-PSDrive -PSProvider FileSystem", "tags": "drives,storage,psdrive,everyday"},
-  {"name": "Disk Free Space via fsutil", "command": "fsutil volume diskfree c:", "shell": "both", "category": "Disk", "description": "Queries total free bytes and available quota on the specified volume.", "example": "fsutil volume diskfree d:", "tags": "fsutil,free,quota,everyday"},
-  {"name": "Check and Repair Disk Volume", "command": "chkdsk C: /f /r", "shell": "both", "category": "Disk", "description": "Checks file system metadata and repairs bad sectors on disk volume.", "example": "chkdsk D: /scan", "tags": "chkdsk,disk,repair,badsectors,specialized"},
-  {"name": "List Local User Accounts", "command": "Get-LocalUser", "shell": "powershell", "category": "Users", "description": "Retrieves all user accounts configured on the local machine.", "example": "Get-LocalUser | Select-Object Name, Enabled, LastLogon", "tags": "users,accounts,security,everyday"},
-  {"name": "List Users via Net Command", "command": "net user", "shell": "both", "category": "Users", "description": "Lists local user accounts using Windows networking command.", "example": "net user Administrator", "tags": "user,admin,accounts,everyday"},
-  {"name": "Inspect Current User Privileges", "command": "whoami /all", "shell": "both", "category": "Users", "description": "Shows user name, security identifiers (SID), group membership, and privileges.", "example": "whoami /priv", "tags": "whoami,security,privileges,tokens,everyday"},
-  {"name": "List Active Sessions", "command": "query user", "shell": "both", "category": "Users", "description": "Displays information about active user sessions on the computer.", "example": "query user", "tags": "sessions,rdp,login,everyday"},
-  {"name": "List Local Groups", "command": "Get-LocalGroup", "shell": "powershell", "category": "Users", "description": "Retrieves local security groups such as Administrators and Users.", "example": "Get-LocalGroupMember -Group Administrators", "tags": "groups,security,membership,everyday"},
-  {"name": "Grep File Content (Select-String)", "command": "Select-String -Path *.py -Pattern \"def main\"", "shell": "powershell", "category": "Search", "description": "Searches for matching regex patterns across multiple files like grep.", "example": "Get-ChildItem -Recurse | Select-String -Pattern \"API_KEY\"", "tags": "grep,search,regex,code,everyday"},
-  {"name": "Locate Executable Path", "command": "where python", "shell": "both", "category": "Search", "description": "Displays the exact filesystem location of executable files on PATH.", "example": "where git", "tags": "which,where,path,binary,everyday"},
-  {"name": "Find PowerShell Cmdlet", "command": "Get-Command *Network*", "shell": "powershell", "category": "Search", "description": "Searches all available PowerShell cmdlets, functions, and aliases.", "example": "Get-Command -Module Microsoft.PowerShell.Management", "tags": "cmdlet,function,help,everyday"},
-  {"name": "Find Large Files (>500MB)", "command": "Get-ChildItem -Path C:\\ -Recurse -File | Where-Object Length -gt 500MB | Select-Object FullName, Length", "shell": "powershell", "category": "Search", "description": "Finds files larger than 500 megabytes across the system.", "example": "Get-ChildItem -File | Where-Object Length -gt 100MB", "tags": "large,size,cleanup,everyday"},
-  {"name": "List Running Windows Services", "command": "Get-Service | Where-Object {$_.Status -eq 'Running'}", "shell": "powershell", "category": "Services", "description": "Retrieves all currently active and running Windows services.", "example": "Get-Service -Name wuauserv", "tags": "services,daemons,background,everyday"},
-  {"name": "Query Service Status via SC", "command": "sc query type= service", "shell": "both", "category": "Services", "description": "Queries status and configuration of services using the Service Controller.", "example": "sc query spooler", "tags": "sc,services,status,everyday"},
-  {"name": "Restart Windows Service", "command": "Restart-Service -Name Spooler -Force", "shell": "powershell", "category": "Services", "description": "Stops and immediately restarts a Windows service.", "example": "Restart-Service -Name W32Time -Force", "tags": "restart,service,daemons,everyday"},
-  {"name": "Start Service via Net", "command": "net start", "shell": "both", "category": "Services", "description": "Lists all services currently started on the system.", "example": "net start Spooler", "tags": "services,net,start,everyday"},
-  {"name": "Stop Service via Net", "command": "net stop spooler", "shell": "both", "category": "Services", "description": "Stops a running Windows service using the net command.", "example": "net stop wuauserv", "tags": "stop,service,daemon,everyday"}
+  {
+    "name": "Batch File Existence Check",
+    "command": "if exist file.txt (echo found) else (echo missing)",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Branch execution based on whether a target file exists.",
+    "example": "if exist config.ini (echo ready)",
+    "tags": "if,branch,batch,everyday"
+  },
+  {
+    "name": "Batch File Iteration Loop",
+    "command": "for %f in (*.txt) do echo %~nxf",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Loop over matching files in current directory.",
+    "example": "for %f in (*.log) do type %f",
+    "tags": "for,files,batch,specialized"
+  },
+  {
+    "name": "Batch Numeric Counting Loop",
+    "command": "for /l %i in (1,1,3) do echo %i",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Iterate a counting loop from start to end with step increment.",
+    "example": "for /l %i in (1,1,5) do echo %i",
+    "tags": "for,loop,batch,specialized"
+  },
+  {
+    "name": "Batch Pause Prompt",
+    "command": "pause",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Prompt user with 'Press any key to continue...' and wait.",
+    "example": "pause",
+    "tags": "pause,wait,batch,everyday"
+  },
+  {
+    "name": "Batch Prompt User Choice",
+    "command": "choice /t 15 /c ync /cs /d y /m \"Press y=Yes, n=No, c=cancel:\"",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Prompt user to select an on-screen option with optional timeout.",
+    "example": "choice /c yn /m \"Continue?\"",
+    "tags": "choice,prompt,input,everyday"
+  },
+  {
+    "name": "Batch Run on Failure",
+    "command": "cmd1 || cmd2",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Execute second command only if first command fails (non-zero exit).",
+    "example": "ping 1.1.1.1 || echo Offline",
+    "tags": "batch,flow,or,everyday"
+  },
+  {
+    "name": "Batch Run on Success",
+    "command": "cmd1 && cmd2",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Execute second command only if first command succeeds (exit code 0).",
+    "example": "build.bat && test.bat",
+    "tags": "batch,flow,and,everyday"
+  },
+  {
+    "name": "Batch Sleep Timeout",
+    "command": "timeout 3600",
+    "shell": "both",
+    "category": "Batch",
+    "description": "Pause script execution for a specified duration in seconds.",
+    "example": "timeout 5",
+    "tags": "timeout,sleep,batch,everyday"
+  },
+  {
+    "name": "Print Last Exit Code",
+    "command": "echo %ERRORLEVEL%",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Print numeric exit code of the previously executed command.",
+    "example": "echo %ERRORLEVEL%",
+    "tags": "errorlevel,exit,code,everyday"
+  },
+  {
+    "name": "Redirect Stdout & Stderr to File",
+    "command": "cmd > out.txt 2>&1",
+    "shell": "both",
+    "category": "Batch",
+    "description": "Redirect both output and error streams into a single log file.",
+    "example": "build.bat > log.txt 2>&1",
+    "tags": "batch,redirect,output,everyday"
+  },
+  {
+    "name": "Set Console Colors",
+    "command": "color 0A",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Set foreground and background color attributes for console.",
+    "example": "color 0A",
+    "tags": "color,theme,cmd,everyday"
+  },
+  {
+    "name": "Set Console Window Title",
+    "command": "title My Terminal",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Set the text title of the current console window.",
+    "example": "title Easy_Terminal",
+    "tags": "title,window,cmd,everyday"
+  },
+  {
+    "name": "Silence Error Messages",
+    "command": "cmd 2>nul",
+    "shell": "cmd",
+    "category": "Batch",
+    "description": "Discard standard error messages to NUL stream.",
+    "example": "del *.tmp 2>nul",
+    "tags": "batch,nul,silence,everyday"
+  },
+  {
+    "name": "Assign Volume Letter",
+    "command": "assign letter=F",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Assign a drive letter to the selected volume in diskpart.",
+    "example": "assign letter=E",
+    "tags": "diskpart,drive,specialized"
+  },
+  {
+    "name": "Bdehdcfg Utility",
+    "command": "bdehdcfg",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The bdehdcfg command is used to prepare a hard drive for BitLocker Drive Encryption.",
+    "example": "bdehdcfg /?",
+    "tags": "bdehdcfg,disk,specialized"
+  },
+  {
+    "name": "Bring Offline Disk Online",
+    "command": "online disk",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Bring an offline physical disk online in diskpart.",
+    "example": "online disk",
+    "tags": "diskpart,mount,specialized"
+  },
+  {
+    "name": "Check Disk Volumes",
+    "command": "Get-Volume",
+    "shell": "powershell",
+    "category": "Disk",
+    "description": "Lists local disk volumes, drive letters, file systems, and free space.",
+    "example": "Get-Volume -DriveLetter C",
+    "tags": "disk,volumes,storage,free,everyday"
+  },
+  {
+    "name": "Check and Repair Disk Volume",
+    "command": "chkdsk C: /f /r",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Checks file system metadata and repairs bad sectors on disk volume.",
+    "example": "chkdsk D: /scan",
+    "tags": "chkdsk,disk,repair,badsectors,specialized"
+  },
+  {
+    "name": "Chkdsk Utility",
+    "command": "chkdsk C: /scan",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The chkdsk command, often referred to as check disk, is used to identify and correct certain hard drive errors.",
+    "example": "chkdsk C: /scan",
+    "tags": "chkdsk,disk,specialized"
+  },
+  {
+    "name": "Chkntfs Utility",
+    "command": "chkntfs",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The chkntfs command is used to configure or display the checking of the disk drive during the Windows boot process.",
+    "example": "chkntfs /?",
+    "tags": "chkntfs,disk,specialized"
+  },
+  {
+    "name": "Clean Disk Partitions",
+    "command": "clean",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Wipe every partition table from the selected disk in diskpart.",
+    "example": "clean",
+    "tags": "diskpart,clean,wipe,specialized"
+  },
+  {
+    "name": "Clear Disk Read-Only",
+    "command": "attributes disk clear readonly",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Clear the read-only flag on the selected disk.",
+    "example": "attributes disk clear readonly",
+    "tags": "diskpart,readonly,specialized"
+  },
+  {
+    "name": "Compact Utility",
+    "command": "compact /c /s:folder",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The compact command is used to show or change the compression state of files and directories on NTFS partitions.",
+    "example": "compact /u /s:folder",
+    "tags": "compact,disk,specialized"
+  },
+  {
+    "name": "Convert Disk to GPT",
+    "command": "convert gpt",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Convert empty disk partition style to GPT.",
+    "example": "convert gpt",
+    "tags": "diskpart,gpt,specialized"
+  },
+  {
+    "name": "Convert Utility",
+    "command": "convert",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Convert FAT or FAT32 volumes to NTFS using the convert command.",
+    "example": "convert /?",
+    "tags": "convert,disk,specialized"
+  },
+  {
+    "name": "Create Primary Partition",
+    "command": "create partition primary",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Create a primary partition using all remaining free space.",
+    "example": "create partition primary",
+    "tags": "diskpart,partition,specialized"
+  },
+  {
+    "name": "Defrag Utility",
+    "command": "defrag C: /O",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The defrag command is used to defragment a drive you specify.",
+    "example": "defrag C: /A",
+    "tags": "defrag,disk,specialized"
+  },
+  {
+    "name": "Disk Free Space via fsutil",
+    "command": "fsutil volume diskfree c:",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Queries total free bytes and available quota on the specified volume.",
+    "example": "fsutil volume diskfree d:",
+    "tags": "fsutil,free,quota,everyday"
+  },
+  {
+    "name": "DiskPart Partition Shell",
+    "command": "diskpart",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Launch the Windows DiskPart partition manager (admin).",
+    "example": "diskpart",
+    "tags": "diskpart,partition,admin,specialized"
+  },
+  {
+    "name": "Diskperf Utility",
+    "command": "diskperf",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The diskperf command is used to manage disk performance counters remotely.",
+    "example": "diskperf /?",
+    "tags": "diskperf,disk,specialized"
+  },
+  {
+    "name": "Diskraid Utility",
+    "command": "diskraid",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The diskraid command starts the DiskRAID tool which is used to manage and configure RAID arrays.",
+    "example": "diskraid /?",
+    "tags": "diskraid,disk,specialized"
+  },
+  {
+    "name": "Dism Utility",
+    "command": "dism",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The dism command starts the Deployment Image Servicing and Management tool (DISM).",
+    "example": "dism /?",
+    "tags": "dism,disk,specialized"
+  },
+  {
+    "name": "Execute DiskPart Script",
+    "command": "diskpart /s script.txt",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Run automated DiskPart partition commands from a text script.",
+    "example": "diskpart /s setup.txt",
+    "tags": "diskpart,script,admin,specialized"
+  },
+  {
+    "name": "Fix Disk Errors Locked Volume",
+    "command": "chkdsk F: /f",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Fix file system errors, locking volume or scheduling on reboot.",
+    "example": "chkdsk C: /f",
+    "tags": "chkdsk,repair,disk,specialized"
+  },
+  {
+    "name": "Format Utility",
+    "command": "format",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Use the format command to format a drive in the file system you specify.",
+    "example": "format /?",
+    "tags": "format,disk,specialized"
+  },
+  {
+    "name": "Format Volume CLI",
+    "command": "format F: /fs:ntfs /q /v:DATA /y",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Quickly format volume with label from standard prompt.",
+    "example": "format E: /fs:exfat /q /y",
+    "tags": "format,volume,admin,specialized"
+  },
+  {
+    "name": "Label Utility",
+    "command": "label",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The label command allows you to manage the volume label of a disk.",
+    "example": "label /?",
+    "tags": "label,disk,specialized"
+  },
+  {
+    "name": "List Disk Drives Space",
+    "command": "wmic logicaldisk get caption,freespace,size",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Queries total capacity and remaining free bytes on logical drives.",
+    "example": "wmic logicaldisk get caption,freespace,size",
+    "tags": "disk,space,capacity,everyday"
+  },
+  {
+    "name": "List Disks and Volumes",
+    "command": "list disk",
+    "shell": "both",
+    "category": "Disk",
+    "description": "List available physical disks in diskpart.",
+    "example": "list volume",
+    "tags": "diskpart,disk,specialized"
+  },
+  {
+    "name": "Mountvol Utility",
+    "command": "mountvol",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The mountvol command lets you display, create, or remove volume mount points.",
+    "example": "mountvol /?",
+    "tags": "mountvol,disk,specialized"
+  },
+  {
+    "name": "PowerShell File System Drives",
+    "command": "Get-PSDrive -PSProvider FileSystem",
+    "shell": "powershell",
+    "category": "Disk",
+    "description": "Displays storage usage and free space on mapped filesystem drives.",
+    "example": "Get-PSDrive -PSProvider FileSystem",
+    "tags": "drives,storage,psdrive,everyday"
+  },
+  {
+    "name": "Quick Format Volume NTFS",
+    "command": "format fs=ntfs quick label=DATA",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Quickly format selected volume as NTFS with a label in diskpart.",
+    "example": "format fs=ntfs quick label=BACKUP",
+    "tags": "diskpart,format,ntfs,specialized"
+  },
+  {
+    "name": "Recover Utility",
+    "command": "recover",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The recover command lets you recover readable data from a bad or defective disk.",
+    "example": "recover /?",
+    "tags": "recover,disk,specialized"
+  },
+  {
+    "name": "Select Active Disk",
+    "command": "select disk 1",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Select the target disk for partition commands in diskpart.",
+    "example": "select disk 0",
+    "tags": "diskpart,select,specialized"
+  },
+  {
+    "name": "Show or Set Volume Label",
+    "command": "vol F: / label F: BACKUP",
+    "shell": "cmd",
+    "category": "Disk",
+    "description": "Show current volume serial or set volume label name.",
+    "example": "vol C:",
+    "tags": "vol,label,disk,everyday"
+  },
+  {
+    "name": "Subst Utility",
+    "command": "subst",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The subst command associates a local path with a drive letter, similar to how the net use command works, but for local paths rather than shared network paths.",
+    "example": "subst /?",
+    "tags": "subst,disk,specialized"
+  },
+  {
+    "name": "Vol Utility",
+    "command": "vol",
+    "shell": "both",
+    "category": "Disk",
+    "description": "The vol command displays the volume label and serial number of a specified disk, if this information exists.",
+    "example": "vol /?",
+    "tags": "vol,disk,specialized"
+  },
+  {
+    "name": "Volume Free & Used Space",
+    "command": "fsutil volume diskfree F:",
+    "shell": "both",
+    "category": "Disk",
+    "description": "Query exact free and total capacity bytes on a volume.",
+    "example": "fsutil volume diskfree C:",
+    "tags": "fsutil,disk,free,everyday"
+  },
+  {
+    "name": "ASCII Folder Tree View",
+    "command": "tree /a /f",
+    "shell": "both",
+    "category": "Files",
+    "description": "Display graphical ASCII tree view of folders and files.",
+    "example": "tree /a /f",
+    "tags": "tree,files,diagram,everyday"
+  },
+  {
+    "name": "Append Utility",
+    "command": "append",
+    "shell": "both",
+    "category": "Files",
+    "description": "The append command allows programs to open files in a different directory as if they're in the current one.",
+    "example": "append /?",
+    "tags": "append,files,specialized"
+  },
+  {
+    "name": "Attrib Utility",
+    "command": "attrib",
+    "shell": "both",
+    "category": "Files",
+    "description": "The attrib command is used to change the attributes of a single file or a directory.",
+    "example": "attrib +h myfile.txt",
+    "tags": "attrib,files,everyday"
+  },
+  {
+    "name": "Cacls Utility",
+    "command": "cacls",
+    "shell": "both",
+    "category": "Files",
+    "description": "The cacls command is used to display or change access control lists of files.",
+    "example": "cacls /?",
+    "tags": "cacls,files,specialized"
+  },
+  {
+    "name": "Cd Utility",
+    "command": "cd",
+    "shell": "both",
+    "category": "Files",
+    "description": "The cd command is the shorthand version of the chdir command.",
+    "example": "cd /?",
+    "tags": "cd,files,everyday"
+  },
+  {
+    "name": "Change Drive and Folder",
+    "command": "cd /d F:\\",
+    "shell": "cmd",
+    "category": "Files",
+    "description": "Change both drive and directory in one step.",
+    "example": "cd /d D:\\projects",
+    "tags": "cd,navigate,everyday"
+  },
+  {
+    "name": "Chdir Utility",
+    "command": "chdir",
+    "shell": "both",
+    "category": "Files",
+    "description": "The chdir command is used to display the drive letter and folder that you are currently in.",
+    "example": "chdir /?",
+    "tags": "chdir,files,specialized"
+  },
+  {
+    "name": "Check File Hash via CertUtil",
+    "command": "certutil -hashfile file.txt SHA256",
+    "shell": "both",
+    "category": "Files",
+    "description": "Calculates cryptographic hash of a file using Windows CertUtil.",
+    "example": "certutil -hashfile archive.zip MD5",
+    "tags": "certutil,hash,checksum,everyday"
+  },
+  {
+    "name": "Command Syntax Help",
+    "command": "robocopy /?",
+    "shell": "both",
+    "category": "Files",
+    "description": "Display full command-line parameter syntax for any command.",
+    "example": "robocopy /?",
+    "tags": "help,syntax,everyday"
+  },
+  {
+    "name": "Comp Utility",
+    "command": "comp",
+    "shell": "both",
+    "category": "Files",
+    "description": "The comp command is used to compare the contents of two files or sets of files.",
+    "example": "comp /?",
+    "tags": "comp,files,specialized"
+  },
+  {
+    "name": "Compute File SHA256 Hash",
+    "command": "Get-FileHash -Algorithm SHA256 file.txt",
+    "shell": "powershell",
+    "category": "Files",
+    "description": "Calculates the cryptographic SHA256 checksum of a file.",
+    "example": "Get-FileHash setup.exe",
+    "tags": "hash,sha256,checksum,everyday"
+  },
+  {
+    "name": "Copy Overwrite File",
+    "command": "copy /y a.txt b.txt",
+    "shell": "both",
+    "category": "Files",
+    "description": "Copy a file and overwrite destination without asking.",
+    "example": "copy /y src.txt dst.txt",
+    "tags": "copy,files,everyday"
+  },
+  {
+    "name": "Copy Tree with Empty & Hidden",
+    "command": "xcopy src dst\\ /e /i /h /y",
+    "shell": "both",
+    "category": "Files",
+    "description": "Copy a directory tree including empty and hidden files.",
+    "example": "xcopy C:\\src C:\\dst /e /h /y",
+    "tags": "xcopy,backup,files,specialized"
+  },
+  {
+    "name": "Copy Utility",
+    "command": "copy",
+    "shell": "both",
+    "category": "Files",
+    "description": "The copy command does simply that — it copies one or more files from one location to another.",
+    "example": "copy /?",
+    "tags": "copy,files,everyday"
+  },
+  {
+    "name": "Count Lines and Words",
+    "command": "Get-Content filename.txt | Measure-Object -Line -Word -Character",
+    "shell": "powershell",
+    "category": "Files",
+    "description": "Counts total lines, words, and characters inside a file like wc.",
+    "example": "Get-Content app.py | Measure-Object -Line",
+    "tags": "wc,count,lines,measure,everyday"
+  },
+  {
+    "name": "Create Directory Symbolic Link",
+    "command": "mklink /d link target",
+    "shell": "cmd",
+    "category": "Files",
+    "description": "Create a directory symbolic link in NTFS.",
+    "example": "mklink /d C:\\symlink C:\\target",
+    "tags": "mklink,symlink,admin,specialized"
+  },
+  {
+    "name": "Create Folder Tree",
+    "command": "mkdir C:\\lab\\demo\\logs",
+    "shell": "both",
+    "category": "Files",
+    "description": "Create a directory folder path including parent folders.",
+    "example": "mkdir C:\\logs\\app",
+    "tags": "mkdir,folder,create,everyday"
+  },
+  {
+    "name": "Create ZIP Archive",
+    "command": "Compress-Archive -Path src\\* -DestinationPath backup.zip -Force",
+    "shell": "powershell",
+    "category": "Files",
+    "description": "Creates a compressed zip archive from specified files or directories.",
+    "example": "Compress-Archive -Path .\\docs -DestinationPath docs.zip",
+    "tags": "zip,archive,compress,everyday"
+  },
+  {
+    "name": "Del Utility",
+    "command": "del",
+    "shell": "both",
+    "category": "Files",
+    "description": "Use the del command to delete one or more files.",
+    "example": "del /?",
+    "tags": "del,files,everyday"
+  },
+  {
+    "name": "Delete Matching Subfolder Files",
+    "command": "del /s /q *.tmp",
+    "shell": "both",
+    "category": "Files",
+    "description": "Quietly delete matching files in current and all subfolders.",
+    "example": "del /s /q *.log",
+    "tags": "del,delete,cleanup,specialized"
+  },
+  {
+    "name": "Dir Utility",
+    "command": "dir",
+    "shell": "both",
+    "category": "Files",
+    "description": "The dir command is used to display a list of files and folders contained inside the folder that you are currently working in.",
+    "example": "dir /?",
+    "tags": "dir,files,everyday"
+  },
+  {
+    "name": "Display Directory Tree",
+    "command": "tree /f",
+    "shell": "both",
+    "category": "Files",
+    "description": "Graphically displays the directory structure of a path including files.",
+    "example": "tree /f /a",
+    "tags": "tree,folders,structure,everyday"
+  },
+  {
+    "name": "Erase Utility",
+    "command": "erase",
+    "shell": "both",
+    "category": "Files",
+    "description": "The erase command deletes one or more files.",
+    "example": "erase /?",
+    "tags": "erase,files,specialized"
+  },
+  {
+    "name": "Expand Utility",
+    "command": "expand",
+    "shell": "both",
+    "category": "Files",
+    "description": "The expand command extracts files and folders from Microsoft Cabinet (CAB) files.",
+    "example": "expand /?",
+    "tags": "expand,files,specialized"
+  },
+  {
+    "name": "Extract Tar/Gzip Archive",
+    "command": "tar -xvf archive.tar.gz",
+    "shell": "both",
+    "category": "Files",
+    "description": "Extracts files from a tar or compressed tarball using built-in Windows tar.",
+    "example": "tar -xvf archive.zip",
+    "tags": "tar,extract,archive,everyday"
+  },
+  {
+    "name": "Extract Utility",
+    "command": "extract",
+    "shell": "both",
+    "category": "Files",
+    "description": "The extract command is used to retrieve files and folders from Microsoft Cabinet (CAB) files in Windows 98 and 95.",
+    "example": "extract /?",
+    "tags": "extract,files,specialized"
+  },
+  {
+    "name": "Extract ZIP Archive",
+    "command": "Expand-Archive -Path backup.zip -DestinationPath . -Force",
+    "shell": "powershell",
+    "category": "Files",
+    "description": "Unpacks files from a specified zip archive.",
+    "example": "Expand-Archive -Path package.zip -DestinationPath .\\output",
+    "tags": "unzip,extract,archive,everyday"
+  },
+  {
+    "name": "Fc Utility",
+    "command": "fc",
+    "shell": "both",
+    "category": "Files",
+    "description": "The fc command compares two files or sets of files and displays the differences.",
+    "example": "fc /?",
+    "tags": "fc,files,specialized"
+  },
+  {
+    "name": "Find Files by Extension",
+    "command": "Get-ChildItem -Recurse -Filter *.log",
+    "shell": "powershell",
+    "category": "Files",
+    "description": "Recursively searches directory for files matching a pattern.",
+    "example": "Get-ChildItem -Path C:\\Logs -Filter *.log -Recurse",
+    "tags": "search,files,glob,everyday"
+  },
+  {
+    "name": "Hide File Attribute",
+    "command": "attrib +h a.txt",
+    "shell": "both",
+    "category": "Files",
+    "description": "Set hidden file attribute on a file (+h hides, -h unhides).",
+    "example": "attrib +h secret.txt",
+    "tags": "attrib,hidden,files,specialized"
+  },
+  {
+    "name": "Icacls Utility",
+    "command": "icacls folder /grant %USERNAME%:(OI)(CI)F",
+    "shell": "both",
+    "category": "Files",
+    "description": "The icacls command lets you display or modify access control lists (ACLs) for files.",
+    "example": "icacls file.txt /reset",
+    "tags": "icacls,files,specialized"
+  },
+  {
+    "name": "List Files Newest First",
+    "command": "dir /a /o:-d",
+    "shell": "cmd",
+    "category": "Files",
+    "description": "List all files including hidden, ordered newest first.",
+    "example": "dir /a /o:-d",
+    "tags": "dir,files,hidden,everyday"
+  },
+  {
+    "name": "Makecab Utility",
+    "command": "makecab",
+    "shell": "both",
+    "category": "Files",
+    "description": "The makecab command is used to compress files without losing data.",
+    "example": "makecab /?",
+    "tags": "makecab,files,specialized"
+  },
+  {
+    "name": "Md Utility",
+    "command": "md",
+    "shell": "both",
+    "category": "Files",
+    "description": "The md command is a shorter version of the `mkdir` command.",
+    "example": "md /?",
+    "tags": "md,files,specialized"
+  },
+  {
+    "name": "Mirror Directory Multi-threaded",
+    "command": "robocopy src dst /MIR /MT:8",
+    "shell": "both",
+    "category": "Files",
+    "description": "Mirror a directory folder tree using 8 parallel threads.",
+    "example": "robocopy C:\\src C:\\dst /MIR /MT:8",
+    "tags": "robocopy,mirror,sync,specialized"
+  },
+  {
+    "name": "Mkdir Utility",
+    "command": "mkdir",
+    "shell": "both",
+    "category": "Files",
+    "description": "The mkdir command creates a new folder.",
+    "example": "mkdir /?",
+    "tags": "mkdir,files,everyday"
+  },
+  {
+    "name": "More Utility",
+    "command": "more",
+    "shell": "both",
+    "category": "Files",
+    "description": "The more command displays information from a text file and paginates results from any Command Prompt or MS-DOS command.",
+    "example": "more /?",
+    "tags": "more,files,everyday"
+  },
+  {
+    "name": "Move File",
+    "command": "move c.txt logs\\",
+    "shell": "both",
+    "category": "Files",
+    "description": "Move a file from one directory to another.",
+    "example": "move data.txt logs\\",
+    "tags": "move,files,everyday"
+  },
+  {
+    "name": "Move Utility",
+    "command": "move",
+    "shell": "both",
+    "category": "Files",
+    "description": "Use the move command to transfer one or more files from one folder to another, or to rename directories.",
+    "example": "move /?",
+    "tags": "move,files,everyday"
+  },
+  {
+    "name": "Open in File Explorer",
+    "command": "explorer .",
+    "shell": "both",
+    "category": "Files",
+    "description": "Opens the current working directory in Windows File Explorer.",
+    "example": "explorer .",
+    "tags": "explorer,folder,gui,everyday"
+  },
+  {
+    "name": "Openfiles Utility",
+    "command": "openfiles",
+    "shell": "both",
+    "category": "Files",
+    "description": "The openfiles command displays and disconnects open files and folders on your system.",
+    "example": "openfiles /?",
+    "tags": "openfiles,files,specialized"
+  },
+  {
+    "name": "Print File Content",
+    "command": "type filename.txt",
+    "shell": "both",
+    "category": "Files",
+    "description": "Displays the text contents of a file on standard output.",
+    "example": "type README.md",
+    "tags": "cat,type,print,everyday"
+  },
+  {
+    "name": "Print File Contents",
+    "command": "type a.txt",
+    "shell": "both",
+    "category": "Files",
+    "description": "Display the raw text contents of a file in the console.",
+    "example": "type README.md",
+    "tags": "type,cat,files,everyday"
+  },
+  {
+    "name": "Quick Recursive File Listing",
+    "command": "dir /s /b *.txt",
+    "shell": "cmd",
+    "category": "Files",
+    "description": "Lists all matching files in current directory and subdirectories in bare format.",
+    "example": "dir /s /b config.json",
+    "tags": "dir,search,files,everyday"
+  },
+  {
+    "name": "Rd Utility",
+    "command": "rd",
+    "shell": "both",
+    "category": "Files",
+    "description": "The rd command is a shorthand for the `rmdir` command.",
+    "example": "rd /?",
+    "tags": "rd,files,specialized"
+  },
+  {
+    "name": "Remove Folder Recursively",
+    "command": "rmdir /s /q logs",
+    "shell": "both",
+    "category": "Files",
+    "description": "Delete a folder and all its contents without confirmation.",
+    "example": "rmdir /s /q temp",
+    "tags": "rmdir,delete,folder,specialized"
+  },
+  {
+    "name": "Ren Utility",
+    "command": "ren",
+    "shell": "both",
+    "category": "Files",
+    "description": "The ren command is a shortened form of the `rename` command.",
+    "example": "ren /?",
+    "tags": "ren,files,everyday"
+  },
+  {
+    "name": "Rename File",
+    "command": "ren b.txt c.txt",
+    "shell": "cmd",
+    "category": "Files",
+    "description": "Rename a file to a new name.",
+    "example": "ren old.txt new.txt",
+    "tags": "ren,rename,files,everyday"
+  },
+  {
+    "name": "Rename Utility",
+    "command": "rename",
+    "shell": "both",
+    "category": "Files",
+    "description": "The rename command lets you change the name of a specified file.",
+    "example": "rename /?",
+    "tags": "rename,files,specialized"
+  },
+  {
+    "name": "Replace Utility",
+    "command": "replace",
+    "shell": "both",
+    "category": "Files",
+    "description": "The replace command lets you replace one or more files with different files.",
+    "example": "replace /?",
+    "tags": "replace,files,specialized"
+  },
+  {
+    "name": "Rmdir Utility",
+    "command": "rmdir",
+    "shell": "both",
+    "category": "Files",
+    "description": "The rmdir command lets you delete an existing or completely empty folder.",
+    "example": "rmdir /?",
+    "tags": "rmdir,files,everyday"
+  },
+  {
+    "name": "Robust File Copy",
+    "command": "robocopy src dest /E /Z /ZB /R:3 /W:5",
+    "shell": "both",
+    "category": "Files",
+    "description": "Reliably copies files and directory trees with restartability and retries.",
+    "example": "robocopy C:\\Data D:\\Backup /MIR",
+    "tags": "copy,backup,sync,mirror,everyday"
+  },
+  {
+    "name": "Search Text Inside Files",
+    "command": "findstr /i /s \"error\" *.log",
+    "shell": "both",
+    "category": "Files",
+    "description": "Searches for text patterns inside files recursively.",
+    "example": "findstr /s /n /i \"TODO\" *.py",
+    "tags": "grep,find,search,text,everyday"
+  },
+  {
+    "name": "Tail Log File",
+    "command": "Get-Content -Path app.log -Tail 50 -Wait",
+    "shell": "powershell",
+    "category": "Files",
+    "description": "Monitors a log file live as new lines are appended.",
+    "example": "Get-Content -Path debug.log -Tail 100 -Wait",
+    "tags": "tail,follow,log,stream,everyday"
+  },
+  {
+    "name": "Tree Utility",
+    "command": "tree",
+    "shell": "both",
+    "category": "Files",
+    "description": "The tree command graphically shows the folder structure for a specific drive or path.",
+    "example": "tree /?",
+    "tags": "tree,files,everyday"
+  },
+  {
+    "name": "Type Utility",
+    "command": "type",
+    "shell": "both",
+    "category": "Files",
+    "description": "Use the type command to display the contents of a text file.",
+    "example": "type /?",
+    "tags": "type,files,everyday"
+  },
+  {
+    "name": "Xcopy Utility",
+    "command": "xcopy",
+    "shell": "both",
+    "category": "Files",
+    "description": "The xcopy command copies one or more files or entire directory trees from one location to another.",
+    "example": "xcopy /?",
+    "tags": "xcopy,files,specialized"
+  },
+  {
+    "name": "Git Add Remote URL",
+    "command": "git remote add <name> <url>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Register a new named remote repository URL.",
+    "example": "git remote add origin https://github.com/user/repo.git",
+    "tags": "git,remote,config,everyday"
+  },
+  {
+    "name": "Git Amend Commit Message",
+    "command": "git commit --amend",
+    "shell": "both",
+    "category": "Git",
+    "description": "Modify the commit message or files of the most recent commit.",
+    "example": "git commit --amend --no-edit",
+    "tags": "git,amend,commit,everyday"
+  },
+  {
+    "name": "Git Blame Line Author",
+    "command": "git blame <file>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Display last modifying commit and author for each file line.",
+    "example": "git blame app.py",
+    "tags": "git,blame,audit,everyday"
+  },
+  {
+    "name": "Git Cherry-Pick Commit",
+    "command": "git cherry-pick <commit>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Apply the changes introduced by an existing commit to current branch.",
+    "example": "git cherry-pick 3e887ab",
+    "tags": "git,cherrypick,specialized"
+  },
+  {
+    "name": "Git Clean Untracked Files",
+    "command": "git clean -fd",
+    "shell": "both",
+    "category": "Git",
+    "description": "Remove untracked files and directories from working tree.",
+    "example": "git clean -fd",
+    "tags": "git,clean,untracked,specialized"
+  },
+  {
+    "name": "Git Clone Remote",
+    "command": "git clone <url>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Clone an existing remote Git repository into a local folder.",
+    "example": "git clone https://github.com/user/repo.git",
+    "tags": "git,clone,remote,everyday"
+  },
+  {
+    "name": "Git Commit All Modified",
+    "command": "git commit -am \"update\"",
+    "shell": "both",
+    "category": "Git",
+    "description": "Automatically stage modified tracked files and commit.",
+    "example": "git commit -am \"refactor: cleanup\"",
+    "tags": "git,commit,everyday"
+  },
+  {
+    "name": "Git Commit with Message",
+    "command": "git commit -m \"feat: update\"",
+    "shell": "both",
+    "category": "Git",
+    "description": "Record staged snapshot changes to repository history.",
+    "example": "git commit -m \"fix: resolve bug\"",
+    "tags": "git,commit,vcs,everyday"
+  },
+  {
+    "name": "Git Config User Details",
+    "command": "git config --global user.name \"Your Name\"",
+    "shell": "both",
+    "category": "Git",
+    "description": "Set global author name used for all future commits.",
+    "example": "git config --global user.name \"B.Mohammed_Amin\"",
+    "tags": "git,config,user,everyday"
+  },
+  {
+    "name": "Git Create & Switch Branch",
+    "command": "git switch -c <name>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Create a new branch and immediately switch to it.",
+    "example": "git switch -c feature/login",
+    "tags": "git,branch,create,everyday"
+  },
+  {
+    "name": "Git Delete Branch",
+    "command": "git branch -d <name>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Safely delete a merged branch.",
+    "example": "git branch -d feature-test",
+    "tags": "git,branch,delete,everyday"
+  },
+  {
+    "name": "Git Diff All Working Tree",
+    "command": "git diff HEAD",
+    "shell": "both",
+    "category": "Git",
+    "description": "Show all differences in working tree against last commit.",
+    "example": "git diff HEAD",
+    "tags": "git,diff,head,everyday"
+  },
+  {
+    "name": "Git Diff Staged Changes",
+    "command": "git diff --staged",
+    "shell": "both",
+    "category": "Git",
+    "description": "Show line-by-line differences between staged changes and HEAD.",
+    "example": "git diff --staged",
+    "tags": "git,diff,staged,everyday"
+  },
+  {
+    "name": "Git Diff Unstaged Changes",
+    "command": "git diff",
+    "shell": "both",
+    "category": "Git",
+    "description": "Show line-by-line differences between unstaged files and index.",
+    "example": "git diff",
+    "tags": "git,diff,changes,everyday"
+  },
+  {
+    "name": "Git Discard Unstaged Changes",
+    "command": "git restore <file>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Discard unstaged modifications to a file in working tree.",
+    "example": "git restore app.py",
+    "tags": "git,restore,discard,everyday"
+  },
+  {
+    "name": "Git Force Push with Lease",
+    "command": "git push --force-with-lease",
+    "shell": "both",
+    "category": "Git",
+    "description": "Safely force push ensuring no remote commits are overwritten.",
+    "example": "git push --force-with-lease",
+    "tags": "git,force,push,specialized"
+  },
+  {
+    "name": "Git Graphical Branch Log",
+    "command": "git log --graph --oneline --all",
+    "shell": "both",
+    "category": "Git",
+    "description": "Show ASCII branch topology graph of all commits.",
+    "example": "git log --graph --oneline --all",
+    "tags": "git,graph,log,everyday"
+  },
+  {
+    "name": "Git Initialize Repository",
+    "command": "git init",
+    "shell": "both",
+    "category": "Git",
+    "description": "Create an empty Git repository or reinitialize an existing one.",
+    "example": "git init",
+    "tags": "git,init,vcs,everyday"
+  },
+  {
+    "name": "Git List Branches Recent",
+    "command": "git branch --sort=-committerdate",
+    "shell": "both",
+    "category": "Git",
+    "description": "List branches sorted by most recently committed to.",
+    "example": "git branch --sort=-committerdate",
+    "tags": "git,branch,list,everyday"
+  },
+  {
+    "name": "Git Move or Rename File",
+    "command": "git mv <old> <new>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Move or rename a file, folder, or symlink and stage change.",
+    "example": "git mv old.txt new.txt",
+    "tags": "git,mv,rename,everyday"
+  },
+  {
+    "name": "Git One-line Log History",
+    "command": "git log --oneline",
+    "shell": "both",
+    "category": "Git",
+    "description": "Display compact commit history with abbreviated SHA and title.",
+    "example": "git log --oneline -n 10",
+    "tags": "git,log,history,everyday"
+  },
+  {
+    "name": "Git Patch Stage",
+    "command": "git add -p",
+    "shell": "both",
+    "category": "Git",
+    "description": "Interactively choose which hunks of a file to stage.",
+    "example": "git add -p",
+    "tags": "git,patch,stage,specialized"
+  },
+  {
+    "name": "Git Pull Rebase",
+    "command": "git pull --rebase",
+    "shell": "both",
+    "category": "Git",
+    "description": "Fetch remote branch and rebase local commits on top.",
+    "example": "git pull --rebase origin main",
+    "tags": "git,pull,rebase,everyday"
+  },
+  {
+    "name": "Git Push Tracking Branch",
+    "command": "git push -u origin <name>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Push new local branch and set upstream tracking reference.",
+    "example": "git push -u origin main",
+    "tags": "git,push,remote,everyday"
+  },
+  {
+    "name": "Git Remove File",
+    "command": "git rm <file>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Remove file from working tree and staging area.",
+    "example": "git rm temp.log",
+    "tags": "git,rm,delete,everyday"
+  },
+  {
+    "name": "Git Reset Hard Discard All",
+    "command": "git reset --hard HEAD",
+    "shell": "both",
+    "category": "Git",
+    "description": "Discard all staged and unstaged changes, resetting to HEAD.",
+    "example": "git reset --hard HEAD",
+    "tags": "git,reset,hard,specialized"
+  },
+  {
+    "name": "Git Show Commit Details",
+    "command": "git show <commit>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Show metadata and unified diff of a specific commit.",
+    "example": "git show HEAD",
+    "tags": "git,show,commit,everyday"
+  },
+  {
+    "name": "Git Show Commit Stat Summary",
+    "command": "git show --stat <commit>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Show file modification count summary for a commit.",
+    "example": "git show --stat HEAD",
+    "tags": "git,show,stat,everyday"
+  },
+  {
+    "name": "Git Stage All Changes",
+    "command": "git add .",
+    "shell": "both",
+    "category": "Git",
+    "description": "Stage all modified and newly created files in workspace.",
+    "example": "git add .",
+    "tags": "git,add,stage,everyday"
+  },
+  {
+    "name": "Git Stage File",
+    "command": "git add <file>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Add file contents to the staging area for next commit.",
+    "example": "git add README.md",
+    "tags": "git,add,stage,everyday"
+  },
+  {
+    "name": "Git Stash Changes",
+    "command": "git stash",
+    "shell": "both",
+    "category": "Git",
+    "description": "Stash current uncommitted changes into a temporary stack.",
+    "example": "git stash",
+    "tags": "git,stash,save,everyday"
+  },
+  {
+    "name": "Git Stash Pop",
+    "command": "git stash pop",
+    "shell": "both",
+    "category": "Git",
+    "description": "Reapply most recently stashed changes and remove from stack.",
+    "example": "git stash pop",
+    "tags": "git,stash,apply,everyday"
+  },
+  {
+    "name": "Git Switch Branch",
+    "command": "git switch <name>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Switch working tree to target existing branch.",
+    "example": "git switch main",
+    "tags": "git,switch,branch,everyday"
+  },
+  {
+    "name": "Git Undo Last Commit Keep Changes",
+    "command": "git reset HEAD^",
+    "shell": "both",
+    "category": "Git",
+    "description": "Undo the most recent commit while keeping modified files intact.",
+    "example": "git reset HEAD^",
+    "tags": "git,undo,reset,everyday"
+  },
+  {
+    "name": "Git Unstage File",
+    "command": "git restore --staged <file>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Remove a file from staging area while preserving changes.",
+    "example": "git restore --staged app.py",
+    "tags": "git,unstage,restore,everyday"
+  },
+  {
+    "name": "Git Untrack Cached File",
+    "command": "git rm --cached <file>",
+    "shell": "both",
+    "category": "Git",
+    "description": "Stop tracking file in Git while keeping it on local disk.",
+    "example": "git rm --cached config.env",
+    "tags": "git,untrack,cache,everyday"
+  },
+  {
+    "name": "Git Working Tree Status",
+    "command": "git status",
+    "shell": "both",
+    "category": "Git",
+    "description": "Show staged, unstaged, and untracked file status.",
+    "example": "git status -s",
+    "tags": "git,status,vcs,everyday"
+  },
+  {
+    "name": "Active Network Adapters",
+    "command": "Get-NetAdapter | Where-Object Status -eq 'Up'",
+    "shell": "powershell",
+    "category": "Network",
+    "description": "Lists all active physical and virtual network adapters.",
+    "example": "Get-NetAdapter",
+    "tags": "adapters,nic,link,everyday"
+  },
+  {
+    "name": "Active Network Connections",
+    "command": "netstat -ano",
+    "shell": "both",
+    "category": "Network",
+    "description": "Displays active TCP connections and listening ports with PID.",
+    "example": "netstat -ano | findstr :8080",
+    "tags": "netstat,ports,listening,socket,everyday"
+  },
+  {
+    "name": "Add Inbound Firewall Port Rule",
+    "command": "netsh advfirewall firewall add rule name=\"Allow TCP 8080\" dir=in action=allow protocol=TCP localport=8080",
+    "shell": "both",
+    "category": "Network",
+    "description": "Open a TCP port in Windows Firewall for inbound traffic.",
+    "example": "netsh advfirewall firewall add rule name=\"Node 3000\" dir=in action=allow protocol=TCP localport=3000",
+    "tags": "firewall,rule,port,admin,specialized"
+  },
+  {
+    "name": "Arp Utility",
+    "command": "arp",
+    "shell": "both",
+    "category": "Network",
+    "description": "Use the arp command to view or modify entries in the ARP (Address Resolution Protocol) cache.",
+    "example": "arp /?",
+    "tags": "arp,network,specialized"
+  },
+  {
+    "name": "Atmadm Utility",
+    "command": "atmadm",
+    "shell": "both",
+    "category": "Network",
+    "description": "The atmadm command is used to display information related to asynchronous transfer mode (ATM) connections on the system.",
+    "example": "atmadm /?",
+    "tags": "atmadm,network,specialized"
+  },
+  {
+    "name": "Check IP Configuration",
+    "command": "ipconfig /all",
+    "shell": "both",
+    "category": "Network",
+    "description": "Displays all current TCP/IP network configuration values.",
+    "example": "ipconfig /all",
+    "tags": "ip,network,dns,adapter,everyday"
+  },
+  {
+    "name": "DNS Lookup",
+    "command": "nslookup google.com",
+    "shell": "both",
+    "category": "Network",
+    "description": "Queries Domain Name System (DNS) to obtain domain name or IP address.",
+    "example": "nslookup github.com 8.8.8.8",
+    "tags": "dns,lookup,ip,everyday"
+  },
+  {
+    "name": "DNS MX Record Lookup",
+    "command": "nslookup -type=mx example.com",
+    "shell": "both",
+    "category": "Network",
+    "description": "Query specific mail exchanger (MX) DNS records for a domain.",
+    "example": "nslookup -type=mx google.com",
+    "tags": "nslookup,dns,mx,network,everyday"
+  },
+  {
+    "name": "Export Wi-Fi Password",
+    "command": "netsh wlan show profile name=\"Wi-Fi\" key=clear",
+    "shell": "both",
+    "category": "Network",
+    "description": "Displays saved wireless profile settings and security key in plain text.",
+    "example": "netsh wlan show profile name=\"Office\" key=clear",
+    "tags": "wifi,key,password,specialized"
+  },
+  {
+    "name": "Fast Traceroute No DNS",
+    "command": "tracert -d 1.1.1.1",
+    "shell": "both",
+    "category": "Network",
+    "description": "Trace network hops without reverse DNS resolution for speed.",
+    "example": "tracert -d 8.8.8.8",
+    "tags": "tracert,hops,network,everyday"
+  },
+  {
+    "name": "Fetch HTTP Headers",
+    "command": "curl.exe -I https://google.com",
+    "shell": "both",
+    "category": "Network",
+    "description": "Fetches HTTP response status and headers from a web endpoint.",
+    "example": "curl.exe -I https://github.com",
+    "tags": "curl,http,headers,web,everyday"
+  },
+  {
+    "name": "Fetch HTTP Headers",
+    "command": "curl -I https://example.com",
+    "shell": "both",
+    "category": "Network",
+    "description": "Inspect HTTP response headers without downloading response body.",
+    "example": "curl -I https://google.com",
+    "tags": "curl,http,headers,network,everyday"
+  },
+  {
+    "name": "Finger Utility",
+    "command": "finger",
+    "shell": "both",
+    "category": "Network",
+    "description": "The finger command returns information about users on a remote computer that's running the Finger service.",
+    "example": "finger /?",
+    "tags": "finger,network,specialized"
+  },
+  {
+    "name": "Firewall State Per Profile",
+    "command": "netsh advfirewall show allprofiles state",
+    "shell": "both",
+    "category": "Network",
+    "description": "Check if Windows Firewall is enabled across all network profiles.",
+    "example": "netsh advfirewall show allprofiles state",
+    "tags": "firewall,security,network,everyday"
+  },
+  {
+    "name": "Flush DNS Cache",
+    "command": "ipconfig /flushdns",
+    "shell": "both",
+    "category": "Network",
+    "description": "Clears and resets the contents of the DNS client resolver cache.",
+    "example": "ipconfig /flushdns",
+    "tags": "dns,flush,cache,everyday"
+  },
+  {
+    "name": "Ftp Utility",
+    "command": "ftp",
+    "shell": "both",
+    "category": "Network",
+    "description": "The ftp command is used to transfer files to and from another computer, which must be set up as an FTP server.",
+    "example": "ftp /?",
+    "tags": "ftp,network,specialized"
+  },
+  {
+    "name": "Getmac Utility",
+    "command": "getmac /v",
+    "shell": "both",
+    "category": "Network",
+    "description": "The getmac command shows the media access control (MAC) address of all the network controllers on your system.",
+    "example": "getmac /fo list",
+    "tags": "getmac,network,specialized"
+  },
+  {
+    "name": "Ipconfig Utility",
+    "command": "ipconfig",
+    "shell": "both",
+    "category": "Network",
+    "description": "The ipconfig command displays detailed IP information for each network adapter using TCP/IP.",
+    "example": "ipconfig /?",
+    "tags": "ipconfig,network,everyday"
+  },
+  {
+    "name": "List IP Addresses",
+    "command": "Get-NetIPAddress -AddressFamily IPv4",
+    "shell": "powershell",
+    "category": "Network",
+    "description": "Retrieves local IP addresses configured on all network adapters.",
+    "example": "Get-NetIPAddress -InterfaceAlias 'Wi-Fi'",
+    "tags": "ip,adapters,interface,everyday"
+  },
+  {
+    "name": "Listening TCP Ports & PIDs",
+    "command": "Get-NetTCPConnection -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess",
+    "shell": "powershell",
+    "category": "Network",
+    "description": "Queries all local listening TCP sockets and mapped process IDs.",
+    "example": "Get-NetTCPConnection -State Listen",
+    "tags": "ports,listen,sockets,specialized"
+  },
+  {
+    "name": "Local ARP Table",
+    "command": "arp -a",
+    "shell": "both",
+    "category": "Network",
+    "description": "Shows current ARP resolution tables displaying IP to MAC hardware addresses.",
+    "example": "arp -a",
+    "tags": "arp,mac,network,everyday"
+  },
+  {
+    "name": "Nbtstat Utility",
+    "command": "nbtstat",
+    "shell": "both",
+    "category": "Network",
+    "description": "The nbtstat command displays TCP/IP details and various statistics about a remote computer.",
+    "example": "nbtstat /?",
+    "tags": "nbtstat,network,specialized"
+  },
+  {
+    "name": "Net Utility",
+    "command": "net",
+    "shell": "both",
+    "category": "Network",
+    "description": "The net command allows you to display, configure, and adjust many network settings.",
+    "example": "net /?",
+    "tags": "net,network,specialized"
+  },
+  {
+    "name": "Netstat Utility",
+    "command": "netstat",
+    "shell": "both",
+    "category": "Network",
+    "description": "The netstat command is commonly used to show all open network connections and listening ports.",
+    "example": "netstat /?",
+    "tags": "netstat,network,specialized"
+  },
+  {
+    "name": "Network Routing Table",
+    "command": "route print",
+    "shell": "both",
+    "category": "Network",
+    "description": "Prints current network routing table including gateway routes.",
+    "example": "route print -4",
+    "tags": "route,gateway,routing,everyday"
+  },
+  {
+    "name": "Nslookup Utility",
+    "command": "nslookup",
+    "shell": "both",
+    "category": "Network",
+    "description": "The nslookup command is primarily used to display the hostname of a specified IP address.",
+    "example": "nslookup /?",
+    "tags": "nslookup,network,specialized"
+  },
+  {
+    "name": "Open Inbound Firewall Port",
+    "command": "netsh advfirewall firewall add rule name=\"Allow Port 8080\" dir=in action=allow protocol=TCP localport=8080",
+    "shell": "both",
+    "category": "Network",
+    "description": "Creates a new inbound rule allowing traffic on a specified TCP port.",
+    "example": "netsh advfirewall firewall show rule name=\"Allow Port 8080\"",
+    "tags": "firewall,rule,port,specialized"
+  },
+  {
+    "name": "Pathping Packet Loss Test",
+    "command": "pathping -n 1.1.1.1",
+    "shell": "both",
+    "category": "Network",
+    "description": "Analyze network path and latency plus packet loss per hop.",
+    "example": "pathping -n 8.8.8.8",
+    "tags": "pathping,packetloss,network,specialized"
+  },
+  {
+    "name": "Pathping Utility",
+    "command": "pathping -n 8.8.8.8",
+    "shell": "both",
+    "category": "Network",
+    "description": "The pathping command works similarly to the `tracert` command but also provides information about network latency and loss at each hop.",
+    "example": "pathping 1.1.1.1",
+    "tags": "pathping,network,specialized"
+  },
+  {
+    "name": "Ping Four Packets",
+    "command": "ping -n 4 1.1.1.1",
+    "shell": "both",
+    "category": "Network",
+    "description": "Send four ICMP echo requests to verify connectivity.",
+    "example": "ping -n 4 8.8.8.8",
+    "tags": "ping,icmp,network,everyday"
+  },
+  {
+    "name": "Ping Host",
+    "command": "ping -n 4 8.8.8.8",
+    "shell": "both",
+    "category": "Network",
+    "description": "Sends ICMP echo requests to verify network connectivity.",
+    "example": "ping -n 4 google.com",
+    "tags": "ping,icmp,connectivity,everyday"
+  },
+  {
+    "name": "Ping Utility",
+    "command": "ping",
+    "shell": "both",
+    "category": "Network",
+    "description": "The ping command sends an Internet Control Message Protocol (ICMP) Echo Request message to a specified remote computer to verify IP-level connectivity.",
+    "example": "ping /?",
+    "tags": "ping,network,everyday"
+  },
+  {
+    "name": "Port Forwarding Rules",
+    "command": "netsh interface portproxy show all",
+    "shell": "both",
+    "category": "Network",
+    "description": "Displays active IPv4 and IPv6 port forwarding proxy configurations.",
+    "example": "netsh interface portproxy show all",
+    "tags": "proxy,portproxy,forwarding,specialized"
+  },
+  {
+    "name": "Port Listening Process PID",
+    "command": "netstat -ano | findstr :3389",
+    "shell": "both",
+    "category": "Network",
+    "description": "Find which PID is listening on a specific TCP/UDP port.",
+    "example": "netstat -ano | findstr :8080",
+    "tags": "netstat,port,pid,network,specialized"
+  },
+  {
+    "name": "Rasdial Utility",
+    "command": "rasdial",
+    "shell": "both",
+    "category": "Network",
+    "description": "The rasdial command starts or ends a network connection for a Microsoft client.",
+    "example": "rasdial /?",
+    "tags": "rasdial,network,specialized"
+  },
+  {
+    "name": "Rcp Utility",
+    "command": "rcp",
+    "shell": "both",
+    "category": "Network",
+    "description": "The rcp command copies files between a Windows computer and a system running the `rshd` daemon.",
+    "example": "rcp /?",
+    "tags": "rcp,network,specialized"
+  },
+  {
+    "name": "Renew DHCP IP Address",
+    "command": "ipconfig /release & ipconfig /renew",
+    "shell": "both",
+    "category": "Network",
+    "description": "Release and obtain a new DHCP lease in a single combined step.",
+    "example": "ipconfig /release & ipconfig /renew",
+    "tags": "ipconfig,dhcp,network,everyday"
+  },
+  {
+    "name": "Rexec Utility",
+    "command": "rexec",
+    "shell": "both",
+    "category": "Network",
+    "description": "The rexec command allows you to run commands on remote computers that have the `rexec` daemon running.",
+    "example": "rexec /?",
+    "tags": "rexec,network,specialized"
+  },
+  {
+    "name": "Route Utility",
+    "command": "route print -4",
+    "shell": "both",
+    "category": "Network",
+    "description": "The route command manipulates network routing tables and is available in all versions of Windows.",
+    "example": "route print",
+    "tags": "route,network,specialized"
+  },
+  {
+    "name": "Rsh Utility",
+    "command": "rsh",
+    "shell": "both",
+    "category": "Network",
+    "description": "The rsh command allows you to run commands on remote computers with the rsh daemon.",
+    "example": "rsh /?",
+    "tags": "rsh,network,specialized"
+  },
+  {
+    "name": "Set Static DNS Server",
+    "command": "netsh interface ipv4 set dnsservers name=\"Ethernet\" static 1.1.1.1 primary",
+    "shell": "both",
+    "category": "Network",
+    "description": "Configure static primary DNS resolver on a network adapter.",
+    "example": "netsh interface ipv4 set dnsservers name=\"Wi-Fi\" static 8.8.8.8 primary",
+    "tags": "netsh,dns,network,admin,specialized"
+  },
+  {
+    "name": "Show Firewall Status",
+    "command": "netsh advfirewall show allprofiles",
+    "shell": "both",
+    "category": "Network",
+    "description": "Displays state and settings for Domain, Private, and Public firewall profiles.",
+    "example": "netsh advfirewall show currentprofile",
+    "tags": "firewall,netsh,security,specialized"
+  },
+  {
+    "name": "Show Interface IP & DNS",
+    "command": "netsh interface ipv4 show config",
+    "shell": "both",
+    "category": "Network",
+    "description": "Display address, default gateway, and DNS servers per adapter.",
+    "example": "netsh interface ipv4 show config",
+    "tags": "netsh,ipv4,network,everyday"
+  },
+  {
+    "name": "Show Saved Wi-Fi Profiles",
+    "command": "netsh wlan show profiles",
+    "shell": "both",
+    "category": "Network",
+    "description": "Lists all wireless network profiles saved on the local machine.",
+    "example": "netsh wlan show profiles",
+    "tags": "wifi,wlan,wireless,specialized"
+  },
+  {
+    "name": "Telnet Utility",
+    "command": "telnet",
+    "shell": "both",
+    "category": "Network",
+    "description": "Use the telnet command to communicate with remote computers using the Telnet protocol.",
+    "example": "telnet /?",
+    "tags": "telnet,network,specialized"
+  },
+  {
+    "name": "Test Connection with Count",
+    "command": "Test-Connection -ComputerName google.com -Count 3",
+    "shell": "powershell",
+    "category": "Network",
+    "description": "Sends ICMP echo requests with structured output in PowerShell.",
+    "example": "Test-Connection -ComputerName 1.1.1.1 -Count 2",
+    "tags": "ping,icmp,connectivity,everyday"
+  },
+  {
+    "name": "Test TCP Port Connection",
+    "command": "Test-NetConnection -ComputerName 1.1.1.1 -Port 443",
+    "shell": "powershell",
+    "category": "Network",
+    "description": "Tests network connection to a remote computer on a specific port.",
+    "example": "Test-NetConnection -ComputerName google.com -Port 443",
+    "tags": "port,tcp,ping,firewall,specialized"
+  },
+  {
+    "name": "Tftp Utility",
+    "command": "tftp",
+    "shell": "both",
+    "category": "Network",
+    "description": "The tftp command lets you transfer files to and from a remote computer that runs the Trivial File Transfer Protocol (TFTP) service or daemon.",
+    "example": "tftp /?",
+    "tags": "tftp,network,specialized"
+  },
+  {
+    "name": "Trace Route to Host",
+    "command": "tracert -d 8.8.8.8",
+    "shell": "both",
+    "category": "Network",
+    "description": "Traces the path network packets take to a remote host.",
+    "example": "tracert google.com",
+    "tags": "traceroute,hops,routing,specialized"
+  },
+  {
+    "name": "Winrm Utility",
+    "command": "winrm",
+    "shell": "both",
+    "category": "Network",
+    "description": "The winrm command launches the command-line version of Windows Remote Management.",
+    "example": "winrm /?",
+    "tags": "winrm,network,specialized"
+  },
+  {
+    "name": "Winrs Utility",
+    "command": "winrs",
+    "shell": "both",
+    "category": "Network",
+    "description": "The winrs command is used to open a secure command window with a remote host.",
+    "example": "winrs /?",
+    "tags": "winrs,network,specialized"
+  },
+  {
+    "name": "PS Append Content to File",
+    "command": "Add-Content -Path log.txt -Value 'entry'",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Append text or content to the end of a specified file.",
+    "example": "Add-Content log.txt 'done'",
+    "tags": "powershell,append,everyday"
+  },
+  {
+    "name": "PS Clear File Content",
+    "command": "Clear-Content file.txt",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Delete all contents of a file while keeping the file itself.",
+    "example": "Clear-Content temp.log",
+    "tags": "powershell,truncate,everyday"
+  },
+  {
+    "name": "PS Command History List",
+    "command": "Get-History",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Display list of commands entered in current PowerShell session.",
+    "example": "Get-History -Count 10",
+    "tags": "powershell,history,everyday"
+  },
+  {
+    "name": "PS Compare Two Collections",
+    "command": "Compare-Object -ReferenceObject $a -DifferenceObject $b",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Compare two arrays or file contents showing differences.",
+    "example": "Compare-Object (cat a.txt) (cat b.txt)",
+    "tags": "powershell,diff,compare,everyday"
+  },
+  {
+    "name": "PS Copy Item Recursive",
+    "command": "Copy-Item -Path src -Destination dst -Recurse",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Copy files, folders, or registry keys recursively.",
+    "example": "Copy-Item doc.txt backup\\",
+    "tags": "powershell,copy,files,everyday"
+  },
+  {
+    "name": "PS Current Working Location",
+    "command": "Get-Location",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Get current directory path object within PowerShell provider.",
+    "example": "Get-Location",
+    "tags": "powershell,pwd,path,everyday"
+  },
+  {
+    "name": "PS Display GUI Grid View",
+    "command": "Out-GridView",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Send output to an interactive GUI table with search/filter.",
+    "example": "Get-Process | Out-GridView",
+    "tags": "powershell,gui,table,everyday"
+  },
+  {
+    "name": "PS Export Pipeline to CSV",
+    "command": "Export-Csv -Path export.csv -NoTypeInformation",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Export piped objects directly to CSV spreadsheet file.",
+    "example": "Get-Process | Export-Csv procs.csv -NoTypeInformation",
+    "tags": "powershell,csv,export,everyday"
+  },
+  {
+    "name": "PS Filter Collection",
+    "command": "Where-Object { $_.Handles -gt 500 }",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Filter collection of objects matching boolean condition.",
+    "example": "Get-Service | Where-Object Status -eq 'Running'",
+    "tags": "powershell,where,filter,everyday"
+  },
+  {
+    "name": "PS Find Available Cmdlets",
+    "command": "Get-Command -Noun Process",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "List all cmdlets, functions, and aliases matching pattern.",
+    "example": "Get-Command *Network*",
+    "tags": "powershell,cmdlet,search,everyday"
+  },
+  {
+    "name": "PS ForEach Pipeline Iteration",
+    "command": "ForEach-Object { $_.Name }",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Perform operation on each item in piped collection.",
+    "example": "Get-ChildItem | ForEach-Object { $_.FullName }",
+    "tags": "powershell,foreach,loop,everyday"
+  },
+  {
+    "name": "PS Format Output as Auto Table",
+    "command": "Format-Table -AutoSize",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Format output pipeline as column table with auto sizing.",
+    "example": "Get-Process | Format-Table -AutoSize",
+    "tags": "powershell,table,format,everyday"
+  },
+  {
+    "name": "PS GUI Command Builder",
+    "command": "Show-Command Get-Process",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Open GUI window to graphically build parameters for cmdlet.",
+    "example": "Show-Command Get-Service",
+    "tags": "powershell,gui,builder,everyday"
+  },
+  {
+    "name": "PS Get Cmdlet Documentation",
+    "command": "Get-Help Get-Process -Detailed",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Display help manual, parameters, and examples for cmdlet.",
+    "example": "Get-Help Invoke-WebRequest -Online",
+    "tags": "powershell,help,man,everyday"
+  },
+  {
+    "name": "PS Get File Content",
+    "command": "Get-Content app.log -Tail 20",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Read file lines as string objects with optional tail stream.",
+    "example": "Get-Content server.log -Wait",
+    "tags": "powershell,cat,content,everyday"
+  },
+  {
+    "name": "PS Get Installed Services",
+    "command": "Get-Service",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Display status and startup types of all installed services.",
+    "example": "Get-Service | Where-Object Status -eq 'Running'",
+    "tags": "powershell,services,everyday"
+  },
+  {
+    "name": "PS Get Running Processes",
+    "command": "Get-Process",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Retrieve list of all active processes and resource metrics.",
+    "example": "Get-Process | Sort-Object CPU -Descending",
+    "tags": "powershell,process,everyday"
+  },
+  {
+    "name": "PS Group Objects by Key",
+    "command": "Group-Object -Property Extension",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Group items sharing matching property values.",
+    "example": "Get-ChildItem | Group-Object Extension",
+    "tags": "powershell,group,aggregate,everyday"
+  },
+  {
+    "name": "PS Import CSV into Objects",
+    "command": "Import-Csv -Path export.csv",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Read CSV file into structured PowerShell objects.",
+    "example": "Import-Csv procs.csv",
+    "tags": "powershell,csv,import,everyday"
+  },
+  {
+    "name": "PS Inspect Object Members",
+    "command": "Get-Member",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Inspect properties and methods available on piped object.",
+    "example": "Get-Process | Get-Member",
+    "tags": "powershell,member,inspect,everyday"
+  },
+  {
+    "name": "PS Invoke REST API JSON",
+    "command": "Invoke-RestMethod -Uri https://api.github.com/zen",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Query REST API endpoint and automatically parse JSON response.",
+    "example": "Invoke-RestMethod https://api.ipify.org?format=json",
+    "tags": "powershell,rest,api,json,everyday"
+  },
+  {
+    "name": "PS Invoke Web Request",
+    "command": "Invoke-WebRequest -Uri https://httpbin.org/get",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Send HTTP/HTTPS requests to websites or REST web services.",
+    "example": "Invoke-WebRequest -Uri https://google.com",
+    "tags": "powershell,curl,web,everyday"
+  },
+  {
+    "name": "PS List Child Items",
+    "command": "Get-ChildItem -Recurse",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Get files and folders from file system or registry recursively.",
+    "example": "Get-ChildItem -Filter *.py",
+    "tags": "powershell,dir,files,everyday"
+  },
+  {
+    "name": "PS Measure Lines and Characters",
+    "command": "Measure-Object -Line -Word -Character",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Count numeric properties, lines, words, or characters.",
+    "example": "Get-Content app.log | Measure-Object -Line",
+    "tags": "powershell,count,measure,everyday"
+  },
+  {
+    "name": "PS Move Item",
+    "command": "Move-Item -Path src.txt -Destination dst.txt",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Move an item along with properties to another location.",
+    "example": "Move-Item *.log logs\\",
+    "tags": "powershell,move,files,everyday"
+  },
+  {
+    "name": "PS Pop Directory from Stack",
+    "command": "Pop-Location",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Change directory back to top location from stack.",
+    "example": "Pop-Location",
+    "tags": "powershell,popd,everyday"
+  },
+  {
+    "name": "PS Push Directory to Stack",
+    "command": "Push-Location C:\\lab",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Push directory onto location stack and change location.",
+    "example": "Push-Location logs",
+    "tags": "powershell,pushd,everyday"
+  },
+  {
+    "name": "PS Query Background Jobs",
+    "command": "Get-Job",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "List all background jobs and execution states in session.",
+    "example": "Get-Job",
+    "tags": "powershell,job,list,everyday"
+  },
+  {
+    "name": "PS Query Installed Hotfixes",
+    "command": "Get-HotFix",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "List Windows security hotfixes and updates installed on PC.",
+    "example": "Get-HotFix | Sort-Object InstalledOn -Descending",
+    "tags": "powershell,updates,hotfix,everyday"
+  },
+  {
+    "name": "PS Query WMI OS Class",
+    "command": "Get-WmiObject -Class Win32_OperatingSystem",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Query WMI system classes for OS and hardware details.",
+    "example": "Get-WmiObject Win32_BIOS",
+    "tags": "powershell,wmi,hardware,specialized"
+  },
+  {
+    "name": "PS Receive Job Results",
+    "command": "Receive-Job -Id 1 -Keep",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Retrieve completed output results from background job.",
+    "example": "Receive-Job -Id 1",
+    "tags": "powershell,job,results,everyday"
+  },
+  {
+    "name": "PS Remove Item Recursive",
+    "command": "Remove-Item -Path temp -Recurse -Force",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Delete files, folders, or registry keys permanently.",
+    "example": "Remove-Item *.tmp",
+    "tags": "powershell,rm,delete,specialized"
+  },
+  {
+    "name": "PS Run Background Job",
+    "command": "Start-Job -ScriptBlock { Start-Sleep 10 }",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Run background asynchronous job in separate session.",
+    "example": "Start-Job -ScriptBlock { Get-Process }",
+    "tags": "powershell,job,async,specialized"
+  },
+  {
+    "name": "PS Search Text in Files",
+    "command": "Select-String -Path *.log -Pattern 'Exception'",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Search text strings and regular expression patterns in files.",
+    "example": "Select-String -Path *.py -Pattern 'def test_'",
+    "tags": "powershell,grep,search,everyday"
+  },
+  {
+    "name": "PS Select Specific Properties",
+    "command": "Select-Object Name, CPU, WorkingSet",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Select specific properties or unique items from dataset.",
+    "example": "Get-Process | Select-Object -First 5",
+    "tags": "powershell,select,filter,everyday"
+  },
+  {
+    "name": "PS Set File Content",
+    "command": "Set-Content -Path file.txt -Value 'hello'",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Write or overwrite new content into target file.",
+    "example": "Set-Content version.txt '1.0.0'",
+    "tags": "powershell,write,file,everyday"
+  },
+  {
+    "name": "PS Set Location Path",
+    "command": "Set-Location C:\\lab",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Change working directory location to specified path.",
+    "example": "Set-Location ~",
+    "tags": "powershell,cd,path,everyday"
+  },
+  {
+    "name": "PS Sort Collection by Property",
+    "command": "Sort-Object -Property Length -Descending",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Sort piped objects ascending or descending by properties.",
+    "example": "Get-ChildItem | Sort-Object Length -Descending",
+    "tags": "powershell,sort,order,everyday"
+  },
+  {
+    "name": "PS Start Process",
+    "command": "Start-Process notepad",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Launch one or more processes on the local computer.",
+    "example": "Start-Process powershell -Verb RunAs",
+    "tags": "powershell,start,process,everyday"
+  },
+  {
+    "name": "PS Start Windows Service",
+    "command": "Start-Service Spooler",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Start one or more stopped Windows services.",
+    "example": "Start-Service wuauserv",
+    "tags": "powershell,service,start,specialized"
+  },
+  {
+    "name": "PS Stop Process",
+    "command": "Stop-Process -Name ping -Force",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Forcibly stop one or more running processes by name or PID.",
+    "example": "Stop-Process -Id 1234 -Force",
+    "tags": "powershell,kill,process,everyday"
+  },
+  {
+    "name": "PS Stop Windows Service",
+    "command": "Stop-Service Spooler",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Stop one or more running Windows services.",
+    "example": "Stop-Service Spooler",
+    "tags": "powershell,service,stop,specialized"
+  },
+  {
+    "name": "PS System Date and Time",
+    "command": "Get-Date",
+    "shell": "powershell",
+    "category": "PowerShell",
+    "description": "Get formatted current system date and time object.",
+    "example": "Get-Date -Format 'yyyy-MM-dd'",
+    "tags": "powershell,date,time,everyday"
+  },
+  {
+    "name": "At Utility",
+    "command": "at",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The at command is used to schedule commands and other programs to run at a specific date and time.",
+    "example": "at /?",
+    "tags": "at,processes,specialized"
+  },
+  {
+    "name": "Break Utility",
+    "command": "break",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The break command sets or clears extended CTRL+C checking on DOS systems.",
+    "example": "break /?",
+    "tags": "break,processes,specialized"
+  },
+  {
+    "name": "Choice Utility",
+    "command": "choice",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The choice command is used within a script or batch program to provide a list of choices and return the value of that choice to the program.",
+    "example": "choice /?",
+    "tags": "choice,processes,specialized"
+  },
+  {
+    "name": "Doskey Utility",
+    "command": "doskey",
+    "shell": "cmd",
+    "category": "Processes",
+    "description": "The doskey command is used to edit command lines, create macros, and recall previously entered commands.",
+    "example": "doskey /?",
+    "tags": "doskey,processes,specialized"
+  },
+  {
+    "name": "Find High Memory Processes",
+    "command": "tasklist /fi \"memusage gt 100000\"",
+    "shell": "both",
+    "category": "Processes",
+    "description": "List all processes consuming more than 100 MB of RAM.",
+    "example": "tasklist /fi \"memusage gt 200000\"",
+    "tags": "tasklist,ram,memory,everyday"
+  },
+  {
+    "name": "Find Process By Image Name",
+    "command": "tasklist /fi \"imagename eq ping.exe\"",
+    "shell": "both",
+    "category": "Processes",
+    "description": "Find specific running process entries by executable name.",
+    "example": "tasklist /fi \"imagename eq node.exe\"",
+    "tags": "tasklist,process,find,everyday"
+  },
+  {
+    "name": "Find Process Command Line",
+    "command": "Get-CimInstance Win32_Process | Select-Object ProcessId, CommandLine",
+    "shell": "powershell",
+    "category": "Processes",
+    "description": "Inspects full command-line arguments used to launch running processes.",
+    "example": "Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\"",
+    "tags": "cli,arguments,args,inspect,specialized"
+  },
+  {
+    "name": "Force Kill Process by Name",
+    "command": "Stop-Process -Name notepad -Force",
+    "shell": "powershell",
+    "category": "Processes",
+    "description": "Forcefully terminates all processes matching the specified name.",
+    "example": "Stop-Process -Name chrome -Force",
+    "tags": "kill,terminate,process,everyday"
+  },
+  {
+    "name": "Force Kill Process by Name",
+    "command": "taskkill /im ping.exe /f",
+    "shell": "both",
+    "category": "Processes",
+    "description": "Forcibly terminate running processes by executable name.",
+    "example": "taskkill /im notepad.exe /f",
+    "tags": "taskkill,kill,force,everyday"
+  },
+  {
+    "name": "Force Kill Process via CMD",
+    "command": "taskkill /F /IM notepad.exe",
+    "shell": "cmd",
+    "category": "Processes",
+    "description": "Terminates one or more tasks or processes by process image name.",
+    "example": "taskkill /F /PID 1234",
+    "tags": "kill,taskkill,terminate,everyday"
+  },
+  {
+    "name": "Kill Process Tree by PID",
+    "command": "taskkill /pid 2792 /t /f",
+    "shell": "both",
+    "category": "Processes",
+    "description": "Kill target process ID and all spawned child processes.",
+    "example": "taskkill /pid 1234 /t /f",
+    "tags": "taskkill,tree,pid,specialized"
+  },
+  {
+    "name": "Qprocess Utility",
+    "command": "qprocess",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The qprocess command lets you see information about running processes.",
+    "example": "qprocess /?",
+    "tags": "qprocess,processes,specialized"
+  },
+  {
+    "name": "Quser Utility",
+    "command": "quser",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The quser command displays information about users currently logged in to the system.",
+    "example": "quser /?",
+    "tags": "quser,processes,specialized"
+  },
+  {
+    "name": "Qwinsta Utility",
+    "command": "qwinsta",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The qwinsta command displays information about active Remote Desktop Sessions.",
+    "example": "qwinsta /?",
+    "tags": "qwinsta,processes,specialized"
+  },
+  {
+    "name": "Runas Utility",
+    "command": "runas",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The runas command lets you execute a program using another user's credentials.",
+    "example": "runas /?",
+    "tags": "runas,processes,specialized"
+  },
+  {
+    "name": "Schtasks Utility",
+    "command": "schtasks /query /fo list",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The schtasks command allows you to schedule specific programs or commands to run at certain times.",
+    "example": "schtasks /query /fo table",
+    "tags": "schtasks,processes,specialized"
+  },
+  {
+    "name": "Services Hosted in Processes",
+    "command": "tasklist /svc",
+    "shell": "both",
+    "category": "Processes",
+    "description": "List Windows services hosted inside each running process.",
+    "example": "tasklist /svc",
+    "tags": "tasklist,services,svchost,specialized"
+  },
+  {
+    "name": "Taskkill Utility",
+    "command": "taskkill /im notepad.exe /f",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The taskkill command to end a running task.",
+    "example": "taskkill /pid 1234 /f",
+    "tags": "taskkill,processes,specialized"
+  },
+  {
+    "name": "Tasklist Utility",
+    "command": "tasklist",
+    "shell": "both",
+    "category": "Processes",
+    "description": "Displays a list of applications, services, and the Process ID (PID) currently running on either a local or a remote computer.",
+    "example": "tasklist /fi \"memusage gt 50000\"",
+    "tags": "tasklist,processes,everyday"
+  },
+  {
+    "name": "Timeout Utility",
+    "command": "timeout",
+    "shell": "both",
+    "category": "Processes",
+    "description": "Use the timeout command in batch or script files to set a specified timeout value during a procedure or to ignore keypresses.",
+    "example": "timeout /?",
+    "tags": "timeout,processes,specialized"
+  },
+  {
+    "name": "Top CPU Consuming Processes",
+    "command": "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10",
+    "shell": "powershell",
+    "category": "Processes",
+    "description": "Lists the top 10 processes consuming the most CPU time.",
+    "example": "Get-Process | Sort-Object CPU -Descending | Select-Object -First 5",
+    "tags": "top,cpu,processes,performance,everyday"
+  },
+  {
+    "name": "Top Memory Consuming Processes",
+    "command": "Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 10",
+    "shell": "powershell",
+    "category": "Processes",
+    "description": "Lists the top 10 processes using the largest amount of RAM.",
+    "example": "Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object Name, WS",
+    "tags": "ram,memory,processes,everyday"
+  },
+  {
+    "name": "Tskill Utility",
+    "command": "tskill",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The tskill command ends a specified process.",
+    "example": "tskill /?",
+    "tags": "tskill,processes,specialized"
+  },
+  {
+    "name": "Verbose Process List",
+    "command": "tasklist /v",
+    "shell": "both",
+    "category": "Processes",
+    "description": "Displays running processes with window titles and memory usage.",
+    "example": "tasklist /FI \"STATUS eq running\"",
+    "tags": "ps,tasklist,running,everyday"
+  },
+  {
+    "name": "Waitfor Utility",
+    "command": "waitfor",
+    "shell": "both",
+    "category": "Processes",
+    "description": "The waitfor command lets you send or wait for a system signal.",
+    "example": "waitfor /?",
+    "tags": "waitfor,processes,specialized"
+  },
+  {
+    "name": "Assoc Utility",
+    "command": "assoc",
+    "shell": "cmd",
+    "category": "Search",
+    "description": "This command displays or changes file type associations for specific file extensions.",
+    "example": "assoc .txt",
+    "tags": "assoc,search,everyday"
+  },
+  {
+    "name": "Clip Utility",
+    "command": "dir | clip",
+    "shell": "both",
+    "category": "Search",
+    "description": "The clip command is used to redirect the output from any command to the clipboard in Windows.",
+    "example": "ipconfig | clip",
+    "tags": "clip,search,everyday"
+  },
+  {
+    "name": "Compare Two Files",
+    "command": "fc a.txt b.txt",
+    "shell": "both",
+    "category": "Search",
+    "description": "Compare two files and output differing lines.",
+    "example": "fc v1.txt v2.txt",
+    "tags": "fc,diff,compare,everyday"
+  },
+  {
+    "name": "Count File Lines",
+    "command": "find /c /v \"\" app.log",
+    "shell": "both",
+    "category": "Search",
+    "description": "Count total number of lines in a file.",
+    "example": "find /c /v \"\" data.csv",
+    "tags": "find,wc,count,everyday"
+  },
+  {
+    "name": "Find Files Full Paths",
+    "command": "dir /b /s *.log",
+    "shell": "cmd",
+    "category": "Search",
+    "description": "Find all matching files recursively, printing full paths.",
+    "example": "dir /b /s *.pdf",
+    "tags": "dir,find,paths,everyday"
+  },
+  {
+    "name": "Find Large Files (>500MB)",
+    "command": "Get-ChildItem -Path C:\\ -Recurse -File | Where-Object Length -gt 500MB | Select-Object FullName, Length",
+    "shell": "powershell",
+    "category": "Search",
+    "description": "Finds files larger than 500 megabytes across the system.",
+    "example": "Get-ChildItem -File | Where-Object Length -gt 100MB",
+    "tags": "large,size,cleanup,everyday"
+  },
+  {
+    "name": "Find PowerShell Cmdlet",
+    "command": "Get-Command *Network*",
+    "shell": "powershell",
+    "category": "Search",
+    "description": "Searches all available PowerShell cmdlets, functions, and aliases.",
+    "example": "Get-Command -Module Microsoft.PowerShell.Management",
+    "tags": "cmdlet,function,help,everyday"
+  },
+  {
+    "name": "Find Text Line Numbers",
+    "command": "findstr /i /n \"error\" app.log",
+    "shell": "both",
+    "category": "Search",
+    "description": "Case-insensitive text search with line numbers.",
+    "example": "findstr /i /n \"failed\" server.log",
+    "tags": "findstr,grep,search,everyday"
+  },
+  {
+    "name": "Find Utility",
+    "command": "find",
+    "shell": "both",
+    "category": "Search",
+    "description": "The find  command helps you search for a specific text string in one or more files.",
+    "example": "find /?",
+    "tags": "find,search,everyday"
+  },
+  {
+    "name": "Findstr Utility",
+    "command": "findstr",
+    "shell": "both",
+    "category": "Search",
+    "description": "The findstr command allows you to find patterns of text strings in one or more files.",
+    "example": "findstr /?",
+    "tags": "findstr,search,everyday"
+  },
+  {
+    "name": "Ftype Utility",
+    "command": "ftype",
+    "shell": "cmd",
+    "category": "Search",
+    "description": "The ftype command defines a default program to open a specified file type.",
+    "example": "ftype /?",
+    "tags": "ftype,search,specialized"
+  },
+  {
+    "name": "Grep File Content (Select-String)",
+    "command": "Select-String -Path *.py -Pattern \"def main\"",
+    "shell": "powershell",
+    "category": "Search",
+    "description": "Searches for matching regex patterns across multiple files like grep.",
+    "example": "Get-ChildItem -Recurse | Select-String -Pattern \"API_KEY\"",
+    "tags": "grep,search,regex,code,everyday"
+  },
+  {
+    "name": "Locate Executable Path",
+    "command": "where python",
+    "shell": "both",
+    "category": "Search",
+    "description": "Displays the exact filesystem location of executable files on PATH.",
+    "example": "where git",
+    "tags": "which,where,path,binary,everyday"
+  },
+  {
+    "name": "Locate Programs on PATH",
+    "command": "where curl tar",
+    "shell": "both",
+    "category": "Search",
+    "description": "Show where commands live along the system PATH.",
+    "example": "where python git",
+    "tags": "where,path,search,everyday"
+  },
+  {
+    "name": "Path Utility",
+    "command": "path",
+    "shell": "both",
+    "category": "Search",
+    "description": "The path command displays or sets a specific path for executable files.",
+    "example": "path /?",
+    "tags": "path,search,everyday"
+  },
+  {
+    "name": "Pipe Text to Clipboard",
+    "command": "echo text | clip",
+    "shell": "both",
+    "category": "Search",
+    "description": "Send standard input or text directly to the Windows clipboard.",
+    "example": "dir /b | clip",
+    "tags": "clip,clipboard,pipe,everyday"
+  },
+  {
+    "name": "Reverse Sort File Lines",
+    "command": "sort /r app.log",
+    "shell": "both",
+    "category": "Search",
+    "description": "Sort lines of text in reverse alphabetical order.",
+    "example": "sort /r words.txt",
+    "tags": "sort,text,search,everyday"
+  },
+  {
+    "name": "Search Files Containing String",
+    "command": "findstr /s /i /m \"error\" *",
+    "shell": "both",
+    "category": "Search",
+    "description": "List files in directory and subdirectories containing a string.",
+    "example": "findstr /s /i /m \"TODO\" *.py",
+    "tags": "findstr,search,code,everyday"
+  },
+  {
+    "name": "Sort Utility",
+    "command": "sort",
+    "shell": "both",
+    "category": "Search",
+    "description": "Use the sort command to read data from a specified input, sort it, and then output the sorted results to the Command Prompt, a file, or another device.",
+    "example": "sort /?",
+    "tags": "sort,search,everyday"
+  },
+  {
+    "name": "Auditpol Utility",
+    "command": "auditpol",
+    "shell": "both",
+    "category": "Security",
+    "description": "The auditpol command is used to display or change audit policies.",
+    "example": "auditpol /?",
+    "tags": "auditpol,security,specialized"
+  },
+  {
+    "name": "Certreq Utility",
+    "command": "certreq",
+    "shell": "both",
+    "category": "Security",
+    "description": "The certreq command is used to perform various certification authority (CA) certificate functions.",
+    "example": "certreq /?",
+    "tags": "certreq,security,specialized"
+  },
+  {
+    "name": "Certutil Utility",
+    "command": "certutil",
+    "shell": "both",
+    "category": "Security",
+    "description": "The certutil command is used to dump and display certification authority (CA) configuration information in addition to other CA functions.",
+    "example": "certutil -hashfile myfile.zip SHA256",
+    "tags": "certutil,security,specialized"
+  },
+  {
+    "name": "Check Windows Defender Status",
+    "command": "Get-MpComputerStatus",
+    "shell": "powershell",
+    "category": "Security",
+    "description": "Retrieves status of Windows Defender antivirus signatures and engine.",
+    "example": "Get-MpComputerStatus | Select-Object AntivirusEnabled",
+    "tags": "defender,antivirus,security,specialized"
+  },
+  {
+    "name": "Cipher Utility",
+    "command": "cipher",
+    "shell": "both",
+    "category": "Security",
+    "description": "The cipher command shows or changes the encryption status of files and folders on NTFS partitions.",
+    "example": "cipher /w:C:",
+    "tags": "cipher,security,specialized"
+  },
+  {
+    "name": "Grant Permissions via icacls",
+    "command": "icacls \"C:\\Folder\" /grant \"Users:(OI)(CI)F\"",
+    "shell": "both",
+    "category": "Security",
+    "description": "Modifies discretionary access control lists to grant folder rights.",
+    "example": "icacls file.txt /reset",
+    "tags": "icacls,permissions,ntfs,specialized"
+  },
+  {
+    "name": "Secedit Utility",
+    "command": "secedit",
+    "shell": "both",
+    "category": "Security",
+    "description": "The secedit command lets you configure and analyze system security by comparing the current security settings to a template.",
+    "example": "secedit /?",
+    "tags": "secedit,security,specialized"
+  },
+  {
+    "name": "Trigger Antivirus Quick Scan",
+    "command": "Start-MpScan -ScanType QuickScan",
+    "shell": "powershell",
+    "category": "Security",
+    "description": "Initiates a Windows Defender antivirus scan on active processes and files.",
+    "example": "Start-MpScan -ScanType FullScan",
+    "tags": "defender,scan,antivirus,specialized"
+  },
+  {
+    "name": "Update Antivirus Signatures",
+    "command": "Update-MpSignature",
+    "shell": "powershell",
+    "category": "Security",
+    "description": "Immediately downloads and installs latest Microsoft Defender definitions.",
+    "example": "Update-MpSignature",
+    "tags": "defender,signatures,update,specialized"
+  },
+  {
+    "name": "View NTFS Permissions (ACL)",
+    "command": "Get-Acl -Path C:\\Folder | Format-List",
+    "shell": "powershell",
+    "category": "Security",
+    "description": "Displays security descriptors and access control rules for a path.",
+    "example": "Get-Acl -Path . | Select-Object -ExpandProperty Access",
+    "tags": "acl,permissions,security,ntfs,specialized"
+  },
+  {
+    "name": "Wevtutil Utility",
+    "command": "wevtutil qe System /c:5 /rd:true /f:text",
+    "shell": "both",
+    "category": "Security",
+    "description": "The wevtutil command launches the Windows Events Command Line Utility.",
+    "example": "wevtutil el",
+    "tags": "wevtutil,security,specialized"
+  },
+  {
+    "name": "Change Utility",
+    "command": "change",
+    "shell": "both",
+    "category": "Services",
+    "description": "The change command changes various terminal server settings like install modes, COM port mappings, and logons.",
+    "example": "change /?",
+    "tags": "change,services,specialized"
+  },
+  {
+    "name": "List Running Windows Services",
+    "command": "Get-Service | Where-Object {$_.Status -eq 'Running'}",
+    "shell": "powershell",
+    "category": "Services",
+    "description": "Retrieves all currently active and running Windows services.",
+    "example": "Get-Service -Name wuauserv",
+    "tags": "services,daemons,background,everyday"
+  },
+  {
+    "name": "Logman Utility",
+    "command": "logman query",
+    "shell": "both",
+    "category": "Services",
+    "description": "Use the logman command to create and manage Event Trace Sessions and Performance logs.",
+    "example": "logman start perflog",
+    "tags": "logman,services,specialized"
+  },
+  {
+    "name": "Qappsrv Utility",
+    "command": "qappsrv",
+    "shell": "both",
+    "category": "Services",
+    "description": "The qappsrv command displays all Remote Desktop Session Host servers available on your network.",
+    "example": "qappsrv /?",
+    "tags": "qappsrv,services,specialized"
+  },
+  {
+    "name": "Query Service Configuration",
+    "command": "sc qc Spooler",
+    "shell": "both",
+    "category": "Services",
+    "description": "View service start type, binary path, and user account.",
+    "example": "sc qc Winmgmt",
+    "tags": "sc,service,config,specialized"
+  },
+  {
+    "name": "Query Service State",
+    "command": "sc query Spooler",
+    "shell": "both",
+    "category": "Services",
+    "description": "Query current running state and exit code of a service.",
+    "example": "sc query wuauserv",
+    "tags": "sc,service,query,everyday"
+  },
+  {
+    "name": "Query Service Status via SC",
+    "command": "sc query type= service",
+    "shell": "both",
+    "category": "Services",
+    "description": "Queries status and configuration of services using the Service Controller.",
+    "example": "sc query spooler",
+    "tags": "sc,services,status,everyday"
+  },
+  {
+    "name": "Query Service with PID",
+    "command": "sc queryex Spooler",
+    "shell": "both",
+    "category": "Services",
+    "description": "Query service state alongside its host process PID.",
+    "example": "sc queryex wuauserv",
+    "tags": "sc,pid,service,specialized"
+  },
+  {
+    "name": "Relog Utility",
+    "command": "relog",
+    "shell": "both",
+    "category": "Services",
+    "description": "The relog command creates new performance logs from data in existing performance logs.",
+    "example": "relog /?",
+    "tags": "relog,services,specialized"
+  },
+  {
+    "name": "Restart Service Synchronously",
+    "command": "net stop Spooler / net start Spooler",
+    "shell": "both",
+    "category": "Services",
+    "description": "Stop and start a service, waiting for confirmation.",
+    "example": "net stop wuauserv & net start wuauserv",
+    "tags": "net,service,restart,specialized"
+  },
+  {
+    "name": "Restart Windows Service",
+    "command": "Restart-Service -Name Spooler -Force",
+    "shell": "powershell",
+    "category": "Services",
+    "description": "Stops and immediately restarts a Windows service.",
+    "example": "Restart-Service -Name W32Time -Force",
+    "tags": "restart,service,daemons,everyday"
+  },
+  {
+    "name": "Sc Utility",
+    "command": "sc",
+    "shell": "both",
+    "category": "Services",
+    "description": "The sc command is used to configure service information and communicates with the Service Control Manager.",
+    "example": "sc /?",
+    "tags": "sc,services,specialized"
+  },
+  {
+    "name": "Set Service Start Type",
+    "command": "sc config Spooler start= demand",
+    "shell": "both",
+    "category": "Services",
+    "description": "Set service startup type to auto, demand, or disabled.",
+    "example": "sc config Spooler start= auto",
+    "tags": "sc,service,admin,specialized"
+  },
+  {
+    "name": "Start Service via Net",
+    "command": "net start",
+    "shell": "both",
+    "category": "Services",
+    "description": "Lists all services currently started on the system.",
+    "example": "net start Spooler",
+    "tags": "services,net,start,everyday"
+  },
+  {
+    "name": "Stop Service via Net",
+    "command": "net stop spooler",
+    "shell": "both",
+    "category": "Services",
+    "description": "Stops a running Windows service using the net command.",
+    "example": "net stop wuauserv",
+    "tags": "stop,service,daemon,everyday"
+  },
+  {
+    "name": "Tscon Utility",
+    "command": "tscon",
+    "shell": "both",
+    "category": "Services",
+    "description": "The tscon command to connect a user session with a Remote Desktop session.",
+    "example": "tscon /?",
+    "tags": "tscon,services,specialized"
+  },
+  {
+    "name": "Tsdiscon Utility",
+    "command": "tsdiscon",
+    "shell": "both",
+    "category": "Services",
+    "description": "The tsdiscon command disconnects a Remote Desktop session.",
+    "example": "tsdiscon /?",
+    "tags": "tsdiscon,services,specialized"
+  },
+  {
+    "name": "Tsshutdn Utility",
+    "command": "tsshutdn",
+    "shell": "both",
+    "category": "Services",
+    "description": "The tsshutdn command lets you remotely shut down or restart a terminal server.",
+    "example": "tsshutdn /?",
+    "tags": "tsshutdn,services,specialized"
+  },
+  {
+    "name": "Typeperf Utility",
+    "command": "typeperf",
+    "shell": "both",
+    "category": "Services",
+    "description": "The typerperf command provides performance data either directly in the Command Prompt window or saves it to a specified log file.",
+    "example": "typeperf /?",
+    "tags": "typeperf,services,specialized"
+  },
+  {
+    "name": "Analyze Sleep & Energy Efficiency",
+    "command": "powercfg /energy",
+    "shell": "both",
+    "category": "System",
+    "description": "Analyzes system energy efficiency and common battery drain problems.",
+    "example": "powercfg /energy /output energy.html",
+    "tags": "power,energy,sleep,battery,specialized"
+  },
+  {
+    "name": "Bcdboot Utility",
+    "command": "bcdboot",
+    "shell": "both",
+    "category": "System",
+    "description": "The bcdboot command is used to copy boot files to the system partition and to create a new system BCD store.",
+    "example": "bcdboot /?",
+    "tags": "bcdboot,system,specialized"
+  },
+  {
+    "name": "Bcdedit Utility",
+    "command": "bcdedit",
+    "shell": "both",
+    "category": "System",
+    "description": "The bcdedit command is used to view or make changes to Boot Configuration Data.",
+    "example": "bcdedit /enum",
+    "tags": "bcdedit,system,specialized"
+  },
+  {
+    "name": "Bitsadmin Utility",
+    "command": "bitsadmin",
+    "shell": "both",
+    "category": "System",
+    "description": "Use bitsadmin to manage download and upload jobs.",
+    "example": "bitsadmin /?",
+    "tags": "bitsadmin,system,specialized"
+  },
+  {
+    "name": "Bootcfg Utility",
+    "command": "bootcfg",
+    "shell": "both",
+    "category": "System",
+    "description": "Bootcfg builds, modifies, or views the boot.",
+    "example": "bootcfg /?",
+    "tags": "bootcfg,system,specialized"
+  },
+  {
+    "name": "Bootsect Utility",
+    "command": "bootsect",
+    "shell": "both",
+    "category": "System",
+    "description": "The bootsect command is used to configure the master boot code to one compatible with BOOTMGR (Vista and later) or NTLDR (XP and earlier).",
+    "example": "bootsect /?",
+    "tags": "bootsect,system,specialized"
+  },
+  {
+    "name": "Call Utility",
+    "command": "call",
+    "shell": "both",
+    "category": "System",
+    "description": "The call command is used to run a script or batch program from within another script or batch program.",
+    "example": "call /?",
+    "tags": "call,system,specialized"
+  },
+  {
+    "name": "Cancel Pending Shutdown",
+    "command": "shutdown /a",
+    "shell": "both",
+    "category": "System",
+    "description": "Abort a previously scheduled shutdown or restart.",
+    "example": "shutdown /a",
+    "tags": "shutdown,abort,system,everyday"
+  },
+  {
+    "name": "Chcp Utility",
+    "command": "chcp",
+    "shell": "both",
+    "category": "System",
+    "description": "Use chcp to display or set the active code page number.",
+    "example": "chcp /?",
+    "tags": "chcp,system,specialized"
+  },
+  {
+    "name": "Check Installed Hotfixes",
+    "command": "Get-HotFix | Sort-Object InstalledOn -Descending",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Lists installed Windows updates and patches sorted by date.",
+    "example": "Get-HotFix -Id KB5000000",
+    "tags": "updates,patches,kb,hotfix,specialized"
+  },
+  {
+    "name": "Check System Uptime",
+    "command": "(Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Calculates how long the Windows system has been running since last boot.",
+    "example": "Get-Uptime",
+    "tags": "uptime,boot,restart,everyday"
+  },
+  {
+    "name": "Checknetisolation Utility",
+    "command": "checknetisolation",
+    "shell": "both",
+    "category": "System",
+    "description": "The checknetisolation command is used to test apps that require network capabilities.",
+    "example": "checknetisolation /?",
+    "tags": "checknetisolation,system,specialized"
+  },
+  {
+    "name": "Chglogon Utility",
+    "command": "chglogon",
+    "shell": "both",
+    "category": "System",
+    "description": "The chglogon command enables, disables, or drains terminal server session logins.",
+    "example": "chglogon /?",
+    "tags": "chglogon,system,specialized"
+  },
+  {
+    "name": "Chgport Utility",
+    "command": "chgport",
+    "shell": "both",
+    "category": "System",
+    "description": "The chgport command can be used to display or change COM port mappings for DOS compatibility.",
+    "example": "chgport /?",
+    "tags": "chgport,system,specialized"
+  },
+  {
+    "name": "Chgusr Utility",
+    "command": "chgusr",
+    "shell": "both",
+    "category": "System",
+    "description": "The chgusr command is used to change the install mode for the terminal server.",
+    "example": "chgusr /?",
+    "tags": "chgusr,system,specialized"
+  },
+  {
+    "name": "Clear Screen",
+    "command": "cls",
+    "shell": "both",
+    "category": "System",
+    "description": "Clear the terminal output screen.",
+    "example": "cls",
+    "tags": "cls,clear,everyday"
+  },
+  {
+    "name": "Cmd Utility",
+    "command": "cmd",
+    "shell": "both",
+    "category": "System",
+    "description": "The cmd command starts a new instance of the cmd.",
+    "example": "cmd /?",
+    "tags": "cmd,system,specialized"
+  },
+  {
+    "name": "Cmstp Utility",
+    "command": "cmstp",
+    "shell": "both",
+    "category": "System",
+    "description": "The cmstp command installs or uninstalls a Connection Manager service profile.",
+    "example": "cmstp /?",
+    "tags": "cmstp,system,specialized"
+  },
+  {
+    "name": "Color Utility",
+    "command": "color",
+    "shell": "cmd",
+    "category": "System",
+    "description": "The color command is used to change the colors of the text and background within the Command Prompt window.",
+    "example": "color /?",
+    "tags": "color,system,everyday"
+  },
+  {
+    "name": "Copy to Clipboard",
+    "command": "Set-Clipboard -Value \"Sample text\"",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Copies text or pipeline objects directly to the Windows clipboard.",
+    "example": "Get-Location | Set-Clipboard",
+    "tags": "clip,clipboard,copy,everyday"
+  },
+  {
+    "name": "Create Daily Scheduled Task",
+    "command": "schtasks /create /tn \"Lab\\Cleanup\" /tr \"cmd /c del /q C:\\lab\\tmp\\*\" /sc daily /st 02:00 /ru SYSTEM",
+    "shell": "both",
+    "category": "System",
+    "description": "Register a daily scheduled task running as SYSTEM.",
+    "example": "schtasks /create /tn \"Backup\" /tr \"backup.bat\" /sc daily /st 01:00",
+    "tags": "schtasks,cron,task,admin,specialized"
+  },
+  {
+    "name": "Cscript Utility",
+    "command": "cscript",
+    "shell": "both",
+    "category": "System",
+    "description": "The cscript command is used to execute scripts via Microsoft Script Host.",
+    "example": "cscript /?",
+    "tags": "cscript,system,specialized"
+  },
+  {
+    "name": "Ctty Utility",
+    "command": "ctty",
+    "shell": "both",
+    "category": "System",
+    "description": "The ctty command is used to change the default input and output devices for the system.",
+    "example": "ctty /?",
+    "tags": "ctty,system,specialized"
+  },
+  {
+    "name": "Current Date and Time",
+    "command": "Get-Date -Format \"yyyy-MM-dd HH:mm:ss\"",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Displays current local date and time with standard ISO formatting.",
+    "example": "Get-Date",
+    "tags": "date,time,clock,everyday"
+  },
+  {
+    "name": "DISM Check Component Store",
+    "command": "DISM /Online /Cleanup-Image /CheckHealth",
+    "shell": "both",
+    "category": "System",
+    "description": "Check if Windows component store is flagged as corrupted.",
+    "example": "DISM /Online /Cleanup-Image /CheckHealth",
+    "tags": "dism,repair,health,specialized"
+  },
+  {
+    "name": "DISM Restore Component Health",
+    "command": "DISM /Online /Cleanup-Image /RestoreHealth",
+    "shell": "both",
+    "category": "System",
+    "description": "Repair corrupted Windows component store using Windows Update.",
+    "example": "DISM /Online /Cleanup-Image /RestoreHealth",
+    "tags": "dism,repair,system,specialized"
+  },
+  {
+    "name": "Date Utility",
+    "command": "date",
+    "shell": "both",
+    "category": "System",
+    "description": "The date command is used to show or change the current date.",
+    "example": "date /?",
+    "tags": "date,system,everyday"
+  },
+  {
+    "name": "Date and Time in CMD",
+    "command": "date /t & time /t",
+    "shell": "cmd",
+    "category": "System",
+    "description": "Displays the current system date and time in command prompt.",
+    "example": "echo %DATE% %TIME%",
+    "tags": "date,time,cmd,everyday"
+  },
+  {
+    "name": "Dblspace Utility",
+    "command": "dblspace",
+    "shell": "both",
+    "category": "System",
+    "description": "The dblspace command is used to create or configure DoubleSpace compressed drives.",
+    "example": "dblspace /?",
+    "tags": "dblspace,system,specialized"
+  },
+  {
+    "name": "Debug Utility",
+    "command": "debug",
+    "shell": "both",
+    "category": "System",
+    "description": "The debug command starts Debug, a command line application used to test and edit programs.",
+    "example": "debug /?",
+    "tags": "debug,system,specialized"
+  },
+  {
+    "name": "Deltree Utility",
+    "command": "deltree",
+    "shell": "both",
+    "category": "System",
+    "description": "The deltree command is used to delete a directory and all the files and subdirectories within it.",
+    "example": "deltree /?",
+    "tags": "deltree,system,specialized"
+  },
+  {
+    "name": "Detailed Computer Info",
+    "command": "Get-ComputerInfo",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Retrieves comprehensive operating system and hardware properties in PowerShell.",
+    "example": "Get-ComputerInfo | Select-Object OsName, WindowsVersion",
+    "tags": "system,hardware,version,specialized"
+  },
+  {
+    "name": "Diantz Utility",
+    "command": "diantz",
+    "shell": "both",
+    "category": "System",
+    "description": "The diantz command is used to losslessly compress one or more files.",
+    "example": "diantz /?",
+    "tags": "diantz,system,specialized"
+  },
+  {
+    "name": "Diskcomp Utility",
+    "command": "diskcomp",
+    "shell": "both",
+    "category": "System",
+    "description": "The diskcomp command is used to compare the contents of two floppy disks.",
+    "example": "diskcomp /?",
+    "tags": "diskcomp,system,specialized"
+  },
+  {
+    "name": "Diskcopy Utility",
+    "command": "diskcopy",
+    "shell": "both",
+    "category": "System",
+    "description": "The diskcopy command is used to copy the entire contents of one floppy disk to another.",
+    "example": "diskcopy /?",
+    "tags": "diskcopy,system,specialized"
+  },
+  {
+    "name": "Dispdiag Utility",
+    "command": "dispdiag",
+    "shell": "both",
+    "category": "System",
+    "description": "The dispdiag command is used to output a log of information about the display system.",
+    "example": "dispdiag /?",
+    "tags": "dispdiag,system,specialized"
+  },
+  {
+    "name": "Djoin Utility",
+    "command": "djoin",
+    "shell": "both",
+    "category": "System",
+    "description": "The djoin command is used to create a new computer account in a domain.",
+    "example": "djoin /?",
+    "tags": "djoin,system,specialized"
+  },
+  {
+    "name": "Dosshell Utility",
+    "command": "dosshell",
+    "shell": "both",
+    "category": "System",
+    "description": "The dosshell command starts DOS Shell, a graphical file management tool for MS-DOS.",
+    "example": "dosshell /?",
+    "tags": "dosshell,system,specialized"
+  },
+  {
+    "name": "Dosx Utility",
+    "command": "dosx",
+    "shell": "both",
+    "category": "System",
+    "description": "The dosx command is used to start DOS Protected Mode Interface (DPMI), a special mode designed to give MS-DOS applications access to more than the normally allowed 640 KB.",
+    "example": "dosx /?",
+    "tags": "dosx,system,specialized"
+  },
+  {
+    "name": "Driverquery Utility",
+    "command": "driverquery /v",
+    "shell": "both",
+    "category": "System",
+    "description": "The driverquery command is used to show a list of all installed drivers.",
+    "example": "driverquery /fo list",
+    "tags": "driverquery,system,specialized"
+  },
+  {
+    "name": "Drvspace Utility",
+    "command": "drvspace",
+    "shell": "both",
+    "category": "System",
+    "description": "The drvspace command is used to create or configure DriveSpace compressed drives.",
+    "example": "drvspace /?",
+    "tags": "drvspace,system,specialized"
+  },
+  {
+    "name": "Echo Utility",
+    "command": "echo",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the echo command to display messages, typically within script or batch files.",
+    "example": "echo /?",
+    "tags": "echo,system,everyday"
+  },
+  {
+    "name": "Edit Utility",
+    "command": "edit",
+    "shell": "both",
+    "category": "System",
+    "description": "The edit command starts the MS-DOS Editor, allowing you to create and modify text files.",
+    "example": "edit /?",
+    "tags": "edit,system,specialized"
+  },
+  {
+    "name": "Edlin Utility",
+    "command": "edlin",
+    "shell": "both",
+    "category": "System",
+    "description": "The edlin command starts the Edlin tool, which creates and modifies text files from the command line.",
+    "example": "edlin /?",
+    "tags": "edlin,system,specialized"
+  },
+  {
+    "name": "Emm386 Utility",
+    "command": "emm386",
+    "shell": "both",
+    "category": "System",
+    "description": "The emm386 command gives MS-DOS access to more than 640 KB of memory (RAM).",
+    "example": "emm386 /?",
+    "tags": "emm386,system,specialized"
+  },
+  {
+    "name": "Endlocal Utility",
+    "command": "endlocal",
+    "shell": "both",
+    "category": "System",
+    "description": "The endlocal command ends the localization of environment changes within a batch or script file.",
+    "example": "endlocal /?",
+    "tags": "endlocal,system,specialized"
+  },
+  {
+    "name": "Enumerate Current Boot Entry",
+    "command": "bcdedit /enum {current}",
+    "shell": "both",
+    "category": "System",
+    "description": "View Boot Configuration Data entry for the running OS.",
+    "example": "bcdedit /enum {current}",
+    "tags": "bcdedit,boot,admin,specialized"
+  },
+  {
+    "name": "Environment Variables",
+    "command": "set",
+    "shell": "cmd",
+    "category": "System",
+    "description": "List all current environment variables and values.",
+    "example": "set",
+    "tags": "env,variables,everyday"
+  },
+  {
+    "name": "Environment Variables in PowerShell",
+    "command": "Get-ChildItem Env:",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Lists all current environment variables and their values.",
+    "example": "Get-ChildItem Env:PATH",
+    "tags": "env,variables,path,everyday"
+  },
+  {
+    "name": "Esentutl Utility",
+    "command": "esentutl",
+    "shell": "both",
+    "category": "System",
+    "description": "The esentutl command manages Extensible Storage Engine (ESE) databases.",
+    "example": "esentutl /?",
+    "tags": "esentutl,system,specialized"
+  },
+  {
+    "name": "Eventcreate Utility",
+    "command": "eventcreate",
+    "shell": "both",
+    "category": "System",
+    "description": "The eventcreate command lets you create a custom event in an event log.",
+    "example": "eventcreate /?",
+    "tags": "eventcreate,system,specialized"
+  },
+  {
+    "name": "Eventtriggers Utility",
+    "command": "eventtriggers",
+    "shell": "both",
+    "category": "System",
+    "description": "The eventtriggers command allows you to configure and display event triggers, but it's only available in Windows XP.",
+    "example": "eventtriggers /?",
+    "tags": "eventtriggers,system,specialized"
+  },
+  {
+    "name": "Exe2bin Utility",
+    "command": "exe2bin",
+    "shell": "both",
+    "category": "System",
+    "description": "The exe2bin command converts an executable EXE file to a binary file.",
+    "example": "exe2bin /?",
+    "tags": "exe2bin,system,specialized"
+  },
+  {
+    "name": "Exit Utility",
+    "command": "exit",
+    "shell": "both",
+    "category": "System",
+    "description": "The exit command ends the cmd.",
+    "example": "exit /?",
+    "tags": "exit,system,everyday"
+  },
+  {
+    "name": "Extrac32 Utility",
+    "command": "extrac32",
+    "shell": "both",
+    "category": "System",
+    "description": "The extrac32 command extracts files and folders from Microsoft Cabinet (CAB) files.",
+    "example": "extrac32 /?",
+    "tags": "extrac32,system,specialized"
+  },
+  {
+    "name": "Fasthelp Utility",
+    "command": "fasthelp",
+    "shell": "both",
+    "category": "System",
+    "description": "The fasthelp command provides more detailed information on any of the other MS-DOS commands.",
+    "example": "fasthelp /?",
+    "tags": "fasthelp,system,specialized"
+  },
+  {
+    "name": "Fastopen Utility",
+    "command": "fastopen",
+    "shell": "both",
+    "category": "System",
+    "description": "The fastopen command adds a program's hard drive location to a list in memory, which can improve launch times by removing the need for MS-DOS to search for the application on the drive.",
+    "example": "fastopen /?",
+    "tags": "fastopen,system,specialized"
+  },
+  {
+    "name": "Fdisk Utility",
+    "command": "fdisk",
+    "shell": "both",
+    "category": "System",
+    "description": "The fdisk command lets you create, manage, and delete hard drive partitions.",
+    "example": "fdisk /?",
+    "tags": "fdisk,system,specialized"
+  },
+  {
+    "name": "Fltmc Utility",
+    "command": "fltmc",
+    "shell": "both",
+    "category": "System",
+    "description": "The fltmc command loads, unloads, lists, and manages Filter Drivers.",
+    "example": "fltmc /?",
+    "tags": "fltmc,system,specialized"
+  },
+  {
+    "name": "Fondue Utility",
+    "command": "fondue",
+    "shell": "both",
+    "category": "System",
+    "description": "The fondue command, which stands for Features on Demand User Experience Tool, lets you install optional Windows features through the command line.",
+    "example": "fondue /?",
+    "tags": "fondue,system,specialized"
+  },
+  {
+    "name": "For Utility",
+    "command": "for",
+    "shell": "both",
+    "category": "System",
+    "description": "The for command starts a specified program within the MS-DOS subsystem.",
+    "example": "for /?",
+    "tags": "for,system,specialized"
+  },
+  {
+    "name": "Forcedos Utility",
+    "command": "forcedos",
+    "shell": "both",
+    "category": "System",
+    "description": "The forcedos command is used to start the specified program in the MS-DOS subsystem.",
+    "example": "forcedos /?",
+    "tags": "forcedos,system,specialized"
+  },
+  {
+    "name": "Forfiles Utility",
+    "command": "forfiles",
+    "shell": "both",
+    "category": "System",
+    "description": "The forfiles command lets you select one or more files to run a specific command on.",
+    "example": "forfiles /?",
+    "tags": "forfiles,system,specialized"
+  },
+  {
+    "name": "Generate Battery Report",
+    "command": "powercfg /batteryreport",
+    "shell": "both",
+    "category": "System",
+    "description": "Generates a detailed HTML battery performance and health report on laptops.",
+    "example": "powercfg /batteryreport /output battery.html",
+    "tags": "battery,power,laptop,health,everyday"
+  },
+  {
+    "name": "Get Computer Hostname",
+    "command": "hostname",
+    "shell": "both",
+    "category": "System",
+    "description": "Prints the NetBIOS name of the current computer.",
+    "example": "hostname",
+    "tags": "host,name,network,everyday"
+  },
+  {
+    "name": "Get System Information",
+    "command": "systeminfo",
+    "shell": "both",
+    "category": "System",
+    "description": "Displays detailed configuration information about the computer and operating system.",
+    "example": "systeminfo | findstr /B /C:\"OS Name\"",
+    "tags": "os,hardware,specs,info,everyday"
+  },
+  {
+    "name": "Goto Utility",
+    "command": "goto",
+    "shell": "both",
+    "category": "System",
+    "description": "The goto command in a batch or script file directs the command process to a labeled line within the script.",
+    "example": "goto /?",
+    "tags": "goto,system,specialized"
+  },
+  {
+    "name": "Graftabl Utility",
+    "command": "graftabl",
+    "shell": "both",
+    "category": "System",
+    "description": "The graftabl command lets Windows show an extended character set in graphics mode.",
+    "example": "graftabl /?",
+    "tags": "graftabl,system,specialized"
+  },
+  {
+    "name": "Graphics Utility",
+    "command": "graphics",
+    "shell": "both",
+    "category": "System",
+    "description": "The graphics command loads a program that prints graphics.",
+    "example": "graphics /?",
+    "tags": "graphics,system,specialized"
+  },
+  {
+    "name": "Hardware Serial Number",
+    "command": "wmic bios get serialnumber",
+    "shell": "both",
+    "category": "System",
+    "description": "Queries BIOS firmware for the machine serial number.",
+    "example": "wmic bios get serialnumber",
+    "tags": "serial,bios,hardware,everyday"
+  },
+  {
+    "name": "Help Reference",
+    "command": "help",
+    "shell": "both",
+    "category": "System",
+    "description": "List built-in commands with one-line descriptions.",
+    "example": "help",
+    "tags": "help,system,info,everyday"
+  },
+  {
+    "name": "Hwrcomp Utility",
+    "command": "hwrcomp",
+    "shell": "both",
+    "category": "System",
+    "description": "The hwrcomp command compiles custom dictionaries for handwriting recognition.",
+    "example": "hwrcomp /?",
+    "tags": "hwrcomp,system,specialized"
+  },
+  {
+    "name": "Hwrreg Utility",
+    "command": "hwrreg",
+    "shell": "both",
+    "category": "System",
+    "description": "The hwrreg command installs a previously compiled custom dictionary for handwriting recognition.",
+    "example": "hwrreg /?",
+    "tags": "hwrreg,system,specialized"
+  },
+  {
+    "name": "If Utility",
+    "command": "if",
+    "shell": "both",
+    "category": "System",
+    "description": "The if command performs conditional functions in a batch file.",
+    "example": "if /?",
+    "tags": "if,system,specialized"
+  },
+  {
+    "name": "Inspect Startup Programs in Registry",
+    "command": "reg query \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\"",
+    "shell": "both",
+    "category": "System",
+    "description": "Queries Windows registry for autorun programs started on login.",
+    "example": "reg query \"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\"",
+    "tags": "registry,startup,autorun,specialized"
+  },
+  {
+    "name": "Interlnk Utility",
+    "command": "interlnk",
+    "shell": "both",
+    "category": "System",
+    "description": "The interlnk command lets you connect two computers using a serial or parallel connection to share files and printers.",
+    "example": "interlnk /?",
+    "tags": "interlnk,system,specialized"
+  },
+  {
+    "name": "Intersvr Utility",
+    "command": "intersvr",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the intersvr command to start the Interlnk server and copy Interlnk files between computers.",
+    "example": "intersvr /?",
+    "tags": "intersvr,system,specialized"
+  },
+  {
+    "name": "Ipxroute Utility",
+    "command": "ipxroute",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the ipxroute command to display and change information about IPX (Internetwork Packet Exchange) routing tables.",
+    "example": "ipxroute /?",
+    "tags": "ipxroute,system,specialized"
+  },
+  {
+    "name": "Irftp Utility",
+    "command": "irftp",
+    "shell": "both",
+    "category": "System",
+    "description": "The irftp command lets you transmit files over an infrared link.",
+    "example": "irftp /?",
+    "tags": "irftp,system,specialized"
+  },
+  {
+    "name": "Iscsicli Utility",
+    "command": "iscsicli",
+    "shell": "both",
+    "category": "System",
+    "description": "The iscsicli command launches the Microsoft iSCSI Initiator, which is used to manage iSCSI (Internet Small Computer Systems Interface).",
+    "example": "iscsicli /?",
+    "tags": "iscsicli,system,specialized"
+  },
+  {
+    "name": "Kb16 Utility",
+    "command": "kb16",
+    "shell": "both",
+    "category": "System",
+    "description": "The kb16 command supports MS-DOS files that require keyboard configuration for a specific language.",
+    "example": "kb16 /?",
+    "tags": "kb16,system,specialized"
+  },
+  {
+    "name": "Keyb Utility",
+    "command": "keyb",
+    "shell": "both",
+    "category": "System",
+    "description": "The keyb command is used to configure a keyboard for a specific language.",
+    "example": "keyb /?",
+    "tags": "keyb,system,specialized"
+  },
+  {
+    "name": "Ktmutil Utility",
+    "command": "ktmutil",
+    "shell": "both",
+    "category": "System",
+    "description": "The ktmutil command initiates the Kernel Transaction Manager utility, which is available in Windows 11, Windows 10, Windows 8, Windows 7, and Windows Vista.",
+    "example": "ktmutil /?",
+    "tags": "ktmutil,system,specialized"
+  },
+  {
+    "name": "Lh Utility",
+    "command": "lh",
+    "shell": "both",
+    "category": "System",
+    "description": "The lh command stands for `loadhigh` and is available in Windows 98, Windows 95, and MS-DOS.",
+    "example": "lh /?",
+    "tags": "lh,system,specialized"
+  },
+  {
+    "name": "Licensingdiag Utility",
+    "command": "licensingdiag",
+    "shell": "both",
+    "category": "System",
+    "description": "The licensingdiag command generates text-based logs and data files with product activation and Windows licensing info.",
+    "example": "licensingdiag /?",
+    "tags": "licensingdiag,system,specialized"
+  },
+  {
+    "name": "List Devices That Wake PC",
+    "command": "powercfg /devicequery wake_armed",
+    "shell": "both",
+    "category": "System",
+    "description": "Lists hardware devices currently configured to wake computer from sleep.",
+    "example": "powercfg /devicequery wake_armed",
+    "tags": "sleep,wake,powercfg,specialized"
+  },
+  {
+    "name": "List Power Plans",
+    "command": "powercfg /l",
+    "shell": "both",
+    "category": "System",
+    "description": "List all power management schemes with active plan starred.",
+    "example": "powercfg /l",
+    "tags": "powercfg,battery,power,everyday"
+  },
+  {
+    "name": "Loadfix Utility",
+    "command": "loadfix",
+    "shell": "both",
+    "category": "System",
+    "description": "The loadfix command loads a specified program into the first 64K of memory, then runs it.",
+    "example": "loadfix /?",
+    "tags": "loadfix,system,specialized"
+  },
+  {
+    "name": "Loadhigh Utility",
+    "command": "loadhigh",
+    "shell": "both",
+    "category": "System",
+    "description": "The loadhigh command lets you load a program into high memory.",
+    "example": "loadhigh /?",
+    "tags": "loadhigh,system,specialized"
+  },
+  {
+    "name": "Lock Utility",
+    "command": "lock",
+    "shell": "both",
+    "category": "System",
+    "description": "The lock command lets you lock a drive for direct disk access by a program.",
+    "example": "lock /?",
+    "tags": "lock,system,specialized"
+  },
+  {
+    "name": "Lodctr Utility",
+    "command": "lodctr",
+    "shell": "both",
+    "category": "System",
+    "description": "The lodctr command updates registry values tied to performance counters.",
+    "example": "lodctr /?",
+    "tags": "lodctr,system,specialized"
+  },
+  {
+    "name": "Lpq Utility",
+    "command": "lpq",
+    "shell": "both",
+    "category": "System",
+    "description": "The lpq command shows the status of a print queue on a computer using the Line Printer Daemon (LPD).",
+    "example": "lpq /?",
+    "tags": "lpq,system,specialized"
+  },
+  {
+    "name": "Lpr Utility",
+    "command": "lpr",
+    "shell": "both",
+    "category": "System",
+    "description": "You use the lpr command to send a file to a computer running the Line Printer Daemon (LPD).",
+    "example": "lpr /?",
+    "tags": "lpr,system,specialized"
+  },
+  {
+    "name": "Manage-bde Utility",
+    "command": "manage-bde",
+    "shell": "both",
+    "category": "System",
+    "description": "The manage-bde command lets you configure BitLocker Drive Encryption directly from the command line.",
+    "example": "manage-bde /?",
+    "tags": "manage-bde,system,specialized"
+  },
+  {
+    "name": "Mem Utility",
+    "command": "mem",
+    "shell": "both",
+    "category": "System",
+    "description": "The mem command provides information about used and free memory areas and programs currently loaded into memory in the MS-DOS subsystem.",
+    "example": "mem /?",
+    "tags": "mem,system,specialized"
+  },
+  {
+    "name": "Memmaker Utility",
+    "command": "memmaker",
+    "shell": "both",
+    "category": "System",
+    "description": "The memmaker command starts MemMaker, a memory optimization tool available in Windows 98, 95, and MS-DOS.",
+    "example": "memmaker /?",
+    "tags": "memmaker,system,specialized"
+  },
+  {
+    "name": "Mode Utility",
+    "command": "mode",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the mode command to configure system devices, such as COM and LPT ports.",
+    "example": "mode /?",
+    "tags": "mode,system,specialized"
+  },
+  {
+    "name": "Mofcomp Utility",
+    "command": "mofcomp",
+    "shell": "both",
+    "category": "System",
+    "description": "The mofcomp command displays data from a Managed Object Format (MOF) file.",
+    "example": "mofcomp /?",
+    "tags": "mofcomp,system,specialized"
+  },
+  {
+    "name": "Mount Utility",
+    "command": "mount",
+    "shell": "both",
+    "category": "System",
+    "description": "The mount command mounts Network File System (NFS) network shares.",
+    "example": "mount /?",
+    "tags": "mount,system,specialized"
+  },
+  {
+    "name": "Mrinfo Utility",
+    "command": "mrinfo",
+    "shell": "both",
+    "category": "System",
+    "description": "The mrinfo command provides information about a router's interfaces and neighbors.",
+    "example": "mrinfo /?",
+    "tags": "mrinfo,system,specialized"
+  },
+  {
+    "name": "Msav Utility",
+    "command": "msav",
+    "shell": "both",
+    "category": "System",
+    "description": "The msav command launches Microsoft Antivirus and is only available in MS-DOS.",
+    "example": "msav /?",
+    "tags": "msav,system,specialized"
+  },
+  {
+    "name": "Msbackup Utility",
+    "command": "msbackup",
+    "shell": "both",
+    "category": "System",
+    "description": "The msbackup command starts Microsoft Backup, a tool for backing up and restoring files.",
+    "example": "msbackup /?",
+    "tags": "msbackup,system,specialized"
+  },
+  {
+    "name": "Mscdex Utility",
+    "command": "mscdex",
+    "shell": "both",
+    "category": "System",
+    "description": "The mscdex command allows MS-DOS to access CD-ROM drives.",
+    "example": "mscdex /?",
+    "tags": "mscdex,system,specialized"
+  },
+  {
+    "name": "Msd Utility",
+    "command": "msd",
+    "shell": "both",
+    "category": "System",
+    "description": "The msd command launches Microsoft Diagnostics, a system information tool exclusive to MS-DOS.",
+    "example": "msd /?",
+    "tags": "msd,system,specialized"
+  },
+  {
+    "name": "Msg Utility",
+    "command": "msg",
+    "shell": "both",
+    "category": "System",
+    "description": "The msg command lets you send a message to a user.",
+    "example": "msg /?",
+    "tags": "msg,system,specialized"
+  },
+  {
+    "name": "Msiexec Utility",
+    "command": "msiexec",
+    "shell": "both",
+    "category": "System",
+    "description": "The msiexec command starts the Windows Installer, which is used to install and configure software.",
+    "example": "msiexec /?",
+    "tags": "msiexec,system,specialized"
+  },
+  {
+    "name": "Muiunattend Utility",
+    "command": "muiunattend",
+    "shell": "both",
+    "category": "System",
+    "description": "The muiunattend command begins the Multilanguage User Interface unattended setup process.",
+    "example": "muiunattend /?",
+    "tags": "muiunattend,system,specialized"
+  },
+  {
+    "name": "Net1 Utility",
+    "command": "net1",
+    "shell": "both",
+    "category": "System",
+    "description": "The net1 command allows you to display, configure, and correct various network settings.",
+    "example": "net1 /?",
+    "tags": "net1,system,specialized"
+  },
+  {
+    "name": "Netcfg Utility",
+    "command": "netcfg",
+    "shell": "both",
+    "category": "System",
+    "description": "The netcfg command installs the Windows Preinstallation Environment (WinPE), a streamlined version of Windows for deploying workstations.",
+    "example": "netcfg /?",
+    "tags": "netcfg,system,specialized"
+  },
+  {
+    "name": "Nfsadmin Utility",
+    "command": "nfsadmin",
+    "shell": "both",
+    "category": "System",
+    "description": "The nfsadmin command manages the Server for Network File System (NFS) or Client for NFS from the command line.",
+    "example": "nfsadmin /?",
+    "tags": "nfsadmin,system,specialized"
+  },
+  {
+    "name": "Nlsfunc Utility",
+    "command": "nlsfunc",
+    "shell": "both",
+    "category": "System",
+    "description": "The nlsfunc command loads information specific to a particular country or region.",
+    "example": "nlsfunc /?",
+    "tags": "nlsfunc,system,specialized"
+  },
+  {
+    "name": "Nltest Utility",
+    "command": "nltest",
+    "shell": "both",
+    "category": "System",
+    "description": "The nltest command tests secure channels between Windows computers in a domain and between domain controllers that trust other domains.",
+    "example": "nltest /?",
+    "tags": "nltest,system,specialized"
+  },
+  {
+    "name": "Ntbackup Utility",
+    "command": "ntbackup",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the ntbackup command to perform various backup functions from the Command Prompt, a batch file, or a script file.",
+    "example": "ntbackup /?",
+    "tags": "ntbackup,system,specialized"
+  },
+  {
+    "name": "Ntsd Utility",
+    "command": "ntsd",
+    "shell": "both",
+    "category": "System",
+    "description": "The ntsd command allows you to perform specific command-line debugging tasks.",
+    "example": "ntsd /?",
+    "tags": "ntsd,system,specialized"
+  },
+  {
+    "name": "Ocsetup Utility",
+    "command": "ocsetup",
+    "shell": "both",
+    "category": "System",
+    "description": "The ocsetup command launches the Windows Optional Component Setup tool, which installs additional Windows features.",
+    "example": "ocsetup /?",
+    "tags": "ocsetup,system,specialized"
+  },
+  {
+    "name": "Pentnt Utility",
+    "command": "pentnt",
+    "shell": "both",
+    "category": "System",
+    "description": "The pentnt command helps detect floating-point division errors in Intel Pentium chips.",
+    "example": "pentnt /?",
+    "tags": "pentnt,system,specialized"
+  },
+  {
+    "name": "Pkgmgr Utility",
+    "command": "pkgmgr",
+    "shell": "both",
+    "category": "System",
+    "description": "The pkgmgr command starts the Windows Package Manager from the Command Prompt.",
+    "example": "pkgmgr /?",
+    "tags": "pkgmgr,system,specialized"
+  },
+  {
+    "name": "Pnpunattend Utility",
+    "command": "pnpunattend",
+    "shell": "both",
+    "category": "System",
+    "description": "The pnpunattend command automates the installation of hardware device drivers.",
+    "example": "pnpunattend /?",
+    "tags": "pnpunattend,system,specialized"
+  },
+  {
+    "name": "Pnputil Utility",
+    "command": "pnputil",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the pnputil command to start the Microsoft Plug and Play (PnP) Utility, which allows installation of a Plug and Play device from the command line.",
+    "example": "pnputil /?",
+    "tags": "pnputil,system,specialized"
+  },
+  {
+    "name": "Popd Utility",
+    "command": "popd",
+    "shell": "both",
+    "category": "System",
+    "description": "The popd command changes the current directory to the one stored most recently by the `pushd` command.",
+    "example": "popd /?",
+    "tags": "popd,system,specialized"
+  },
+  {
+    "name": "Power Utility",
+    "command": "power",
+    "shell": "both",
+    "category": "System",
+    "description": "The power command helps reduce a computer's power consumption by monitoring software and hardware devices.",
+    "example": "power /?",
+    "tags": "power,system,specialized"
+  },
+  {
+    "name": "Print Utility",
+    "command": "print",
+    "shell": "both",
+    "category": "System",
+    "description": "The print command lets you print a specific text file to a selected printing device.",
+    "example": "print /?",
+    "tags": "print,system,specialized"
+  },
+  {
+    "name": "Prompt Utility",
+    "command": "prompt",
+    "shell": "cmd",
+    "category": "System",
+    "description": "Use the prompt command to customize how the prompt text looks in Command Prompt or MS-DOS.",
+    "example": "prompt /?",
+    "tags": "prompt,system,specialized"
+  },
+  {
+    "name": "Pushd Utility",
+    "command": "pushd",
+    "shell": "both",
+    "category": "System",
+    "description": "The pushd command stores a directory for use, usually within a batch file or script.",
+    "example": "pushd /?",
+    "tags": "pushd,system,specialized"
+  },
+  {
+    "name": "Pwlauncher Utility",
+    "command": "pwlauncher",
+    "shell": "both",
+    "category": "System",
+    "description": "The pwlauncher command enables, disables, or shows the status of your Windows To Go startup options.",
+    "example": "pwlauncher /?",
+    "tags": "pwlauncher,system,specialized"
+  },
+  {
+    "name": "Qbasic Utility",
+    "command": "qbasic",
+    "shell": "both",
+    "category": "System",
+    "description": "The qbasic command launches QBasic, an MS-DOS-based programming environment for the BASIC programming language.",
+    "example": "qbasic /?",
+    "tags": "qbasic,system,specialized"
+  },
+  {
+    "name": "Query Application Event Log",
+    "command": "wevtutil qe Application /c:10 /rd:true /f:text",
+    "shell": "both",
+    "category": "System",
+    "description": "Queries latest application event records directly from command line.",
+    "example": "wevtutil qe System /c:5 /rd:true /f:text",
+    "tags": "wevtutil,events,logs,specialized"
+  },
+  {
+    "name": "Query Scheduled Task Info",
+    "command": "schtasks /query /tn \"Lab\\Cleanup\" /fo list",
+    "shell": "both",
+    "category": "System",
+    "description": "Query next run time and status of a scheduled task.",
+    "example": "schtasks /query /fo table",
+    "tags": "schtasks,task,query,everyday"
+  },
+  {
+    "name": "Query System Event Log Errors",
+    "command": "Get-WinEvent -LogName System -MaxEvents 20 | Where-Object LevelDisplayName -eq 'Error'",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Retrieves the latest 20 critical error entries from Windows System log.",
+    "example": "Get-WinEvent -LogName Application -MaxEvents 10",
+    "tags": "events,logs,errors,eventvwr,specialized"
+  },
+  {
+    "name": "Query Utility",
+    "command": "query",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the query command to check the status of a specific service.",
+    "example": "query /?",
+    "tags": "query,system,specialized"
+  },
+  {
+    "name": "Query Windows Release Version",
+    "command": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\" /v DisplayVersion",
+    "shell": "both",
+    "category": "System",
+    "description": "Query exact Windows feature release (e.g. 24H2, 23H2).",
+    "example": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\" /v DisplayVersion",
+    "tags": "reg,version,build,everyday"
+  },
+  {
+    "name": "Rasautou Utility",
+    "command": "rasautou",
+    "shell": "both",
+    "category": "System",
+    "description": "The rasautou command manages Remote Access Dialer AutoDial addresses.",
+    "example": "rasautou /?",
+    "tags": "rasautou,system,specialized"
+  },
+  {
+    "name": "Rdpsign Utility",
+    "command": "rdpsign",
+    "shell": "both",
+    "category": "System",
+    "description": "The rdpsign command signs a Remote Desktop Protocol (RDP) file.",
+    "example": "rdpsign /?",
+    "tags": "rdpsign,system,specialized"
+  },
+  {
+    "name": "Read from Clipboard",
+    "command": "Get-Clipboard",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Retrieves the current plain text contents of the Windows clipboard.",
+    "example": "Get-Clipboard",
+    "tags": "clip,paste,clipboard,everyday"
+  },
+  {
+    "name": "Reagentc Utility",
+    "command": "reagentc",
+    "shell": "both",
+    "category": "System",
+    "description": "The reagentc command configures the Windows Recovery Environment (RE).",
+    "example": "reagentc /?",
+    "tags": "reagentc,system,specialized"
+  },
+  {
+    "name": "Reboot Computer Immediately",
+    "command": "shutdown /r /t 0",
+    "shell": "both",
+    "category": "System",
+    "description": "Immediately restart the local computer with 0 seconds delay.",
+    "example": "shutdown /r /t 0",
+    "tags": "shutdown,reboot,system,everyday"
+  },
+  {
+    "name": "Recimg Utility",
+    "command": "recimg",
+    "shell": "both",
+    "category": "System",
+    "description": "The recimg command creates a custom refresh image and is available in Windows 8.",
+    "example": "recimg /?",
+    "tags": "recimg,system,specialized"
+  },
+  {
+    "name": "Reg Utility",
+    "command": "reg",
+    "shell": "both",
+    "category": "System",
+    "description": "The reg command manages the Windows Registry from the command line, allowing you to perform tasks like adding registry keys and exporting the registry.",
+    "example": "reg /?",
+    "tags": "reg,system,specialized"
+  },
+  {
+    "name": "Regini Utility",
+    "command": "regini",
+    "shell": "both",
+    "category": "System",
+    "description": "The regini command lets you set or change registry permissions and values from the command line.",
+    "example": "regini /?",
+    "tags": "regini,system,specialized"
+  },
+  {
+    "name": "Register-cimprovider Utility",
+    "command": "register-cimprovider",
+    "shell": "both",
+    "category": "System",
+    "description": "The register-cimprovider command registers a Common Information Model (CIM) Provider in Windows.",
+    "example": "register-cimprovider /?",
+    "tags": "register-cimprovider,system,specialized"
+  },
+  {
+    "name": "Regsvr32 Utility",
+    "command": "regsvr32",
+    "shell": "both",
+    "category": "System",
+    "description": "The regsvr32 command registers a DLL file as a command component in the Windows Registry.",
+    "example": "regsvr32 /?",
+    "tags": "regsvr32,system,specialized"
+  },
+  {
+    "name": "Rem Utility",
+    "command": "rem",
+    "shell": "both",
+    "category": "System",
+    "description": "The rem command records comments or remarks in a batch or script file.",
+    "example": "rem /?",
+    "tags": "rem,system,specialized"
+  },
+  {
+    "name": "Repair-bde Utility",
+    "command": "repair-bde",
+    "shell": "both",
+    "category": "System",
+    "description": "The repair-bde command repairs or decrypts a damaged drive encrypted with BitLocker.",
+    "example": "repair-bde /?",
+    "tags": "repair-bde,system,specialized"
+  },
+  {
+    "name": "Reset Utility",
+    "command": "reset",
+    "shell": "both",
+    "category": "System",
+    "description": "The reset command, run as `reset session`, restores the session subsystem software and hardware to their initial settings.",
+    "example": "reset /?",
+    "tags": "reset,system,specialized"
+  },
+  {
+    "name": "Restore Utility",
+    "command": "restore",
+    "shell": "both",
+    "category": "System",
+    "description": "The restore command helps you restore files backed up with the `backup` command.",
+    "example": "restore /?",
+    "tags": "restore,system,specialized"
+  },
+  {
+    "name": "Resync System Clock",
+    "command": "w32tm /resync",
+    "shell": "both",
+    "category": "System",
+    "description": "Force immediate clock synchronization with NTP server.",
+    "example": "w32tm /resync",
+    "tags": "w32tm,ntp,clock,specialized"
+  },
+  {
+    "name": "Rpcinfo Utility",
+    "command": "rpcinfo",
+    "shell": "both",
+    "category": "System",
+    "description": "The rpcinfo command initiates a remote procedure call (RPC) to an RPC server and provides a report on its findings.",
+    "example": "rpcinfo /?",
+    "tags": "rpcinfo,system,specialized"
+  },
+  {
+    "name": "Rpcping Utility",
+    "command": "rpcping",
+    "shell": "both",
+    "category": "System",
+    "description": "The rpcping command pings a server using remote procedure call (RPC) technology.",
+    "example": "rpcping /?",
+    "tags": "rpcping,system,specialized"
+  },
+  {
+    "name": "Rsm Utility",
+    "command": "rsm",
+    "shell": "both",
+    "category": "System",
+    "description": "The rsm command manages media resources through Removable Storage, available in Windows Vista and Windows XP.",
+    "example": "rsm /?",
+    "tags": "rsm,system,specialized"
+  },
+  {
+    "name": "Rwinsta Utility",
+    "command": "rwinsta",
+    "shell": "both",
+    "category": "System",
+    "description": "The rwinsta command is a shorthand for the reset session command.",
+    "example": "rwinsta /?",
+    "tags": "rwinsta,system,specialized"
+  },
+  {
+    "name": "SFC Verify System Files",
+    "command": "sfc /verifyonly",
+    "shell": "both",
+    "category": "System",
+    "description": "Scan integrity of protected system files without modifying them.",
+    "example": "sfc /verifyonly",
+    "tags": "sfc,check,integrity,everyday"
+  },
+  {
+    "name": "Scandisk Utility",
+    "command": "scandisk",
+    "shell": "both",
+    "category": "System",
+    "description": "The scandisk command launches Microsoft ScanDisk, a disk repair program.",
+    "example": "scandisk /?",
+    "tags": "scandisk,system,specialized"
+  },
+  {
+    "name": "Scanreg Utility",
+    "command": "scanreg",
+    "shell": "both",
+    "category": "System",
+    "description": "The scanreg command initiates Windows Registry Checker, used for basic registry repair and backup.",
+    "example": "scanreg /?",
+    "tags": "scanreg,system,specialized"
+  },
+  {
+    "name": "Sdbinst Utility",
+    "command": "sdbinst",
+    "shell": "both",
+    "category": "System",
+    "description": "The sdbinst command is used to deploy customized SDB database files.",
+    "example": "sdbinst /?",
+    "tags": "sdbinst,system,specialized"
+  },
+  {
+    "name": "Search Installed Packages",
+    "command": "winget search package_name",
+    "shell": "both",
+    "category": "System",
+    "description": "Searches official Windows Package Manager repositories for applications.",
+    "example": "winget search python",
+    "tags": "winget,install,packages,everyday"
+  },
+  {
+    "name": "Set Persistent User Variable",
+    "command": "setx NAME value",
+    "shell": "both",
+    "category": "System",
+    "description": "Save an environment variable permanently for future sessions.",
+    "example": "setx EDITOR notepad",
+    "tags": "setx,env,specialized"
+  },
+  {
+    "name": "Set PowerShell Execution Policy",
+    "command": "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser",
+    "shell": "powershell",
+    "category": "System",
+    "description": "Sets script execution policy for the current user session.",
+    "example": "Get-ExecutionPolicy -List",
+    "tags": "executionpolicy,scripts,powershell,specialized"
+  },
+  {
+    "name": "Setlocal Utility",
+    "command": "setlocal",
+    "shell": "both",
+    "category": "System",
+    "description": "The setlocal command begins the localization of environment changes in a batch or script file.",
+    "example": "setlocal /?",
+    "tags": "setlocal,system,specialized"
+  },
+  {
+    "name": "Setspn Utility",
+    "command": "setspn",
+    "shell": "both",
+    "category": "System",
+    "description": "The setspn command manages Service Principal Names (SPN) for an Active Directory (AD) service account.",
+    "example": "setspn /?",
+    "tags": "setspn,system,specialized"
+  },
+  {
+    "name": "Setver Utility",
+    "command": "setver",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the setver command to specify the MS-DOS version number that MS-DOS reports to a program.",
+    "example": "setver /?",
+    "tags": "setver,system,specialized"
+  },
+  {
+    "name": "Setx Utility",
+    "command": "setx",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the setx command to create or modify environment variables in either the user or system environment.",
+    "example": "setx /?",
+    "tags": "setx,system,specialized"
+  },
+  {
+    "name": "Shadow Utility",
+    "command": "shadow",
+    "shell": "both",
+    "category": "System",
+    "description": "You can use the shadow command to monitor another Remote Desktop Services session.",
+    "example": "shadow /?",
+    "tags": "shadow,system,specialized"
+  },
+  {
+    "name": "Share Utility",
+    "command": "share",
+    "shell": "both",
+    "category": "System",
+    "description": "The share command installs file locking and sharing functions in MS-DOS.",
+    "example": "share /?",
+    "tags": "share,system,specialized"
+  },
+  {
+    "name": "Shift Utility",
+    "command": "shift",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the shift command to change the position of replaceable parameters in a batch or script file.",
+    "example": "shift /?",
+    "tags": "shift,system,specialized"
+  },
+  {
+    "name": "Showmount Utility",
+    "command": "showmount",
+    "shell": "both",
+    "category": "System",
+    "description": "The showmount command displays information about Network File System (NFS)-mounted file systems.",
+    "example": "showmount /?",
+    "tags": "showmount,system,specialized"
+  },
+  {
+    "name": "Shutdown Utility",
+    "command": "shutdown",
+    "shell": "both",
+    "category": "System",
+    "description": "You can use the shutdown command to shut down, restart, or log off your current system or a remote computer.",
+    "example": "shutdown /?",
+    "tags": "shutdown,system,specialized"
+  },
+  {
+    "name": "Smartdrv Utility",
+    "command": "smartdrv",
+    "shell": "both",
+    "category": "System",
+    "description": "The smartdrv command installs and configures SMARTDrive, which is a disk caching utility for MS-DOS.",
+    "example": "smartdrv /?",
+    "tags": "smartdrv,system,specialized"
+  },
+  {
+    "name": "Start Utility",
+    "command": "start",
+    "shell": "both",
+    "category": "System",
+    "description": "The start command opens a new command line window for running a specified program or command.",
+    "example": "start /?",
+    "tags": "start,system,everyday"
+  },
+  {
+    "name": "Sxstrace Utility",
+    "command": "sxstrace",
+    "shell": "both",
+    "category": "System",
+    "description": "The sxstrace command starts the WinSxs Tracing Utility, which is a programming diagnostic tool.",
+    "example": "sxstrace /?",
+    "tags": "sxstrace,system,specialized"
+  },
+  {
+    "name": "Sys Utility",
+    "command": "sys",
+    "shell": "both",
+    "category": "System",
+    "description": "The sys command copies MS-DOS system files and the command interpreter to a disk.",
+    "example": "sys /?",
+    "tags": "sys,system,specialized"
+  },
+  {
+    "name": "System File Checker Scan",
+    "command": "sfc /scannow",
+    "shell": "both",
+    "category": "System",
+    "description": "Scans integrity of all protected system files and replaces corrupted ones.",
+    "example": "sfc /scannow",
+    "tags": "sfc,repair,integrity,corruption,specialized"
+  },
+  {
+    "name": "Tcmsetup Utility",
+    "command": "tcmsetup",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the tcmsetup command to set up or disable the Telephony Application Programming Interface (TAPI) client.",
+    "example": "tcmsetup /?",
+    "tags": "tcmsetup,system,specialized"
+  },
+  {
+    "name": "Time Utility",
+    "command": "time",
+    "shell": "both",
+    "category": "System",
+    "description": "The time command displays or changes the current time.",
+    "example": "time /?",
+    "tags": "time,system,everyday"
+  },
+  {
+    "name": "Title Utility",
+    "command": "title",
+    "shell": "cmd",
+    "category": "System",
+    "description": "Set the Command Prompt window title using the title command, available in Windows 11, 10, 8, 7, Vista, and XP.",
+    "example": "title /?",
+    "tags": "title,system,everyday"
+  },
+  {
+    "name": "Tlntadmn Utility",
+    "command": "tlntadmn",
+    "shell": "both",
+    "category": "System",
+    "description": "Administer a local or remote computer running a Telnet Server using the tlntadmn command, which is available in Windows 11, 10, 8, 7, Vista, and XP.",
+    "example": "tlntadmn /?",
+    "tags": "tlntadmn,system,specialized"
+  },
+  {
+    "name": "Tpmvscmgr Utility",
+    "command": "tpmvscmgr",
+    "shell": "both",
+    "category": "System",
+    "description": "The tpmvscmgr command creates and destroys TPM virtual smart cards.",
+    "example": "tpmvscmgr /?",
+    "tags": "tpmvscmgr,system,specialized"
+  },
+  {
+    "name": "Tracerpt Utility",
+    "command": "tracerpt",
+    "shell": "both",
+    "category": "System",
+    "description": "The tracerpt command processes event trace logs or real-time data from instrumented event trace providers.",
+    "example": "tracerpt /?",
+    "tags": "tracerpt,system,specialized"
+  },
+  {
+    "name": "Tzutil Utility",
+    "command": "tzutil",
+    "shell": "both",
+    "category": "System",
+    "description": "The tzutil command lets you display or configure your system's current time zone.",
+    "example": "tzutil /?",
+    "tags": "tzutil,system,specialized"
+  },
+  {
+    "name": "Umount Utility",
+    "command": "umount",
+    "shell": "both",
+    "category": "System",
+    "description": "The umount command removes Network File System (NFS) mounted network shares.",
+    "example": "umount /?",
+    "tags": "umount,system,specialized"
+  },
+  {
+    "name": "Undelete Utility",
+    "command": "undelete",
+    "shell": "both",
+    "category": "System",
+    "description": "The undelete command undoes deletions performed with the MS-DOS `delete` command and is exclusive to MS-DOS.",
+    "example": "undelete /?",
+    "tags": "undelete,system,specialized"
+  },
+  {
+    "name": "Unformat Utility",
+    "command": "unformat",
+    "shell": "both",
+    "category": "System",
+    "description": "The unformat command reverses formatting on a drive done by the MS-DOS `format` command, also limited to MS-DOS.",
+    "example": "unformat /?",
+    "tags": "unformat,system,specialized"
+  },
+  {
+    "name": "Unlock Utility",
+    "command": "unlock",
+    "shell": "both",
+    "category": "System",
+    "description": "The unlock command is used to unlock a drive, allowing programs to disable direct disk access.",
+    "example": "unlock /?",
+    "tags": "unlock,system,specialized"
+  },
+  {
+    "name": "Unlodctr Utility",
+    "command": "unlodctr",
+    "shell": "both",
+    "category": "System",
+    "description": "The unlodctr command removes Explain text and performance counter names for a service or device driver from the Windows Registry.",
+    "example": "unlodctr /?",
+    "tags": "unlodctr,system,specialized"
+  },
+  {
+    "name": "Upgrade All Packages",
+    "command": "winget upgrade --all",
+    "shell": "both",
+    "category": "System",
+    "description": "Upgrades all installed applications that have new releases in winget.",
+    "example": "winget upgrade",
+    "tags": "winget,update,upgrade,everyday"
+  },
+  {
+    "name": "Vaultcmd Utility",
+    "command": "vaultcmd",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the vaultcmd command to create, remove, and display stored credentials.",
+    "example": "vaultcmd /?",
+    "tags": "vaultcmd,system,specialized"
+  },
+  {
+    "name": "Verify Utility",
+    "command": "verify",
+    "shell": "both",
+    "category": "System",
+    "description": "The verify command enables or disables the ability of Command Prompt or MS-DOS to confirm that files are written correctly to a disk.",
+    "example": "verify /?",
+    "tags": "verify,system,specialized"
+  },
+  {
+    "name": "Vsafe Utility",
+    "command": "vsafe",
+    "shell": "both",
+    "category": "System",
+    "description": "The vsafe command starts VSafe, a basic virus protection system for MS-DOS.",
+    "example": "vsafe /?",
+    "tags": "vsafe,system,specialized"
+  },
+  {
+    "name": "Vssadmin Utility",
+    "command": "vssadmin",
+    "shell": "both",
+    "category": "System",
+    "description": "The vssadmin command launches the Volume Shadow Copy Service administrative tool.",
+    "example": "vssadmin /?",
+    "tags": "vssadmin,system,specialized"
+  },
+  {
+    "name": "W32tm Utility",
+    "command": "w32tm",
+    "shell": "both",
+    "category": "System",
+    "description": "The w32tm command helps you troubleshoot Windows Time issues.",
+    "example": "w32tm /?",
+    "tags": "w32tm,system,specialized"
+  },
+  {
+    "name": "Wbadmin Utility",
+    "command": "wbadmin",
+    "shell": "both",
+    "category": "System",
+    "description": "Use the wbadmin command to start and stop backup tasks.",
+    "example": "wbadmin /?",
+    "tags": "wbadmin,system,specialized"
+  },
+  {
+    "name": "Wecutil Utility",
+    "command": "wecutil",
+    "shell": "both",
+    "category": "System",
+    "description": "The wecutil command manages subscriptions to events forwarded from computers that support WS-Management.",
+    "example": "wecutil /?",
+    "tags": "wecutil,system,specialized"
+  },
+  {
+    "name": "Windows Build Version",
+    "command": "ver",
+    "shell": "cmd",
+    "category": "System",
+    "description": "Display Windows OS kernel and build number.",
+    "example": "ver",
+    "tags": "version,os,everyday"
+  },
+  {
+    "name": "Windows Time Service Status",
+    "command": "w32tm /query /status",
+    "shell": "both",
+    "category": "System",
+    "description": "Query system clock NTP time source and last sync status.",
+    "example": "w32tm /query /status",
+    "tags": "w32tm,time,clock,ntp,everyday"
+  },
+  {
+    "name": "Winmgmt Utility",
+    "command": "winmgmt",
+    "shell": "both",
+    "category": "System",
+    "description": "The winmgmt command launches the command line version of Windows Management Instrumentation (WMI), a scripting tool within Windows.",
+    "example": "winmgmt /?",
+    "tags": "winmgmt,system,specialized"
+  },
+  {
+    "name": "Winsat Utility",
+    "command": "winsat",
+    "shell": "both",
+    "category": "System",
+    "description": "The winsat command launches the Windows System Assessment Tool, a program that evaluates various features, attributes, and capabilities of a computer running Windows.",
+    "example": "winsat /?",
+    "tags": "winsat,system,specialized"
+  },
+  {
+    "name": "Wmic Utility",
+    "command": "wmic",
+    "shell": "both",
+    "category": "System",
+    "description": "The wmic command opens the Windows Management Instrumentation Command Line (WMIC), a scripting interface that simplifies using Windows Management Instrumentation (WMI) and systems managed with WMI.",
+    "example": "wmic /?",
+    "tags": "wmic,system,specialized"
+  },
+  {
+    "name": "Wsmanhttpconfig Utility",
+    "command": "wsmanhttpconfig",
+    "shell": "both",
+    "category": "System",
+    "description": "The wsmanhttpconfig command manages aspects of the Windows Remote Management (WinRM) service.",
+    "example": "wsmanhttpconfig /?",
+    "tags": "wsmanhttpconfig,system,specialized"
+  },
+  {
+    "name": "Xwizard Utility",
+    "command": "xwizard",
+    "shell": "both",
+    "category": "System",
+    "description": "The xwizard command, short for Extensible Wizard, registers data in Windows, often using a preconfigured XML file.",
+    "example": "xwizard /?",
+    "tags": "xwizard,system,specialized"
+  },
+  {
+    "name": "Add User to Administrators",
+    "command": "net localgroup Administrators joshua /add",
+    "shell": "both",
+    "category": "Users",
+    "description": "Grant administrative privileges by adding user to Administrators.",
+    "example": "net localgroup Administrators dev /add",
+    "tags": "net,admin,privilege,specialized"
+  },
+  {
+    "name": "Cmdkey Utility",
+    "command": "cmdkey",
+    "shell": "both",
+    "category": "Users",
+    "description": "The cmdkey command is used to show, create, and remove stored user names and passwords.",
+    "example": "cmdkey /?",
+    "tags": "cmdkey,users,specialized"
+  },
+  {
+    "name": "Create Local User Account",
+    "command": "net user joshua Lab-Pass-26! /add",
+    "shell": "both",
+    "category": "Users",
+    "description": "Create a new local Windows user account with password.",
+    "example": "net user dev MyPass123! /add",
+    "tags": "net,user,create,admin,specialized"
+  },
+  {
+    "name": "Delete User Account",
+    "command": "net user joshua /delete",
+    "shell": "both",
+    "category": "Users",
+    "description": "Permanently remove a local user account.",
+    "example": "net user testuser /delete",
+    "tags": "net,user,delete,specialized"
+  },
+  {
+    "name": "Disable User Account",
+    "command": "net user joshua /active:no",
+    "shell": "both",
+    "category": "Users",
+    "description": "Disable a local user account without deleting it.",
+    "example": "net user guest /active:no",
+    "tags": "net,user,disable,specialized"
+  },
+  {
+    "name": "Gpresult Utility",
+    "command": "gpresult /r",
+    "shell": "both",
+    "category": "Users",
+    "description": "The gpresult command displays Group Policy settings.",
+    "example": "gpresult /v",
+    "tags": "gpresult,users,specialized"
+  },
+  {
+    "name": "Gpupdate Utility",
+    "command": "gpupdate /force",
+    "shell": "both",
+    "category": "Users",
+    "description": "The gpupdate command refreshes Group Policy settings.",
+    "example": "gpupdate /target:computer /force",
+    "tags": "gpupdate,users,specialized"
+  },
+  {
+    "name": "Grant Inherited Folder Modify Permission",
+    "command": "icacls C:\\data /grant joshua:(OI)(CI)M",
+    "shell": "both",
+    "category": "Users",
+    "description": "Grant inherited Modify permissions on directory tree.",
+    "example": "icacls C:\\shared /grant Users:(OI)(CI)M",
+    "tags": "icacls,permissions,acl,specialized"
+  },
+  {
+    "name": "Inspect Current User Privileges",
+    "command": "whoami /all",
+    "shell": "both",
+    "category": "Users",
+    "description": "Shows user name, security identifiers (SID), group membership, and privileges.",
+    "example": "whoami /priv",
+    "tags": "whoami,security,privileges,tokens,everyday"
+  },
+  {
+    "name": "Klist Utility",
+    "command": "klist",
+    "shell": "both",
+    "category": "Users",
+    "description": "The klist command lists Kerberos service tickets and can also purge them.",
+    "example": "klist /?",
+    "tags": "klist,users,specialized"
+  },
+  {
+    "name": "Ksetup Utility",
+    "command": "ksetup",
+    "shell": "both",
+    "category": "Users",
+    "description": "The ksetup command configures connections to a Kerberos server.",
+    "example": "ksetup /?",
+    "tags": "ksetup,users,specialized"
+  },
+  {
+    "name": "List Active Network Shares",
+    "command": "net share",
+    "shell": "both",
+    "category": "Users",
+    "description": "List all shared folder resources on the local machine.",
+    "example": "net share",
+    "tags": "net,share,network,everyday"
+  },
+  {
+    "name": "List Active Sessions",
+    "command": "query user",
+    "shell": "both",
+    "category": "Users",
+    "description": "Displays information about active user sessions on the computer.",
+    "example": "query user",
+    "tags": "sessions,rdp,login,everyday"
+  },
+  {
+    "name": "List Local Groups",
+    "command": "Get-LocalGroup",
+    "shell": "powershell",
+    "category": "Users",
+    "description": "Retrieves local security groups such as Administrators and Users.",
+    "example": "Get-LocalGroupMember -Group Administrators",
+    "tags": "groups,security,membership,everyday"
+  },
+  {
+    "name": "List Local User Accounts",
+    "command": "Get-LocalUser",
+    "shell": "powershell",
+    "category": "Users",
+    "description": "Retrieves all user accounts configured on the local machine.",
+    "example": "Get-LocalUser | Select-Object Name, Enabled, LastLogon",
+    "tags": "users,accounts,security,everyday"
+  },
+  {
+    "name": "List Local Users",
+    "command": "net user",
+    "shell": "both",
+    "category": "Users",
+    "description": "List all local user accounts registered on this PC.",
+    "example": "net user",
+    "tags": "net,user,accounts,everyday"
+  },
+  {
+    "name": "Logoff Utility",
+    "command": "logoff",
+    "shell": "both",
+    "category": "Users",
+    "description": "Use the logoff command to end a session.",
+    "example": "logoff /?",
+    "tags": "logoff,users,specialized"
+  },
+  {
+    "name": "Password Policy Settings",
+    "command": "net accounts",
+    "shell": "both",
+    "category": "Users",
+    "description": "Display minimum password length, age, and lockout threshold.",
+    "example": "net accounts",
+    "tags": "net,policy,security,everyday"
+  },
+  {
+    "name": "Reset Inherited Permissions",
+    "command": "icacls file.txt /reset",
+    "shell": "both",
+    "category": "Users",
+    "description": "Replace explicit permissions with parent inherited ACLs.",
+    "example": "icacls folder /reset /t",
+    "tags": "icacls,reset,acl,specialized"
+  },
+  {
+    "name": "Take Ownership of File",
+    "command": "takeown /f file.txt",
+    "shell": "both",
+    "category": "Users",
+    "description": "Take administrator ownership of a locked or inaccessible file.",
+    "example": "takeown /f locked.txt",
+    "tags": "takeown,owner,admin,specialized"
+  },
+  {
+    "name": "User Security Groups and Integrity",
+    "command": "whoami /groups",
+    "shell": "both",
+    "category": "Users",
+    "description": "Show group memberships and mandatory integrity level.",
+    "example": "whoami /priv",
+    "tags": "whoami,groups,security,everyday"
+  }
 ]
