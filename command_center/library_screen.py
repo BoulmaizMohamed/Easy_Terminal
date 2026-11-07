@@ -365,14 +365,19 @@ class LibraryScreen(ModalScreen[Optional[str]]):
             return
 
         tier_tag = "Specialized" if "specialized" in entry.get("tags", "").lower() else "Everyday"
-        detail_log.write(f"[bold cyan]{escape(entry['name'])}[/bold cyan] [dim]({entry['shell'].upper()} • {entry['category']} • {tier_tag})[/dim]")
+        tier_color = "magenta" if tier_tag == "Specialized" else "green"
+        detail_log.write(f"[bold cyan]{escape(entry['name'])}[/bold cyan] [dim]({entry['shell'].upper()} • {entry['category']})[/dim] [{tier_color}][{tier_tag}][/{tier_color}]")
         detail_log.write(f"[bold white]> {escape(entry['command'])}[/bold white]")
         if entry.get("description"):
-            detail_log.write(f"[dim]Description:[/dim] {escape(entry['description'])}")
+            detail_log.write(f"[dim]What it does:[/dim] {escape(entry['description'])}")
         if entry.get("example"):
             detail_log.write(f"[dim]Example:[/dim] [cyan]{escape(entry['example'])}[/cyan]")
         if entry.get("tags"):
-            detail_log.write(f"[dim]Tags:[/dim] {escape(entry['tags'])}")
+            detail_log.write(f"[dim]Keywords:[/dim] [dim]{escape(entry['tags'])}[/dim]")
+        if tier_tag == "Specialized":
+            detail_log.write("[dim yellow]Note: Specialized / Admin command. Press Enter to run.[/dim yellow]")
+        else:
+            detail_log.write("[dim green]Safe everyday command. Press Enter to run or Esc to close.[/dim green]")
 
     def get_selected_entry(self) -> Optional[Dict[str, Any]]:
         table = self.query_one(DataTable)

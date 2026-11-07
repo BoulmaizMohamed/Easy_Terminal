@@ -105,12 +105,36 @@ Screen {
     height: auto;
 }
 
+#quick-actions-bar {
+    height: 3;
+    layout: horizontal;
+    background: $surface-darken-2;
+    padding: 0 1;
+    align: left middle;
+    border-top: solid $primary;
+}
+
+.qa-btn {
+    min-width: 11;
+    height: 3;
+    border: none;
+    background: $surface;
+    color: $text;
+    margin-right: 1;
+}
+
+.qa-btn:hover {
+    background: $primary;
+    color: $surface;
+    text-style: bold;
+}
+
 #input-container {
     height: 3;
     layout: horizontal;
     background: $surface-darken-1;
     padding: 0 2;
-    border-top: solid $primary;
+    border-top: solid $surface-lighten-1;
     align: left middle;
 }
 

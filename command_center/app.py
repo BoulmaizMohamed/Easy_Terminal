@@ -13,7 +13,7 @@ from textual import events, on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Footer, Input, Label, OptionList, RichLog, Static
+from textual.widgets import Button, Footer, Input, Label, OptionList, RichLog, Static
 from textual.widgets.option_list import Option
 
 from command_center.db import init_db
@@ -98,6 +98,15 @@ class CommandCenterApp(App):
             )
 
         with Vertical(id="bottom-dock"):
+            with Horizontal(id="quick-actions-bar"):
+                yield Button("📁 Files", id="qa-files", classes="qa-btn")
+                yield Button("⚡ Top Apps", id="qa-procs", classes="qa-btn")
+                yield Button("💾 Disks", id="qa-disks", classes="qa-btn")
+                yield Button("🌐 Ping", id="qa-ping", classes="qa-btn")
+                yield Button("📚 Library", id="qa-library", classes="qa-btn")
+                yield Button("🔄 Shell", id="qa-shell", classes="qa-btn")
+                yield Button("🧹 Clear", id="qa-clear", classes="qa-btn")
+
             with Horizontal(id="input-container"):
                 yield Static(f"[{prompt_color}]{prompt_glyph}[/{prompt_color}]", id="prompt-symbol")
                 yield Input(
@@ -147,22 +156,61 @@ class CommandCenterApp(App):
         shell_badge_color = "cyan" if self.shell.shell_type == "powershell" else "yellow"
         welcome_body = Text()
         welcome_body.append("⚡ COMMAND CENTER ", style="bold cyan")
-        welcome_body.append("— Modern Windows Terminal Workspace\n", style="bold white")
-        welcome_body.append("Active Shell: ", style="dim")
-        welcome_body.append(f"{self.shell.shell_type.upper()}", style=f"bold {shell_badge_color}")
-        welcome_body.append(" (Persistent)   ", style="dim")
-        welcome_body.append("Directory: ", style="dim")
+        welcome_body.append("— Modern Terminal Workspace for Windows\n\n", style="bold white")
+        welcome_body.append("Active Shell: ", style="bold")
+        welcome_body.append(f"{self.shell.shell_type.upper()} ", style=f"bold {shell_badge_color}")
+        welcome_body.append("• Location: ", style="dim")
         welcome_body.append(f"{self.shell.cwd}\n\n", style="dim cyan")
-        welcome_body.append("Quick Keys: ", style="bold white")
-        welcome_body.append("[F2] Switch Shell  •  [Ctrl+P] Palette  •  [Ctrl+L] Library  •  [Ctrl+H] History  •  [F10] Settings\n", style="dim")
-        welcome_body.append("Tip: Type 'clear' or 'cls' to reset screen, or type 'cmd' / 'powershell' to switch shells instantly.", style="italic dim")
+        welcome_body.append("Quick Start for Beginners:\n", style="bold white")
+        welcome_body.append("  • Click any Quick Action button below (Files, Top Apps, Disks, Ping)\n", style="cyan")
+        welcome_body.append("  • Press [Ctrl+L] to browse 86 everyday & specialized commands\n", style="cyan")
+        welcome_body.append("  • Press [Ctrl+P] for fuzzy command palette & instant search\n", style="cyan")
+        welcome_body.append("  • Type 'clear' or 'cls' anytime to wipe screen, 'exit' to close\n\n", style="dim")
+        welcome_body.append("Pro Tip: Start typing any command or file name and press [Tab] for auto-completion.", style="italic dim")
 
-        log.write(Panel(welcome_body, border_style="cyan", padding=(0, 1)))
+        log.write(Panel(welcome_body, title="[bold cyan]Welcome[/bold cyan]", border_style="cyan", padding=(0, 1)))
 
         shell_label = "PowerShell" if self.shell.shell_type == "powershell" else "Command Prompt (CMD)"
         inp = self.query_one("#command-input", Input)
-        inp.placeholder = f"Type a {shell_label} command and press Enter..."
+        inp.placeholder = f"Type a {shell_label} command or click a quick action above..."
         inp.focus()
+
+    @on(Button.Pressed, "#qa-files")
+    def on_qa_files(self) -> None:
+        cmd = "Get-ChildItem" if self.shell.shell_type == "powershell" else "dir"
+        self._execute_command(cmd)
+        self.query_one("#command-input", Input).focus()
+
+    @on(Button.Pressed, "#qa-procs")
+    def on_qa_procs(self) -> None:
+        cmd = "Get-Process | Sort-Object CPU -Descending | Select-Object -First 8" if self.shell.shell_type == "powershell" else "tasklist"
+        self._execute_command(cmd)
+        self.query_one("#command-input", Input).focus()
+
+    @on(Button.Pressed, "#qa-disks")
+    def on_qa_disks(self) -> None:
+        cmd = "Get-Volume" if self.shell.shell_type == "powershell" else "wmic logicaldisk get caption,freespace,size"
+        self._execute_command(cmd)
+        self.query_one("#command-input", Input).focus()
+
+    @on(Button.Pressed, "#qa-ping")
+    def on_qa_ping(self) -> None:
+        self._execute_command("ping -n 4 8.8.8.8")
+        self.query_one("#command-input", Input).focus()
+
+    @on(Button.Pressed, "#qa-library")
+    def on_qa_library(self) -> None:
+        self.action_open_library()
+
+    @on(Button.Pressed, "#qa-shell")
+    def on_qa_shell(self) -> None:
+        self.action_toggle_shell()
+        self.query_one("#command-input", Input).focus()
+
+    @on(Button.Pressed, "#qa-clear")
+    def on_qa_clear(self) -> None:
+        self.query_one(RichLog).clear()
+        self.query_one("#command-input", Input).focus()
 
     @on(Input.Submitted, "#command-input")
     def handle_command_submit(self, event: Input.Submitted) -> None:

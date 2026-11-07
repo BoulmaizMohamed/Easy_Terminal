@@ -253,3 +253,32 @@ def test_cmd_style_builtins_and_path_completion():
         app.shell_manager.close_all()
 
     asyncio.run(_test())
+
+
+def test_quick_action_buttons():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            # 1. Click Clear Quick Action
+            log = app.query_one("#output-log")
+            log.write("Some line before clear")
+            qa_clear = app.query_one("#qa-clear")
+            qa_clear.press()
+            await pilot.pause(0.2)
+            assert len(log.lines) == 0
+
+            # 2. Click Shell Switch Quick Action
+            assert app.shell.shell_type == "powershell"
+            qa_shell = app.query_one("#qa-shell")
+            qa_shell.press()
+            await pilot.pause(0.2)
+            assert app.shell.shell_type == "cmd"
+
+            # Switch back
+            qa_shell.press()
+            await pilot.pause(0.2)
+            assert app.shell.shell_type == "powershell"
+
+        app.shell_manager.close_all()
+
+    asyncio.run(_test())

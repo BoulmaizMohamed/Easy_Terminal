@@ -124,14 +124,17 @@ class PaletteScreen(ModalScreen[Optional[Tuple[str, str]]]):
         if 0 <= index < len(self.entries):
             item = self.entries[index]
             tier_label = "Specialized" if "specialized" in item.get("tags", "").lower() else "Everyday"
-            log.write(f"[bold cyan]{escape(item['name'])}[/bold cyan] [dim]({item['category']} • {item['shell'].upper()} • {tier_label})[/dim]")
+            tier_color = "magenta" if tier_label == "Specialized" else "green"
+            log.write(f"[bold cyan]{escape(item['name'])}[/bold cyan] [dim]({item['category']} • {item['shell'].upper()})[/dim] [{tier_color}][{tier_label}][/{tier_color}]")
             log.write(f"[bold white]> {escape(item['command'])}[/bold white]")
             if item.get("description"):
-                log.write(f"[dim]Description:[/dim] {escape(item['description'])}")
+                log.write(f"[dim]What it does:[/dim] {escape(item['description'])}")
             if item.get("example"):
                 log.write(f"[dim]Example:[/dim] [cyan]{escape(item['example'])}[/cyan]")
-            if item.get("tags"):
-                log.write(f"[dim]Tags:[/dim] {escape(item['tags'])}")
+            if tier_label == "Specialized":
+                log.write("[dim yellow]Note: Advanced command. Enter=Run, Tab=Insert.[/dim yellow]")
+            else:
+                log.write("[dim green]Safe everyday command. Enter=Run, Tab=Insert into input.[/dim green]")
 
     def action_dismiss_palette(self) -> None:
         self.dismiss(None)
