@@ -24,7 +24,7 @@ def test_app_command_execution():
             app.action_toggle_theme()
             assert app.theme != initial_theme
 
-        app.shell.close()
+        app.shell_manager.close_all()
 
     asyncio.run(_test())
 
@@ -57,6 +57,40 @@ def test_history_screen_flow():
             # We should be back on the main screen
             assert not isinstance(app.screen, HistoryScreen)
 
-        app.shell.close()
+        app.shell_manager.close_all()
+
+    asyncio.run(_test())
+
+
+def test_f2_shell_toggle():
+    async def _test():
+        app = CommandCenterApp()
+        async with app.run_test() as pilot:
+            assert app.shell.shell_type == "powershell"
+
+            # Press F2 to toggle to cmd
+            await pilot.press("f2")
+            await pilot.pause(0.5)
+
+            assert app.shell.shell_type == "cmd"
+            status_shell = app.query_one("#status-shell")
+            assert "CMD" in str(status_shell.content)
+
+            # Execute a CMD command
+            inp = app.query_one("#command-input")
+            inp.value = "echo hello_from_cmd_test"
+            await pilot.press("enter")
+            await pilot.pause(1.0)
+
+            log = app.query_one("#output-log")
+            rendered_text = "\n".join(line.text for line in log.lines)
+            assert "hello_from_cmd_test" in rendered_text
+
+            # Press F2 to toggle back to PowerShell
+            await pilot.press("f2")
+            await pilot.pause(0.5)
+            assert app.shell.shell_type == "powershell"
+
+        app.shell_manager.close_all()
 
     asyncio.run(_test())

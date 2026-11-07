@@ -15,7 +15,7 @@ from textual.widgets import Footer, Input, Label, RichLog, Static
 from command_center.db import init_db
 from command_center.history import get_recent_unique_commands, log_command
 from command_center.history_screen import HistoryScreen
-from command_center.shell import ShellSession
+from command_center.shell import ShellManager, ShellSession
 
 THEMES = [
     "catppuccin-mocha",
@@ -35,6 +35,7 @@ class CommandCenterApp(App):
 
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True),
+        Binding("f2", "toggle_shell", "Switch Shell (F2)", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
         Binding("ctrl+h", "open_history", "History", show=True),
         Binding("ctrl+c", "interrupt_or_clear", "Interrupt/Clear", show=True),
@@ -44,13 +45,18 @@ class CommandCenterApp(App):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        self.shell = ShellSession("powershell")
+        self.shell_manager = ShellManager("powershell")
         self.theme_index = 0
         self.theme = THEMES[0]
         self.command_history: List[str] = []
         self.history_index: int = -1
         self.last_output_buffer: List[str] = []
         self.current_running_command: str = ""
+
+    @property
+    def shell(self) -> ShellSession:
+        """Returns the active persistent shell session."""
+        return self.shell_manager.current
 
     def compose(self) -> ComposeResult:
         """Compose the layout of the terminal UI."""
@@ -75,7 +81,7 @@ class CommandCenterApp(App):
 
         with Horizontal(id="status-bar"):
             yield Static(
-                f"PS: {self.shell.shell_type.upper()}",
+                f"{self.shell.shell_type.upper()}",
                 id="status-shell",
                 classes="status-badge",
             )
@@ -223,6 +229,30 @@ class CommandCenterApp(App):
             input_widget.value = cmd
             input_widget.focus()
             self.handle_command_submit(Input.Submitted(input_widget, cmd))
+
+    def action_toggle_shell(self) -> None:
+        """Toggles active shell between PowerShell and CMD with F2."""
+        new_shell = self.shell_manager.toggle()
+        shell_name = "PowerShell" if new_shell == "powershell" else "Command Prompt (CMD)"
+        log = self.query_one(RichLog)
+        log.write(f"\n[dim]-- Switched active shell to [bold cyan]{shell_name}[/bold cyan] --[/dim]")
+
+        # Update status bar
+        status_shell = self.query_one("#status-shell", Static)
+        status_shell.update(f"{new_shell.upper()}")
+
+        status_cwd = self.query_one("#status-cwd", Static)
+        status_cwd.update(f"{self.shell.cwd}")
+
+        # Update input placeholder
+        inp = self.query_one("#command-input", Input)
+        inp.placeholder = f"Type a {shell_name} command and press Enter..."
+
+        self.notify(f"Active shell: {shell_name}", timeout=2)
+
+    def on_unmount(self) -> None:
+        """Cleanly terminate shell processes upon app exit."""
+        self.shell_manager.close_all()
 
     def action_toggle_theme(self) -> None:
         """Cycles through clean modern themes."""

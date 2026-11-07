@@ -6,7 +6,7 @@ import os
 import subprocess
 import time
 import uuid
-from typing import Callable, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 INTERACTIVE_COMMANDS = {
     "vim",
@@ -60,6 +60,17 @@ class ShellSession:
         )
         self.is_running_command = False
 
+        # For cmd.exe, silence prompts to keep output pristine
+        if self.shell_type == "cmd":
+            init_token = f"__CC_INIT_{uuid.uuid4().hex}__"
+            assert self.process and self.process.stdin and self.process.stdout
+            self.process.stdin.write(f"@echo off\n@prompt $_\n@echo {init_token}\n")
+            self.process.stdin.flush()
+            while True:
+                line = self.process.stdout.readline()
+                if init_token in line or not line:
+                    break
+
     def close(self) -> None:
         """Terminates the underlying shell process if running."""
         if self.process:
@@ -80,8 +91,16 @@ class ShellSession:
 
     def interrupt(self) -> None:
         """Interrupts a running command by restarting the session."""
-        # On Windows stdin pipes, restarting the session is the reliable interrupt
         self.restart()
+
+    def sync_cwd(self, target_cwd: str) -> None:
+        """Synchronizes the shell session's working directory to target_cwd."""
+        if not target_cwd or target_cwd == self.cwd:
+            return
+        if self.shell_type == "powershell":
+            self.execute(f"Set-Location -LiteralPath '{target_cwd}'")
+        else:
+            self.execute(f'cd /d "{target_cwd}"')
 
     def execute(
         self,
@@ -128,10 +147,9 @@ class ShellSession:
                 f'Write-Output "{token} $cc_ec $($PWD.Path)"\n'
             )
         else:
-            # cmd support (will be fully tested in step 3)
             payload = (
                 f"{stripped_cmd}\n"
-                f"@echo {token} %ERRORLEVEL% %CD%\n"
+                f"@echo off & @echo {token} %ERRORLEVEL% %CD%\n"
             )
 
         try:
@@ -149,13 +167,10 @@ class ShellSession:
         while True:
             line = self.process.stdout.readline()
             if not line:
-                # Process ended unexpectedly
                 break
 
             if token in line:
-                # Sentinel detected: extract exit code and cwd
                 clean_line = line.strip()
-                # Find start of sentinel token
                 idx = clean_line.find(token)
                 sentinel_part = clean_line[idx:]
                 parts = sentinel_part.split(" ", 2)
@@ -175,3 +190,32 @@ class ShellSession:
         duration_ms = int((time.perf_counter() - start_time) * 1000)
         self.is_running_command = False
         return exit_code, new_cwd, duration_ms
+
+
+class ShellManager:
+    """Coordinates persistent cmd and PowerShell sessions with smooth switching."""
+
+    def __init__(self, default_shell: str = "powershell") -> None:
+        self.sessions: Dict[str, ShellSession] = {
+            "powershell": ShellSession("powershell"),
+            "cmd": ShellSession("cmd"),
+        }
+        self.active_shell: str = default_shell.lower()
+
+    @property
+    def current(self) -> ShellSession:
+        return self.sessions[self.active_shell]
+
+    def toggle(self) -> str:
+        """Toggles between PowerShell and CMD, syncing working directories."""
+        old_shell = self.active_shell
+        new_shell = "cmd" if old_shell == "powershell" else "powershell"
+        current_cwd = self.sessions[old_shell].cwd
+        self.sessions[new_shell].sync_cwd(current_cwd)
+        self.active_shell = new_shell
+        return new_shell
+
+    def close_all(self) -> None:
+        """Terminates all managed shell processes."""
+        for session in self.sessions.values():
+            session.close()
