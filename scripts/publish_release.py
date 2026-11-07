@@ -9,6 +9,9 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 REPO = "BoulmaizMohamed/Easy_Terminal"
 TAG = "v1.0.0"
 TITLE = "Easy_Terminal v1.0.0 - Official Release"
@@ -59,7 +62,10 @@ def api_request(url: str, token: str, data: bytes | None = None, method: str = "
         req_headers.update(headers)
     req = urllib.request.Request(url, data=data, headers=req_headers, method=method)
     with urllib.request.urlopen(req) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+        content = resp.read()
+        if not content:
+            return None
+        return json.loads(content.decode("utf-8"))
 
 
 def main():
@@ -146,7 +152,7 @@ def main():
         req = urllib.request.Request(upload_url, data=data, headers=req_headers, method="POST")
         with urllib.request.urlopen(req) as resp:
             resp_data = json.loads(resp.read().decode("utf-8"))
-            print(f"    ✓ Uploaded: {resp_data.get('browser_download_url')}")
+            print(f"    [OK] Uploaded: {resp_data.get('browser_download_url')}")
 
     print("\n" + "=" * 60)
     print("SUCCESS: GitHub Release v1.0.0 published with all assets!")
