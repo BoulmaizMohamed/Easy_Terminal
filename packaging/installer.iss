@@ -26,6 +26,20 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "contextmenu"; Description: "Add 'Open in Terminal' to Windows Explorer right-click menu"; GroupDescription: "Windows Explorer Integration:"; Flags: checkablefirst
+
+[Registry]
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\CommandCenter"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\CommandCenter"; ValueType: string; ValueName: "Icon"; ValueData: ""{app}\{#MyAppExeName}""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\CommandCenter\command"; ValueType: string; ValueName: ""; ValueData: ""{app}\{#MyAppExeName}" "%V""; Tasks: contextmenu
+
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\CommandCenter"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\CommandCenter"; ValueType: string; ValueName: "Icon"; ValueData: ""{app}\{#MyAppExeName}""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\CommandCenter\command"; ValueType: string; ValueName: ""; ValueData: ""{app}\{#MyAppExeName}" "%1""; Tasks: contextmenu
+
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\CommandCenter"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\CommandCenter"; ValueType: string; ValueName: "Icon"; ValueData: ""{app}\{#MyAppExeName}""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\CommandCenter\command"; ValueType: string; ValueName: ""; ValueData: ""{app}\{#MyAppExeName}" "%1""; Tasks: contextmenu
 
 [Files]
 Source: "..\dist\CommandCenter\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

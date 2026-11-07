@@ -69,10 +69,15 @@ class CommandCenterApp(App):
         Binding("ctrl+y", "copy_last_output", "Copy Output", show=True),
     ]
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, initial_cwd: Optional[str] = None, **kwargs) -> None:
         super().__init__(**kwargs)
+        if initial_cwd and Path(initial_cwd).exists():
+            try:
+                os.chdir(initial_cwd)
+            except Exception:
+                pass
         self.settings = load_settings()
-        self.shell_manager = ShellManager(self.settings.default_shell)
+        self.shell_manager = ShellManager(self.settings.default_shell, cwd=initial_cwd)
         self.theme = self.settings.theme
         self.theme_index = THEMES.index(self.theme) if self.theme in THEMES else 0
         self.command_history: List[str] = []
@@ -821,7 +826,28 @@ class CommandCenterApp(App):
 
 def main() -> None:
     """Entry point for running Command Center."""
-    app = CommandCenterApp()
+    import sys
+    initial_cwd = None
+    if len(sys.argv) > 1:
+        first_arg = sys.argv[1].strip()
+        if first_arg in ("--register-context-menu", "-r"):
+            from command_center.context_menu import register_context_menu
+            success = register_context_menu()
+            print("Successfully registered Explorer context menu ('Open in Terminal')!" if success else "Failed to register context menu.")
+            return
+        if first_arg in ("--unregister-context-menu", "-u"):
+            from command_center.context_menu import unregister_context_menu
+            success = unregister_context_menu()
+            print("Successfully unregistered Explorer context menu!" if success else "Failed to unregister context menu.")
+            return
+
+        candidate = Path(first_arg.strip('"')).resolve()
+        if candidate.is_dir():
+            initial_cwd = str(candidate)
+        elif candidate.is_file():
+            initial_cwd = str(candidate.parent)
+
+    app = CommandCenterApp(initial_cwd=initial_cwd)
     app.run()
 
 

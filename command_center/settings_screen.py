@@ -11,6 +11,11 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Footer, Label, Static
 
+from command_center.context_menu import (
+    is_context_menu_registered,
+    register_context_menu,
+    unregister_context_menu,
+)
 from command_center.i18n import t
 from command_center.settings import AppSettings, save_settings
 
@@ -91,6 +96,17 @@ class SettingsScreen(ModalScreen[Optional[AppSettings]]):
                     classes="settings-btn",
                 )
 
+            # Explorer Context Menu
+            yield Label(t("settings_context_menu_label", lang), id="lbl-context-menu", classes="settings-label")
+            with Horizontal(classes="settings-row"):
+                is_reg = is_context_menu_registered()
+                cm_str = t("context_menu_enabled_str", lang) if is_reg else t("context_menu_disabled_str", lang)
+                yield Button(
+                    f"{t('settings_context_menu_btn', lang)}: {cm_str}",
+                    id="btn-context-menu-toggle",
+                    classes="settings-btn",
+                )
+
             with Horizontal(id="settings-actions"):
                 yield Button(t("settings_save_btn", lang), variant="primary", id="btn-settings-save")
                 yield Button(t("settings_cancel_btn", lang), variant="default", id="btn-settings-cancel")
@@ -114,6 +130,10 @@ class SettingsScreen(ModalScreen[Optional[AppSettings]]):
             self.query_one("#lbl-safety", Label).update(t("settings_safety_label", lang))
             status_str = t("safety_enabled_str", lang) if self.settings.safety_enabled else t("safety_disabled_str", lang)
             self.query_one("#btn-safety-toggle", Button).label = f"{t('settings_safety_btn', lang)}: {status_str}"
+            self.query_one("#lbl-context-menu", Label).update(t("settings_context_menu_label", lang))
+            is_reg = is_context_menu_registered()
+            cm_str = t("context_menu_enabled_str", lang) if is_reg else t("context_menu_disabled_str", lang)
+            self.query_one("#btn-context-menu-toggle", Button).label = f"{t('settings_context_menu_btn', lang)}: {cm_str}"
             self.query_one("#btn-settings-save", Button).label = t("settings_save_btn", lang)
             self.query_one("#btn-settings-cancel", Button).label = t("settings_cancel_btn", lang)
         except Exception:
@@ -154,6 +174,17 @@ class SettingsScreen(ModalScreen[Optional[AppSettings]]):
         self.settings.safety_enabled = not self.settings.safety_enabled
         status_str = "ENABLED (Confirm before run)" if self.settings.safety_enabled else "DISABLED"
         self.query_one("#btn-safety-toggle", Button).label = f"Safety: {status_str}"
+
+    @on(Button.Pressed, "#btn-context-menu-toggle")
+    def toggle_context_menu(self) -> None:
+        if is_context_menu_registered():
+            unregister_context_menu()
+        else:
+            register_context_menu()
+        lang = self.settings.language
+        is_reg = is_context_menu_registered()
+        cm_str = t("context_menu_enabled_str", lang) if is_reg else t("context_menu_disabled_str", lang)
+        self.query_one("#btn-context-menu-toggle", Button).label = f"{t('settings_context_menu_btn', lang)}: {cm_str}"
 
     @on(Button.Pressed, "#btn-settings-save")
     def on_save_pressed(self) -> None:

@@ -68,12 +68,30 @@ def make_portable_distribution(source_dir: Path) -> Path:
         "Desktop, or network share without installing or leaving files in AppData.\n\n"
         "HOW TO RUN:\n"
         "1. Double-click CommandCenter.exe to launch.\n"
-        "2. All history, settings, and library databases are saved locally in the 'data' folder.\n\n"
+        "2. All history, settings, and library databases are saved locally in the 'data' folder.\n"
+        "3. Optional: Run 'register-context-menu.bat' to add 'Open in Terminal' to right-click menu\n"
+        "   (especially handy on Windows 10/8/7!). Run 'unregister-context-menu.bat' to remove.\n\n"
         "To return to standard non-portable mode, simply delete 'portable.flag'.\n"
     )
     (portable_dir / "README_PORTABLE.txt").write_text(readme_content, encoding="utf-8")
 
-    # 4. Create ZIP archive
+    # 4. Context menu helpers for portable users
+    (portable_dir / "register-context-menu.bat").write_text(
+        "@echo off\r\n"
+        "echo Registering 'Open in Terminal' context menu for Command Center...\r\n"
+        "\"%~dp0CommandCenter.exe\" --register-context-menu\r\n"
+        "pause\r\n",
+        encoding="utf-8",
+    )
+    (portable_dir / "unregister-context-menu.bat").write_text(
+        "@echo off\r\n"
+        "echo Removing 'Open in Terminal' context menu...\r\n"
+        "\"%~dp0CommandCenter.exe\" --unregister-context-menu\r\n"
+        "pause\r\n",
+        encoding="utf-8",
+    )
+
+    # 5. Create ZIP archive
     zip_path = DIST_DIR / "CommandCenter-Portable.zip"
     print(f"==> Compressing to {zip_path.name}...")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -173,6 +191,14 @@ if ($PathOpt -ne "n" -and $PathOpt -ne "N") {
     }
 }
 
+# Add 'Open in Terminal' to Windows Explorer right-click menu
+$ContextOpt = Read-Host "Add 'Open in Terminal' to Windows Explorer right-click menu? (Y/n)"
+if ($ContextOpt -ne "n" -and $ContextOpt -ne "N") {
+    $ExePath = Join-Path $TargetDir "CommandCenter.exe"
+    & "$ExePath" --register-context-menu
+    Write-Host "✓ Added 'Open in Terminal' to Explorer right-click context menu." -ForegroundColor Green
+}
+
 # Windows Add/Remove Programs registry entry
 $RegPath = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\CommandCenter"
 if (!(Test-Path $RegPath)) {
@@ -207,6 +233,9 @@ Remove-Item (Join-Path $Desktop "Command Center.lnk") -Force
 Remove-Item (Join-Path $StartMenu "Command Center.lnk") -Force
 
 # Remove Registry Entry
+Remove-Item "HKCU:\\Software\\Classes\\Directory\\Background\\shell\\CommandCenter" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "HKCU:\\Software\\Classes\\Directory\\shell\\CommandCenter" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "HKCU:\\Software\\Classes\\Drive\\shell\\CommandCenter" -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\CommandCenter" -Recurse -Force
 
 # Remove from PATH
@@ -261,6 +290,20 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "contextmenu"; Description: "Add 'Open in Terminal' to Windows Explorer right-click menu"; GroupDescription: "Windows Explorer Integration:"; Flags: checkablefirst
+
+[Registry]
+Root: HKCU; Subkey: "Software\\Classes\\Directory\\Background\\shell\\CommandCenter"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\\Classes\\Directory\\Background\\shell\\CommandCenter"; ValueType: string; ValueName: "Icon"; ValueData: "\"{app}\\{#MyAppExeName}\""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\\Classes\\Directory\\Background\\shell\\CommandCenter\\command"; ValueType: string; ValueName: ""; ValueData: "\"{app}\\{#MyAppExeName}\" \"%V\""; Tasks: contextmenu
+
+Root: HKCU; Subkey: "Software\\Classes\\Directory\\shell\\CommandCenter"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\\Classes\\Directory\\shell\\CommandCenter"; ValueType: string; ValueName: "Icon"; ValueData: "\"{app}\\{#MyAppExeName}\""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\\Classes\\Directory\\shell\\CommandCenter\\command"; ValueType: string; ValueName: ""; ValueData: "\"{app}\\{#MyAppExeName}\" \"%1\""; Tasks: contextmenu
+
+Root: HKCU; Subkey: "Software\\Classes\\Drive\\shell\\CommandCenter"; ValueType: string; ValueName: ""; ValueData: "Open in Terminal"; Tasks: contextmenu; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\\Classes\\Drive\\shell\\CommandCenter"; ValueType: string; ValueName: "Icon"; ValueData: "\"{app}\\{#MyAppExeName}\""; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\\Classes\\Drive\\shell\\CommandCenter\\command"; ValueType: string; ValueName: ""; ValueData: "\"{app}\\{#MyAppExeName}\" \"%1\""; Tasks: contextmenu
 
 [Files]
 Source: "..\\dist\\CommandCenter\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

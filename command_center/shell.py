@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 import subprocess
 import time
 import uuid
@@ -23,10 +24,10 @@ INTERACTIVE_COMMANDS = {
 class ShellSession:
     """Manages a long-running shell process (PowerShell / cmd)."""
 
-    def __init__(self, shell_type: str = "powershell") -> None:
+    def __init__(self, shell_type: str = "powershell", cwd: Optional[str] = None) -> None:
         self.shell_type = shell_type.lower()
         self.process: Optional[subprocess.Popen] = None
-        self.cwd: str = os.getcwd()
+        self.cwd: str = str(Path(cwd).resolve()) if cwd and Path(cwd).exists() else os.getcwd()
         self.is_running_command: bool = False
         self.start()
 
@@ -196,10 +197,10 @@ class ShellSession:
 class ShellManager:
     """Coordinates persistent cmd and PowerShell sessions with smooth switching."""
 
-    def __init__(self, default_shell: str = "powershell") -> None:
+    def __init__(self, default_shell: str = "powershell", cwd: Optional[str] = None) -> None:
         self.sessions: Dict[str, ShellSession] = {
-            "powershell": ShellSession("powershell"),
-            "cmd": ShellSession("cmd"),
+            "powershell": ShellSession("powershell", cwd=cwd),
+            "cmd": ShellSession("cmd", cwd=cwd),
         }
         self.active_shell: str = default_shell.lower()
 
