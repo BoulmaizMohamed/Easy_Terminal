@@ -4,8 +4,8 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6?logo=windows)](https://microsoft.com)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org)
 [![Languages](https://img.shields.io/badge/Language-English%20%7C%20Fran%C3%A7ais-green)](#-bilingual-support-en--fr)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-brightgreen)](https://github.com/b-mohammed-amin/Easy_Terminal/releases)
-[![Author](https://img.shields.io/badge/Author-B.Mohammed__Amin-orange)](https://github.com/b-mohammed-amin)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-brightgreen)](https://github.com/BoulmaizMohamed/Easy_Terminal/releases)
+[![Author](https://img.shields.io/badge/Author-B.Mohammed__Amin-orange)](https://github.com/BoulmaizMohamed)
 
 > **The Modern, Safe, and Visual Windows Command Center**  
 > *Transform terminal workflows into an intuitive, productive, and beginner-friendly experience.*
@@ -60,7 +60,7 @@ Whether you are a developer, system administrator, student, or power user, Easy_
 Easy_Terminal is distributed in two ready-to-run editions:
 
 ### 1. Windows Setup Wizard (Recommended)
-Download **`Easy_Terminal-Setup.exe`** from the [Releases](https://github.com/b-mohammed-amin/Easy_Terminal/releases) section:
+Download **`Easy_Terminal-Setup.exe`** from the [Releases](https://github.com/BoulmaizMohamed/Easy_Terminal/releases) section:
 - Guided native Inno Setup installation wizard.
 - Automatically creates Desktop and Start Menu shortcuts.
 - Registers *“Open in Terminal”* in the Windows Explorer right-click context menu.
@@ -111,7 +111,7 @@ Full 7-page, high-resolution printable PDF user guides with screenshots:
 ### Step-by-Step Setup
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/b-mohammed-amin/Easy_Terminal.git
+git clone https://github.com/BoulmaizMohamed/Easy_Terminal.git
 cd Easy_Terminal
 
 # 2. Create and activate a virtual environment
